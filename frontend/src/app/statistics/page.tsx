@@ -1,6 +1,4 @@
-"use client";
-
-import MapWidget from "@/components/map/MapWidget";
+import MapComponent from "@/components/map/MapComponent";
 
 export default function StatisticsPage() {
   return (
@@ -18,7 +16,7 @@ export default function StatisticsPage() {
       {/* Карта */}
       <section className="rounded-2xl shadow p-2 border border-gray-200">
         <h2 className="text-lg font-semibold mb-2">Карта Смоленска</h2>
-        <MapWidget />
+        <MapComponent />
       </section>
     </main>
   );
