@@ -1,6 +1,6 @@
 "use client";
 
-import MapWidget from "@/app/components/map/MapWidget";
+import MapWidget from "@/components/map/MapWidget";
 
 export default function StatisticsPage() {
   return (
