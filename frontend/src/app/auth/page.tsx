@@ -1,51 +1,59 @@
-"use client"
-
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/card"
+import { Button } from "@/app/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/app/components/ui/dialog"
 import { Input } from "@/app/components/ui/input"
 import { Label } from "@/app/components/ui/label"
-import { Button } from "@/app/components/ui/button"
-import { Checkbox } from "@/app/components/ui/checkbox"
-import Link from "next/link"
 
 export default function Authentication() {
   return (
-    <div className="min-h-[932px] flex items-center justify-center bg-black">
-      <Card className="w-full max-w-sm shadow-lg rounded-2xl bg-yellow-100">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">
-            Welcome Back!!!
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Username / Email</Label>
-            <Input id="email" type="email" placeholder="info@example.com" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="********" />
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
-              <Label htmlFor="remember">Remember me</Label>
+    <Dialog>
+      <form>
+        <DialogTrigger asChild>
+          <Button variant="outline">Аутентификация</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Hello...</DialogTitle>
+            <DialogDescription>
+              Register
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="name-1">Email</Label>
+              <Input type="email" placeholder="Email" />
+            </div>
+            <div className="grid gap-4">
+              <Label htmlFor="name-1">Username</Label>
+              <Input type="name" placeholder="Name"/>
+            </div>
+            <div className="grid gap-4">
+              <Label htmlFor="name-1">Password</Label>
+              <Input type="password" placeholder="Password" />
+            </div>
+            <div className="grid gap-4">
+              <Label htmlFor="name-1">Confirm password</Label>
+              <Input type="password" placeholder="Password" />
             </div>
           </div>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-2">
-          <Button className="w-full">Login</Button>
-          <p className="text-sm text-center">
-            Don’t have an account?{" "}
-            <Link href="/register" className="text-red-600 hover:underline">
-              Register
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+          <DialogFooter>
+            Есть уже аккаунт?
+            <Button></Button>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button type="submit">Регистрация</Button>
+          </DialogFooter>
+        </DialogContent>
+      </form>
+    </Dialog>
   )
 }
