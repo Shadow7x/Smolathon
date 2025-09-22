@@ -27,7 +27,7 @@ export const NotificationManagerProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const savedNotifications = localStorage.getItem("notifications");
+  const savedNotifications = localStorage.getItem("notifications") ? localStorage.getItem("notifications") : null;
   const initialNotifications = savedNotifications 
     ? JSON.parse(savedNotifications)
     : [];
