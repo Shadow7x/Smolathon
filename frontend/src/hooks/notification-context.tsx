@@ -30,7 +30,6 @@ export const NotificationManagerProvider = ({
 }) => {
   const [notifications, setNotifications] = useState<NotificationManagerType[]>([]);
 
-  // Загружаем уведомления только после монтирования компонента (в браузере)
   useEffect(() => {
     const savedNotifications = localStorage.getItem("notifications");
     if (savedNotifications) {
@@ -43,7 +42,7 @@ export const NotificationManagerProvider = ({
     }
   }, []);
 
-  // Синхронизируем с localStorage при изменении уведомлений
+
   useEffect(() => {
     if (notifications.length > 0) {
       localStorage.setItem("notifications", JSON.stringify(notifications));
@@ -56,7 +55,7 @@ export const NotificationManagerProvider = ({
     try {
       const newNotification = {
         ...notification,
-        id: Date.now(), // Лучше использовать timestamp для уникальности
+        id: Date.now(), 
       };
       setNotifications(prev => [...prev, newNotification]);
     } catch (error) {
@@ -85,7 +84,7 @@ export const NotificationManagerProvider = ({
       }
     }, []);
 
-    // Синхронизируем с localStorage при изменении уведомлений
+
     useEffect(() => {
       if (notifications.length > 0) {
         localStorage.setItem("notifications", JSON.stringify(notifications));
