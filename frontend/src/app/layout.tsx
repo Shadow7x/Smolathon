@@ -5,6 +5,7 @@ import { NotificationManagerProvider } from "@/hooks/notification-context";
 import { GEOProvider } from "@/hooks/geo-context";
 import "./globals.css";
 import Header from "./components/header/page";
+import Notifications from "./components/notification/page";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,16 +30,20 @@ export default function RootLayout({
   return (
     <GEOProvider>
       <UserProvider>
-        <NotificationManagerProvider>
+        
           <html lang="en">
             <body
               className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-              <Header/>
-                {children}
+              <NotificationManagerProvider>
+                <Header/>
+                <Notifications/>
+                  {children}
+                  
+              </NotificationManagerProvider>
             </body>
           </html>
-        </NotificationManagerProvider>
+        
       </UserProvider>
     </GEOProvider>
   );
