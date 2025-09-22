@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import axi from "@/utils/api";
 import { API_URL } from "@/index";
 
@@ -15,6 +15,7 @@ interface NotificationManagerContextType {
   notifications: NotificationManagerType[];
   addNotification: (notification: NotificationManagerType) => void;
   removeNotification: (id: number) => void;
+  getNotifications: () => NotificationManagerType[];
 }
 
 const NotificationManagerContext =
@@ -27,52 +28,82 @@ export const NotificationManagerProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const savedNotifications = localStorage.getItem("notifications");
-  const initialNotifications = savedNotifications 
-    ? JSON.parse(savedNotifications)
-    : [];
-  const [notifications, setNotifications] = useState<NotificationManagerType[]>(
-    [...initialNotifications]
-  );
+  const [notifications, setNotifications] = useState<NotificationManagerType[]>([]);
 
-  const addNotification = async (notification: NotificationManagerType) => {
+  useEffect(() => {
+    const savedNotifications = localStorage.getItem("notifications");
+    if (savedNotifications) {
+      try {
+        setNotifications(JSON.parse(savedNotifications));
+      } catch (error) {
+        console.error("Error parsing saved notifications:", error);
+        localStorage.removeItem("notifications");
+      }
+    }
+  }, []);
+
+
+  useEffect(() => {
+    if (notifications.length > 0) {
+      localStorage.setItem("notifications", JSON.stringify(notifications));
+    } else {
+      localStorage.removeItem("notifications");
+    }
+  }, [notifications]);
+
+  const addNotification = (notification: NotificationManagerType) => {
     try {
-      notification.id = notifications.length + 1;
-      setNotifications([...notifications, notification]);
-      if (notification.status >= 200 && notification.status < 300) {
-        const newNotifications = [...notifications, notification];
-
-        localStorage.setItem("notifications", JSON.stringify(newNotifications));
-      }
-      else{
-        localStorage.removeItem('notifications')
-      }
-      console.log(notifications);
-    } catch {
-      addNotification({
-        id: notifications.length + 1,
+      const newNotification = {
+        ...notification,
+        id: Date.now(), 
+      };
+      setNotifications(prev => [...prev, newNotification]);
+    } catch (error) {
+      console.error("Error adding notification:", error);
+      // Резервное уведомление об ошибке
+      setNotifications(prev => [...prev, {
+        id: Date.now(),
         title: "Ошибка",
         description: "Произошла ошибка при добавлении уведомления",
         createdAt: new Date(),
-        status: "error",
-      });
+        status: 500,
+      }]);
     }
   };
 
+  const getNotifications = () => {
+    useEffect(() => {
+      const savedNotifications = localStorage.getItem("notifications");
+      if (savedNotifications) {
+        try {
+          setNotifications(JSON.parse(savedNotifications));
+        } catch (error) {
+          console.error("Error parsing saved notifications:", error);
+          localStorage.removeItem("notifications");
+        }
+      }
+    }, []);
+
+
+    useEffect(() => {
+      if (notifications.length > 0) {
+        localStorage.setItem("notifications", JSON.stringify(notifications));
+      } else {
+        localStorage.removeItem("notifications");
+      }
+    }, [notifications]);
+    return notifications
+    
+  }
+
   const removeNotification = (id: number) => {
-    setNotifications(
-      notifications.filter((notification) => notification.id !== id)
-    );
-    const newNotifications = [
-      ...notifications.filter((notification) => notification.id !== id),
-    ];
-    console.log(newNotifications);
-    localStorage.setItem("notifications", JSON.stringify(newNotifications));
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
   };
+
 
   return (
     <NotificationManagerContext.Provider
-      value={{ notifications, addNotification, removeNotification }}
+      value={{ notifications, addNotification, removeNotification, getNotifications }}
     >
       {children}
     </NotificationManagerContext.Provider>

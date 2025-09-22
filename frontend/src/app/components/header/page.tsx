@@ -1,3 +1,4 @@
+"use client"
 import Link from "next/link"
 import Register from "@/app/register/page"
 export default function Header(){

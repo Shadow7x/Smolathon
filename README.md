@@ -11,7 +11,7 @@
 Запуск веб-сервера
 1. Запустить ещё один терминал
 2. Установить node.js
-3. cd crout  
+3. cd frontend
 4. npm i --legacy-peer-deps
 5. npm run dev
 6. по ссылке http://localhost:3000 откроется веб сервер

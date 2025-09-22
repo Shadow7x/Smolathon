@@ -8,7 +8,7 @@ interface UserType {
   id: number;
   is_active: boolean;
   name: string;
-  avatar?: string; // добавляем поле для аватарки
+  avatar?: string; 
 }
 
 interface UserContextType {
