@@ -1,6 +1,6 @@
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 
-export default function MapWidget() {
+const MapComponent = () => {
   const center = [54.7818, 32.0454];
   const zoom = 11;
 
@@ -39,4 +39,6 @@ export default function MapWidget() {
       </Map>
     </YMaps>
   );
-}
+};
+
+export default MapComponent;
