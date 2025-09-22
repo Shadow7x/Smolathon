@@ -1,9 +1,9 @@
 "use client";
 import axi from "@/utils/api";
 import Image from "next/image";
-
+import { useNotificationManager } from "@/hooks/notification-context";
 export default function Home() {
-
+    const {addNotification} = useNotificationManager();
     function handleSubmit(e: React.FormEvent)  {
         console.log(2)
     e.preventDefault();
@@ -11,12 +11,30 @@ export default function Home() {
     const file = data.get("file") as File;
     const formData = new FormData();
     formData.append("file", file);
-    axi.post("/analytics/createPenalties", formData, {
+    axi.post("/analytics/penalties/create", formData, {
         headers: {
         "Content-Type": "multipart/form-data",
         }
-    }).then((res) => console.log(res.data))
-    .catch((err) => console.log(err));
+    }).then((res ) =>{
+      addNotification({
+          
+          id: Date.now().toString(),
+          title: "Успешно",
+          description: res.response?.data,
+          status: res.response?.status ? res.response.status : 200 ,
+          createdAt: new Date().toISOString(),
+        });
+    })
+    .catch((err) => {
+      console.log(err)
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка данных",
+        description: err.response.data,
+        status: err.response.status,
+        createdAt: new Date().toISOString(),
+    })
+  })
     }
 
   return (

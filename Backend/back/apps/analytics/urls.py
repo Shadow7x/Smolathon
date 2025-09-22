@@ -1,7 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 
-from .views import createPenalties
 
 urlpatterns = [
-    path("createPenalties", createPenalties),
+    path("penalties/", include("apps.analytics.penalties.urls")),
 ]
