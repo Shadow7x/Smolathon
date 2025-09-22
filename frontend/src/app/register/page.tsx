@@ -21,10 +21,9 @@ export default function Register() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Hello...</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+              Register
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
@@ -32,12 +31,16 @@ export default function Register() {
               <Label htmlFor="name-1">Email</Label>
               <Input type="email" placeholder="Email" />
             </div>
-            <div className="grid gap-3">
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
+            <div className="grid gap-4">
+              <Label htmlFor="name-1">Username</Label>
+              <Input type="name" placeholder="Name"/>
             </div>
-            <div className="grid gap-3">
+            <div className="grid gap-4">
               <Label htmlFor="name-1">Password</Label>
+              <Input type="password" placeholder="Password" />
+            </div>
+            <div className="grid gap-4">
+              <Label htmlFor="name-1">Confirm password</Label>
               <Input type="password" placeholder="Password" />
             </div>
           </div>
