@@ -1,11 +1,12 @@
 Запуск сервера
-1. Установить python версией 3.8 и выше
-2. py -m venv .venv
-3. .venv\Scripts\activate
-4. pip install poetry
-5. poetry install
-6. cd texstrelka
-7. py manage.py runserver
+1. Установить python версіей 3.8 и выше
+2. cd Backend
+3. py -m venv .venv
+4. .venv\Scripts\activate
+5. pip install poetry
+6. poetry install
+7. cd texstrelka
+8. py manage.py runserver
 
 Запуск веб-сервера
 1. Запустить ещё один терминал
