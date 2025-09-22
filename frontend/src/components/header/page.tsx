@@ -1,18 +1,16 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Authentication from "@/components/auth/authentication";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isHome = pathname === "/";
 
   const navLinks = [
     { href: "/news", label: "Новости" },
@@ -24,11 +22,23 @@ export default function Header() {
   ];
 
   return (
-    <header className="flex flex-wrap items-center gap-3.5 mt-[1rem] md:mt-[3.125rem] bg-transparent shadow-sm absolute top-0 left-0 right-0 z-50 h-[6rem] md:h-[12.5rem] px-[2rem] md:px-[7.5rem]">
+    <header
+      className={`
+    flex flex-wrap items-center gap-3.5 
+    px-[2rem] md:px-[7.5rem] z-50
+    ${
+      isHome
+        ? "absolute top-0 left-0 right-0 bg-transparent text-white h-[6rem] md:h-[12.5rem] pt-[1rem] md:pt-[3.125rem]"
+        : "relative bg-white text-black py-[1rem] md:py-[3.125rem]"
+    }
+  `}
+    >
       <div className="flex justify-between w-full items-start">
-        <div className="flex flex-row h-full items-end text-white gap-2.5">
-          <div className="w-[3.5rem] h-[3.5rem] sm:w-[12.5rem] sm:h-[12.5rem] bg-gray-200"></div>
-          <p className="hidden sm:block font-[400] text-[0.9375rem] leading-[1.25rem] tracking-[0%]">
+        <div className="flex flex-row h-full items-end gap-2.5">
+          <Link href="/">
+            <div className="w-[3.5rem] h-[3.5rem] sm:w-[12.5rem] sm:h-[12.5rem] bg-gray-200"></div>
+          </Link>
+          <p className="hidden sm:block font-[400] text-[0.9375rem] leading-[1.25rem]">
             Центр организации дорожного <br />
             движения смоленской области
           </p>
@@ -40,7 +50,12 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-white font-semibold text-[1rem] hover:text-[#62A744] transition-colors"
+                className={`font-semibold text-[1rem] transition-colors 
+                  ${
+                    isHome
+                      ? "text-white hover:text-[#62A744]"
+                      : "text-black hover:text-[#62A744]"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -53,7 +68,7 @@ export default function Header() {
                 <Button variant="ghost" className="bg-transparent p-2 md:p-0">
                   <Menu
                     style={{ width: "30px", height: "30px" }}
-                    className="text-white"
+                    className={isHome ? "text-white" : "text-black"}
                   />
                   <span className="sr-only">Открыть меню</span>
                 </Button>

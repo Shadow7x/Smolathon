@@ -6,6 +6,7 @@ import { GEOProvider } from "@/hooks/geo-context";
 import "./globals.css";
 import Header from "../components/header/page";
 import Notifications from "../components/notification/page";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,20 +31,26 @@ export default function RootLayout({
   return (
     <GEOProvider>
       <UserProvider>
-        
-          <html lang="en">
-            <body
-              className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-              <NotificationManagerProvider>
-                <Header/>
-                <Notifications/>
-                  {children}
-                  
-              </NotificationManagerProvider>
-            </body>
-          </html>
-        
+        <html lang="en">
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <Script
+              src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"
+              strategy="beforeInteractive"
+            />
+            <Script
+              src="https://yastatic.net/s3/mapsapi-jslibs/heatmap/0.0.1/heatmap.min.js"
+              strategy="beforeInteractive"
+            />
+
+            <NotificationManagerProvider>
+              <Header />
+              <Notifications />
+              {children}
+            </NotificationManagerProvider>
+          </body>
+        </html>
       </UserProvider>
     </GEOProvider>
   );
