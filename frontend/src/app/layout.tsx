@@ -4,8 +4,8 @@ import { UserProvider } from "@/hooks/user-context";
 import { NotificationManagerProvider } from "@/hooks/notification-context";
 import { GEOProvider } from "@/hooks/geo-context";
 import "./globals.css";
-import Header from "./components/header/page";
-import Notifications from "./components/notification/page";
+import Header from "../components/header/page";
+import Notifications from "../components/notification/page";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
