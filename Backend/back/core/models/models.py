@@ -21,6 +21,9 @@ class Penalties(models.Model):
     
     def __str__(self):
         return str(self.date)
+    
+    class Meta:
+        ordering = ['-date']
 
 class TowTrucks(models.Model):
     date = models.DateField()
@@ -30,9 +33,32 @@ class TowTrucks(models.Model):
     summary_of_parking_lot = models.IntegerField()
     report = models.ForeignKey(Reports, on_delete=models.CASCADE)
     
+    
     def __str__(self):
         return str(self.date)
+    
+    class Meta:
+        ordering = ['-date']
 
+
+class Route(models.Model):
+    street = models.TextField()
+
+    def __str__(self):
+        return self.street
+
+
+class EvacuationRoute(models.Model):
+    year = models.IntegerField()
+    month = models.TextField()
+    routes = models.ManyToManyField(Route)
+    report = models.ForeignKey(Reports, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.year) + str(self.month)
+    
+    class Meta:
+        ordering = ['-year', '-month']
 
 class authorizedToken(Token):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
