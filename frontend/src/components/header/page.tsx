@@ -25,7 +25,7 @@ export default function Header() {
     <header
       className={`
     flex flex-wrap items-center gap-3.5 
-    px-[2rem] md:px-[7.5rem] z-50
+    px-[2rem] md:px-[4rem] lg:px-[7.5rem] z-50
     ${
       isHome
         ? "absolute top-0 left-0 right-0 bg-transparent text-white h-[6rem] md:h-[12.5rem] pt-[1rem] md:pt-[3.125rem]"
@@ -50,7 +50,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`font-semibold text-[1rem] transition-colors 
+                className={`font-semibold text-[1rem] transition-colors whitespace-nowrap
                   ${
                     isHome
                       ? "text-white hover:text-[#62A744]"
