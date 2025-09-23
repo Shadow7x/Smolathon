@@ -85,6 +85,8 @@ export default function Home() {
                 </button>
             </form>
             <Second />
+            <Third />
+            <Foth />
         </div>
     );
 }
