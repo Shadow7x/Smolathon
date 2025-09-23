@@ -17,4 +17,20 @@ class TowTrucksSerializer(serializers.ModelSerializer):
         model = TowTrucks
         fields = '__all__'
 
+class RoutesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Route
+        fields = '__all__'
+        
+class EvacuationRouteSerializer(serializers.ModelSerializer):
+    routes = RoutesSerializer(many=True)
+    class Meta:
+        model = TowTrucks
+        fields = '__all__'
+        
+class TrafficLightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TrafficLight
+        fields = '__all__'
+
 

@@ -5,6 +5,8 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import Second from "./second";
 import { useState } from "react";
 
+import Third from "./third";
+import Foth from "./foth";
 export default function Home() {
     const { addNotification } = useNotificationManager();
     const [isLoading, setIsLoading] = useState(false);
@@ -86,3 +88,4 @@ export default function Home() {
         </div>
     );
 }
+
