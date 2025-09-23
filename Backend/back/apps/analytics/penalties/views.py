@@ -6,7 +6,9 @@ from core.utils.parsers.excelParser import ExcelParser
 from core.models.models import Penalties, Reports
 from django.db import transaction
 from core.utils.auth_decor import token_required
+from core.utils.serializers import PenaltiesSerializer
 import  pandas as pd
+
 
 
 
@@ -31,6 +33,7 @@ def createPenalties(request: Request) -> Response:
                                                 'Количество вынесенных постановлений (нарастающим итогом)',
                                                 'Сумма наложенных штрафов (нарастающим итогом)',
                                                 'Сумма взысканных штрафов (нарастающим итогом)']:
+                    report.delete()
                     return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
                 penalties.columns =[
                             'date',
@@ -67,4 +70,18 @@ def createPenalties(request: Request) -> Response:
             return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
     return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
 
-
+@api_view(['GET'])
+def getPenalties(request: Request):
+    penalties = Penalties.objects.all()
+    try:
+        if request.GET.get('date'):
+            penalties = penalties.filter(date=request.GET.get('date'))
+        if request.GET.get('date_from') and request.GET.get('date_to'):
+            penalties = penalties.filter(date__range=[request.GET.get('date_from'), request.GET.get('date_to')])
+        if request.GET.get("year"):
+            penalties = penalties.filter(date__year=request.GET.get("year"))
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+    serializer = PenaltiesSerializer(penalties, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)

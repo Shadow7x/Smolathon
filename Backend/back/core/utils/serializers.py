@@ -7,5 +7,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username','is_superuser')
 
+class PenaltiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Penalties
+        fields = '__all__'
 
 
