@@ -19,3 +19,12 @@
 Аккаунт с правами суперюзера
 login: admin
 password: admin
+
+urls
+v1/account/login -> None
+v1/account/logout -> None
+v1/account/info -> None
+v1/analytics/penalties/create -> None
+v1/analytics/penalties/get -> None
+v1/analytics/towTrucks/create -> None
+v1/analytics/towTrucks/get -> None
