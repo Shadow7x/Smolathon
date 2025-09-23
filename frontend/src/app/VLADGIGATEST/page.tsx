@@ -3,58 +3,86 @@ import axi from "@/utils/api";
 import Image from "next/image";
 import { useNotificationManager } from "@/hooks/notification-context";
 import Second from "./second";
+import { useState } from "react";
+
 export default function Home() {
-    const {addNotification} = useNotificationManager();
-    function handleSubmit(e: React.FormEvent)  {
-        console.log(2)
-    e.preventDefault();
-    const data = new FormData(e.target as HTMLFormElement);
-    const file = data.get("file") as File;
-    const formData = new FormData();
-    formData.append("file", file);
-    axi.post("/analytics/penalties/create", formData, {
-        headers: {
-        "Content-Type": "multipart/form-data",
+    const { addNotification } = useNotificationManager();
+    const [isLoading, setIsLoading] = useState(false);
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const data = new FormData(e.target as HTMLFormElement);
+        const file = data.get("file") as File;
+
+        // Проверка формата файла
+        if (!file.name.endsWith('.xlsx')) {
+            addNotification({
+                id: Date.now().toString(),
+                title: "Ошибка формата",
+                description: "Файл должен быть в формате .xlsx",
+                status: 400,
+                createdAt: new Date().toISOString(),
+            });
+            setIsLoading(false);
+            return;
         }
-    }).then((res ) =>{
-      addNotification({
-          
-          id: Date.now().toString(),
-          title: "Успешно",
-          description: res.response?.data,
-          status: res.response?.status ? res.response.status : 200 ,
-          createdAt: new Date().toISOString(),
-        });
-    })
-    .catch((err) => {
-      console.log(err)
-      addNotification({
-        id: Date.now().toString(),
-        title: "Ошибка данных",
-        description: err.response.data,
-        status: err.response.status,
-        createdAt: new Date().toISOString(),
-    })
-  })
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await axi.post("/analytics/penalties/create", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                }
+            });
+
+            addNotification({
+                id: Date.now().toString(),
+                title: "Успешно",
+                description: "Файл успешно загружен",
+                status: res.status || 200,
+                createdAt: new Date().toISOString(),
+            });
+        } catch (err: any) {
+            console.log(err);
+            addNotification({
+                id: Date.now().toString(),
+                title: "Ошибка загрузки",
+                description: err.response?.data?.message || "Произошла ошибка",
+                status: err.response?.status || 500,
+                createdAt: new Date().toISOString(),
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }
 
-  return (
-    <div className=" ">
-       <form
-            onSubmit={(e) => handleSubmit(e)}
-            className="flex items-center gap-8 h-[calc(100%-50px)]"
-          >
-           Добавте штрафы.xlsx
-            <input type="file" name="file" id="" />
-            <button
-                type="submit"
-                className="text-black hover:underline text-sm"
+    return (
+        <div className="">
+            <form
+                onSubmit={handleSubmit}
+                className="flex items-center gap-8 h-[calc(100%-50px)]"
             >
-                Отправить
-            </button>
-
-          </form>
-          <Second/>
-    </div>
-  );
+                Добавьте штрафы.xlsx
+                <input 
+                    type="file" 
+                    name="file" 
+                    id="file-input"
+                    accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    disabled={isLoading}
+                />
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="text-black hover:underline text-sm disabled:opacity-50"
+                >
+                    {isLoading ? "Загрузка..." : "Отправить"}
+                </button>
+            </form>
+            <Second />
+        </div>
+    );
 }
