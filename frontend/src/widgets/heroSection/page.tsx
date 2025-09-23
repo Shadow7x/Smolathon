@@ -6,15 +6,21 @@ import Link from "next/link";
 const HeroSection = () => {
   return (
     <section
-      className="w-full h-screen bg-cover bg-center flex text-white px-[2rem] md:px-[7.5rem]"
+      className="
+    w-full 
+    pb-[2rem]      
+    md:pb-[4rem]         
+    lg:h-screen            
+    bg-cover bg-center flex text-white px-[2rem] md:px-[4rem] lg:px-[7.5rem]
+  "
       style={{
         backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0) 80%), url('/images/mainBackground.webp')`,
       }}
     >
       <div
         className="    mt-[8rem]       
-    sm:mt-[8rem]    
-    md:mt-[12rem]   
+    sm:mt-[15rem]    
+    md:mt-[17rem]   
     lg:mt-[17.5rem] 
     flex flex-col gap-8 md:gap-12"
       >
