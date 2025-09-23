@@ -1,5 +1,4 @@
-import Image from "next/image";
-import HeroSection from "@/widgets/heroSection/page";
+import HeroSection from "@/widgets/heroSection/heroSection";
 import InfoSection from "@/widgets/infoSection/infoSection";
 
 export default function Home() {
