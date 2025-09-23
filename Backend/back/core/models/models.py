@@ -2,11 +2,14 @@ from django.contrib.auth.models import User
 from django.db import models
 from rest_framework.authtoken.models import Token
 
+
 class Reports(models.Model):
     file = models.FileField(unique=True)
-    
+
     def __str__(self):
         return str(self.file)
+    
+    
 
 class Penalties(models.Model):
     date = models.DateField()
