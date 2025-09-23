@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const MapComponent = () => {
+const MapHeatmap = () => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [ymapsLoaded, setYmapsLoaded] = useState(false);
 
@@ -76,4 +76,4 @@ const MapComponent = () => {
   );
 };
 
-export default MapComponent;
+export default MapHeatmap;

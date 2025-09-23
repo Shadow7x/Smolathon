@@ -1,5 +1,5 @@
 "use client";
-import MapComponent from "@/components/map/MapComponent";
+import MapHeatmap from "@/components/map/MapHeatmap";
 
 export default function StatisticsPage() {
   return (
@@ -15,7 +15,7 @@ export default function StatisticsPage() {
 
       <section className="rounded-2xl shadow p-2 border border-gray-200">
         <h2 className="text-lg font-semibold mb-2">Карта Смоленска</h2>
-        <MapComponent />
+        <MapHeatmap />
       </section>
     </main>
   );
