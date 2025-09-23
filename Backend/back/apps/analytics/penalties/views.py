@@ -4,13 +4,15 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from core.utils.parsers.excelParser import ExcelParser
 from core.models.models import Penalties, Reports
-from django.db import transaction, close_old_connections
-import threading
+from django.db import transaction
+from core.utils.auth_decor import token_required
 import  pandas as pd
 
 
 
+
 @api_view(['POST'])
+@token_required
 def createPenalties(request: Request) -> Response:
     if request.FILES.get('file'):
         try:
