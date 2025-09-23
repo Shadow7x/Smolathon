@@ -17,4 +17,6 @@ def delete_report_file(sender, instance, **kwargs):
 
 admin.site.register(Reports)
 admin.site.register(Penalties)
+admin.site.register(TowTrucks) 
 admin.site.register(authorizedToken)
+
