@@ -13,11 +13,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUser } from "@/hooks/user-context"
+import Logout from "@/components/logout/logout"
 import { useNotificationManager } from "@/hooks/notification-context"
 import axi from "@/utils/api"
 
 export default function Authentication() {
-  const { fetchUser } = useUser();
+  const { user, fetchUser } = useUser(); // Добавляем user здесь
   const { addNotification } = useNotificationManager();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -55,6 +56,11 @@ export default function Authentication() {
         createdAt: new Date().toISOString(),
       });
     }
+  }
+
+  // Проверяем авторизацию и показываем соответствующую кнопку
+  if (user) {
+    return <Logout />
   }
 
   return (
