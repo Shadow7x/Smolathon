@@ -43,7 +43,7 @@ export default function Home() {
             onSubmit={(e) => handleSubmit(e)}
             className="flex items-center gap-8 h-[calc(100%-50px)]"
           >
-           
+           Добавте штрафы.xlsx
             <input type="file" name="file" id="" />
             <button
                 type="submit"

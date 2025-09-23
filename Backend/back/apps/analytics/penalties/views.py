@@ -24,6 +24,12 @@ def createPenalties(request: Request) -> Response:
             report = Reports.objects.create(file=file)
             try:
                 penalties = ExcelParser(file).df
+                if list(penalties.columns) != ['Дата',
+                                                'Количество зафиксированных нарушений камерами ФВФ (нарастающим итогом)',
+                                                'Количество вынесенных постановлений (нарастающим итогом)',
+                                                'Сумма наложенных штрафов (нарастающим итогом)',
+                                                'Сумма взысканных штрафов (нарастающим итогом)']:
+                    return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
                 penalties.columns =[
                             'date',
                             'violations_cumulative',
