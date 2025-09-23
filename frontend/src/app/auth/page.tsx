@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUser } from "@/hooks/user-context"
 import { useNotificationManager } from "@/hooks/notification-context"
+import axi from "@/utils/api"
 
 export default function Authentication() {
   const { fetchUser } = useUser();
@@ -45,6 +46,7 @@ export default function Authentication() {
         e.target.reset();
       }
     } catch (err) {
+      console.log(err);
       addNotification({
         id: Date.now().toString(),
         title: "Ошибка авторизации",
