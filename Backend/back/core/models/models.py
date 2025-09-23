@@ -59,6 +59,20 @@ class EvacuationRoute(models.Model):
     
     class Meta:
         ordering = ['-year', '-month']
+        
+        
+class TrafficLight(models.Model):
+    numPP = models.IntegerField(unique=True)
+    address = models.TextField()
+    type = models.TextField()
+    year = models.IntegerField()
+    report = models.ForeignKey(Reports, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.numPP)
+    
+    class Meta:
+        ordering = ['-numPP']
 
 class authorizedToken(Token):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -20,6 +20,8 @@ admin.site.register(Penalties)
 admin.site.register(TowTrucks) 
 admin.site.register(EvacuationRoute)
 admin.site.register(Route)
+admin.site.register(TrafficLight)
 admin.site.register(authorizedToken)
+
 
  
