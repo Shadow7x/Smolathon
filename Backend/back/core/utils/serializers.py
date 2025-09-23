@@ -11,5 +11,10 @@ class PenaltiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Penalties
         fields = '__all__'
+        
+class TowTrucksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TowTrucks
+        fields = '__all__'
 
 

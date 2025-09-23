@@ -22,6 +22,16 @@ class Penalties(models.Model):
     def __str__(self):
         return str(self.date)
 
+class TowTrucks(models.Model):
+    date = models.DateField()
+    tow_truck_in_line = models.IntegerField()
+    count_departures = models.IntegerField()
+    count_evacuations = models.IntegerField()
+    summary_of_parking_lot = models.IntegerField()
+    report = models.ForeignKey(Reports, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.date)
 
 
 class authorizedToken(Token):
