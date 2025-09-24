@@ -25,16 +25,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <GEOProvider>
-      <UserProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <GEOProvider>
+          <UserProvider>
             <Script
               src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"
               strategy="beforeInteractive"
@@ -49,9 +47,9 @@ export default function RootLayout({
               <Notifications />
               {children}
             </NotificationManagerProvider>
-          </body>
-        </html>
-      </UserProvider>
-    </GEOProvider>
+          </UserProvider>
+        </GEOProvider>
+      </body>
+    </html>
   );
 }

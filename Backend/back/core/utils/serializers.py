@@ -8,6 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username','is_superuser')
         
 class ReportsSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='file.name')
     class Meta:
         model = Reports
         fields = '__all__'
