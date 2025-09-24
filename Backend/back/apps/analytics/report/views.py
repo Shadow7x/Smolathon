@@ -29,7 +29,8 @@ def createReport(request: Request):
         content_file = ContentFile(b"", filename)
         report = Reports(file=content_file)
         report.save()
-        return Response("Успешно созданно", status=status.HTTP_201_CREATED)
+        data = ReportsSerializer(report).data
+        return Response(data, status=status.HTTP_201_CREATED)
     except Exception as e:
         print(e)
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
