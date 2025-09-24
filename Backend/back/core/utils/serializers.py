@@ -6,13 +6,20 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username','is_superuser')
+        
+class ReportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reports
+        fields = '__all__'
 
 class PenaltiesSerializer(serializers.ModelSerializer):
+    report = ReportsSerializer()
     class Meta:
         model = Penalties
         fields = '__all__'
         
 class TowTrucksSerializer(serializers.ModelSerializer):
+    report = ReportsSerializer()
     class Meta:
         model = TowTrucks
         fields = '__all__'
@@ -23,17 +30,20 @@ class RoutesSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class EvacuationRouteSerializer(serializers.ModelSerializer):
+    report = ReportsSerializer()
     routes = RoutesSerializer(many=True)
     class Meta:
         model = TowTrucks
         fields = '__all__'
         
 class TrafficLightSerializer(serializers.ModelSerializer):
+    report = ReportsSerializer()
     class Meta:
         model = TrafficLight
         fields = '__all__'
         
 class DTPSerializer(serializers.ModelSerializer):
+    report = ReportsSerializer()
     class Meta:
         model = DTP
         fields = '__all__'

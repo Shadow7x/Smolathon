@@ -68,7 +68,6 @@ def createTowTruckFromExcel(request: Request) -> Response:
     return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-@admin_required
 def getTowTruck(request: Request):
     towTruck = TowTrucks.objects.all()
     try:
