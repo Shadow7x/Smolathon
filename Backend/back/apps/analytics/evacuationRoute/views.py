@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from core.utils.parsers.excelParser import ExcelParser
 from core.models.models import EvacuationRoute, Reports, Route
 from django.db import transaction
-from core.utils.auth_decor import token_required, admin_required
+from core.utils.auth_decor import admin_required
 from core.utils.serializers import EvacuationRouteSerializer
 import  pandas as pd
 
@@ -14,7 +14,7 @@ import  pandas as pd
 
 
 @api_view(['POST'])
-@token_required
+@admin_required
 def createEvacuationRoute(request: Request) -> Response:
     if request.FILES.get('file'):
         try:

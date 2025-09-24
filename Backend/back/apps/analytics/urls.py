@@ -6,4 +6,5 @@ urlpatterns = [
     path("towTrucks/", include("apps.analytics.towTrucks.urls")),
     path("evacuationRoute/", include("apps.analytics.evacuationRoute.urls")),
     path("trafficLight/", include("apps.analytics.trafficLight.urls")),
+    path("DTP/", include("apps.analytics.DTP.urls")),
 ]

@@ -32,5 +32,10 @@ class TrafficLightSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrafficLight
         fields = '__all__'
+        
+class DTPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DTP
+        fields = '__all__'
 
 

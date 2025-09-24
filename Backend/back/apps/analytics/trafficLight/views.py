@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from core.utils.parsers.excelParser import ExcelParser
 from core.models.models import TrafficLight, Reports
 from django.db import transaction
-from core.utils.auth_decor import token_required
+from core.utils.auth_decor import token_required,admin_required
 from core.utils.serializers import TrafficLightSerializer
 import  pandas as pd
 
@@ -14,7 +14,7 @@ import  pandas as pd
 
 
 @api_view(['POST'])
-@token_required
+@admin_required
 def createTrafficLight(request: Request) -> Response:
     if request.FILES.get('file'):
         try:
@@ -64,6 +64,7 @@ def createTrafficLight(request: Request) -> Response:
     return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@admin_required
 def getTrafficLight(request: Request):
     trafficLight = TrafficLight.objects.all()
     try:

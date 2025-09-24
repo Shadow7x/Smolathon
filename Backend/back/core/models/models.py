@@ -74,6 +74,22 @@ class TrafficLight(models.Model):
     class Meta:
         ordering = ['-numPP']
 
+
+class DTP(models.Model):
+    year = models.IntegerField()
+    month = models.TextField()
+    point_FPSR = models.TextField()
+    statistical_factor = models.TextField()
+    count = models.FloatField()
+    report = models.ForeignKey(Reports, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.year) + str(self.month) + str(self.statistical_factor)
+    
+    class Meta:
+        ordering = ['-year', '-month']
+        
+
 class authorizedToken(Token):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     

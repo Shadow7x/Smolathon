@@ -21,6 +21,7 @@ admin.site.register(TowTrucks)
 admin.site.register(EvacuationRoute)
 admin.site.register(Route)
 admin.site.register(TrafficLight)
+admin.site.register(DTP)
 admin.site.register(authorizedToken)
 
 
