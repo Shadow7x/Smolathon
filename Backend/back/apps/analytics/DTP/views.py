@@ -66,16 +66,18 @@ def createDTP(request: Request) -> Response:
 
 @api_view(['GET'])
 def getDTP(request: Request):
-    penalties = DTP.objects.all()
+    dtp = DTP.objects.all()
     try:
         if request.GET.get('date'):
-            penalties = penalties.filter(date=request.GET.get('date'))
+            dtp = dtp.filter(date=request.GET.get('date'))
         if request.GET.get('date_from') and request.GET.get('date_to'):
-            penalties = penalties.filter(date__range=[request.GET.get('date_from'), request.GET.get('date_to')])
+            dtp = dtp.filter(date__range=[request.GET.get('date_from'), request.GET.get('date_to')])
         if request.GET.get("year"):
-            penalties = penalties.filter(date__year=request.GET.get("year"))
+            dtp = dtp.filter(date__year=request.GET.get("year"))        
+        if request.GET.get("month"):
+            dtp = dtp.filter(month=request.GET.get("month"))
     except Exception as e:
         print(e)
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
-    serializer = DTPSerializer(penalties, many=True)
+    serializer = DTPSerializer(dtp, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
