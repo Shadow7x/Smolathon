@@ -2,7 +2,6 @@
 import { useRef } from "react";
 import HeroSection from "@/widgets/heroSection/heroSection";
 import InfoSection from "@/widgets/infoSection/infoSection";
-import AnaliticsSection from "@/widgets/analyticsSection/analyticsSection";
 
 export default function Home() {
   const infoSectionRef = useRef<HTMLDivElement>(null);
@@ -15,7 +14,6 @@ export default function Home() {
         }
       />
       <InfoSection ref={infoSectionRef} />
-      <AnaliticsSection />
     </div>
   );
 }

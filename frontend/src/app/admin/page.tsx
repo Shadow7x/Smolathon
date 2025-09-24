@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-
+import AnaliticsSection from "@/widgets/analyticsSection/analyticsSection"
 export default function Admin() {
   const { user, isLoading } = useUser()
   const router = useRouter()
@@ -64,8 +64,8 @@ export default function Admin() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Панель администратора</h1>
-      <p className="text-gray-600 mb-8">Добро пожаловать, {user.name}!</p>
-      
+      <p className="text-gray-600 mb-8">Добро пожаловать!</p>
+      <AnaliticsSection />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/admin/penalties">
           <Button className="w-full h-32 text-lg">Штрафы</Button>

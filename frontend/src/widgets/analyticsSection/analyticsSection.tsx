@@ -145,7 +145,7 @@ export default function AnaliticsSection() {
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-5 p-4">
       <h1 className="text-3xl font-bold text-center">Аналитика штрафов</h1>
 
       {/* Диаграмма */}

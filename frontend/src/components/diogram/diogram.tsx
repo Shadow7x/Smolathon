@@ -88,7 +88,7 @@ export default function Diogram({
           <CardTitle>Динамика штрафов</CardTitle>
           <CardDescription>Нет данных для отображения</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-64">
+        <CardContent className="flex items-center justify-center h-30">
           <p className="text-muted-foreground">Загрузите данные о штрафах</p>
         </CardContent>
       </Card>
@@ -187,16 +187,16 @@ export default function Diogram({
 
       {/* Итоги */}
       <CardFooter>
-        <div className="flex w-full items-center gap-4 text-sm flex-wrap">
+        <div className="flex w-full items-center gap-2 text-sm flex-wrap">
           {show2024 && (
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[hsl(220,70%,50%)]"></div>
+              <div className="w-2 h-2 rounded-full bg-[hsl(220,70%,50%)]"></div>
               <span>2024: {total2024.toLocaleString('ru-RU')}</span>
             </div>
           )}
           {show2025 && (
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[hsl(160,70%,50%)]"></div>
+              <div className="w-2 h-2 rounded-full bg-[hsl(160,70%,50%)]"></div>
               <span>2025: {total2025.toLocaleString('ru-RU')}</span>
             </div>
           )}
