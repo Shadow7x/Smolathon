@@ -15,7 +15,7 @@ import  pandas as pd
 
 @api_view(['POST'])
 @admin_required
-def createPenalties(request: Request) -> Response:
+def createPenaltiesFromExcel(request: Request) -> Response:
     if request.FILES.get('file'):
         try:
             file = request.FILES['file']
@@ -84,3 +84,54 @@ def getPenalties(request: Request):
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
     serializer = PenaltiesSerializer(penalties, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@admin_required
+def createPenalty(request: Request):
+    try:
+        data = request.data
+        report = Reports.objects.get(id=data['report'])
+        if Penalties.objects.filter(date=data['date']).exists():
+            return Response("Такая запись уже существует", status=status.HTTP_400_BAD_REQUEST)
+        Penalties.objects.create(date = data['date'], 
+                                 violations_cumulative = data['violations_cumulative'],
+                                 decrees_cumulative = data['decrees_cumulative'],
+                                 fines_imposed_cumulative = data['fines_imposed_cumulative'],
+                                 fines_collected_cumulative = data['fines_collected_cumulative'],
+                                 report = report
+                                 )
+
+        return Response("Успешно созданно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@admin_required
+def updatePenalty(request: Request):
+    try:
+        data = request.data
+        penalties = Penalties.objects.get(id=data['id'])
+        penalties.violations_cumulative = data['violations_cumulative']
+        penalties.decrees_cumulative = data['decrees_cumulative']
+        penalties.fines_imposed_cumulative = data['fines_imposed_cumulative']
+        penalties.fines_collected_cumulative = data['fines_collected_cumulative']
+        penalties.save()
+        return Response("Успешно обновленно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@admin_required
+def deletePenalty(request: Request):
+    try:
+        data = request.data
+        penalties = Penalties.objects.get(id=data['id'])
+        penalties.delete()
+        return Response("Успешно удалено", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
