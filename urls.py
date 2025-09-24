@@ -1,3 +1,4 @@
+# перед использование пропишите python manage.py shell
 from django.urls import get_resolver
 resolver = get_resolver()
 def print_urls(urlpatterns, prefix=''):
