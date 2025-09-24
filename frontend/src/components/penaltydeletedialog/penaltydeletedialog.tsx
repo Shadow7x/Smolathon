@@ -1,9 +1,17 @@
 'use client'
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import axi from "@/utils/api"
+import { useState } from "react"
+import { useNotificationManager } from "@/hooks/notification-context"
 
 interface PenaltyDeleteDialogProps {
   penaltyId: number
@@ -12,14 +20,33 @@ interface PenaltyDeleteDialogProps {
 
 export default function PenaltyDeleteDialog({ penaltyId, onSuccess }: PenaltyDeleteDialogProps) {
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { addNotification } = useNotificationManager()
 
   const handleDelete = async () => {
     try {
-      await axi.delete(`/analytics/penalties/${penaltyId}`)
-      onSuccess()
+      setLoading(true)
+      await axi.post("/analytics/penalties/delete", { id: penaltyId })
+      addNotification({
+        id: Date.now().toString(),
+        title: "Успех",
+        description: "Запись удалена",
+        status: 201,
+        createdAt: new Date().toISOString(),
+      })
       setOpen(false)
-    } catch (e) {
-      console.error("Ошибка удаления", e)
+      onSuccess()
+    } catch (error: any) {
+      console.error(error)
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка",
+        description: error.response?.data || "Не удалось удалить запись",
+        status: error.response?.status || 500,
+        createdAt: new Date().toISOString(),
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -30,11 +57,12 @@ export default function PenaltyDeleteDialog({ penaltyId, onSuccess }: PenaltyDel
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Удалить запись?</DialogTitle>
+          <DialogTitle>Вы уверены, что хотите удалить запись?</DialogTitle>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Отмена</Button>
-          <Button variant="destructive" onClick={handleDelete}>Удалить</Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+            {loading ? "Удаляем..." : "Удалить"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

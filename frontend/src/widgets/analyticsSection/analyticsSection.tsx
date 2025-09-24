@@ -215,6 +215,10 @@ export default function AnaliticsSection() {
                         <TableCell>{formatNumber(penalty.decrees_cumulative)}</TableCell>
                         <TableCell>{formatNumber(penalty.fines_imposed_cumulative)} ₽</TableCell>
                         <TableCell>{formatNumber(penalty.fines_collected_cumulative)} ₽</TableCell>
+                        <TableCell className="flex gap-2">
+                          <PenaltyFormDialog penalty={penalty} onSuccess={fetchPenalties} />
+                          <PenaltyDeleteDialog penaltyId={penalty.id} onSuccess={fetchPenalties} />
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
