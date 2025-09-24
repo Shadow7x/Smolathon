@@ -15,7 +15,7 @@ import  pandas as pd
 
 @api_view(['POST'])
 @admin_required
-def createTrafficLight(request: Request) -> Response:
+def createTrafficLightFromExcel(request: Request) -> Response:
     if request.FILES.get('file'):
         try:
             file = request.FILES['file']
@@ -76,3 +76,48 @@ def getTrafficLight(request: Request):
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
     serializer = TrafficLightSerializer(trafficLight, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@admin_required
+def createTrafficLight(request: Request):
+    try:
+        data = request.data
+        report = Reports.objects.get(id=data['report'])
+        if TrafficLight.objects.filter(numPP=data['numPP']).exists():
+            return Response("Такая запись уже существует", status=status.HTTP_400_BAD_REQUEST)
+        TrafficLight.objects.create(numPP=data['numPP'], address=data['address'], type=data['type'], year=data['year'], report=report)
+
+        return Response("Успешно созданно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@admin_required
+def updateTrafficLight(request: Request):
+    try:
+        data = request.data
+        trafficLight = TrafficLight.objects.get(id=data['id'])
+        trafficLight.address = data['address']
+        trafficLight.type = data['type']
+        trafficLight.year = data['year']
+        trafficLight.save()
+        return Response("Успешно обновленно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@admin_required
+def deleteTrafficLight(request: Request):
+    try:
+        data = request.data
+        penalties = TrafficLight.objects.get(id=data['id'])
+        penalties.delete()
+        return Response("Успешно удалено", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)

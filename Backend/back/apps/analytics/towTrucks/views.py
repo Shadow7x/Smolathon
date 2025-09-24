@@ -15,7 +15,7 @@ import  pandas as pd
 
 @api_view(['POST'])
 @admin_required
-def createTowTruck(request: Request) -> Response:
+def createTowTruckFromExcel(request: Request) -> Response:
     if request.FILES.get('file'):
         try:
             file = request.FILES['file']
@@ -81,3 +81,56 @@ def getTowTruck(request: Request):
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
     serializer = TowTrucksSerializer(towTruck, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@admin_required
+def createTowTruck(request: Request):
+    try:
+        data = request.data
+        report = Reports.objects.get(id=data['report'])
+        if TowTrucks.objects.filter(date = data['date']).exists():
+            return Response("Такая запись уже существует", status=status.HTTP_400_BAD_REQUEST)
+        TowTrucks.objects.create(
+            date = data['date'],
+            tow_truck_in_line = data['tow_truck_in_line'],
+            count_departures = data['count_departures'],
+            count_evacuations = data['count_evacuations'],
+            summary_of_parking_lot = data['summary_of_parking_lot'],
+            report = report
+        )
+
+        return Response("Успешно созданно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@admin_required
+def updateTowTruck(request: Request):
+    try:
+        data = request.data
+        towTruck = TowTrucks.objects.get(id=data['id'])
+        towTruck.tow_truck_in_line = data['tow_truck_in_line']
+        towTruck.count_departures = data['count_departures']
+        towTruck.count_evacuations = data['count_evacuations']
+        towTruck.summary_of_parking_lot = data['summary_of_parking_lot']
+        towTruck.save()
+        return Response("Успешно обновленно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@admin_required
+def deleteTowTruck(request: Request):
+    try:
+        data = request.data
+        towTruck = TowTrucks.objects.get(id=data['id'])
+        towTruck.delete()
+        return Response("Успешно удалено", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
