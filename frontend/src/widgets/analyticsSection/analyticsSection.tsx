@@ -151,8 +151,7 @@ export default function AnaliticsSection() {
       {/* Диаграмма */}
       <Diogram penalties2024={penalties2024} penalties2025={penalties2025} />
 
-      {/* Фильтры и таблица */}
-      <Card>
+      <Card className="w-full max-w-[1200px] mx-auto">
         <CardHeader>
           <CardTitle>Просмотр данных</CardTitle>
           <CardDescription>
@@ -182,7 +181,7 @@ export default function AnaliticsSection() {
 
       {/* Таблица с данными */}
       {penalties.length > 0 && (
-        <Card>
+        <Card className="w-full max-w-[1400px] mx-auto">
           <CardHeader>
             <CardTitle>
               Данные о штрафах {yearFilter && `за ${yearFilter} год`}
