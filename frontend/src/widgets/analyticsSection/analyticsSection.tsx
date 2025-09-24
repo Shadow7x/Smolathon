@@ -8,6 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useNotificationManager } from "@/hooks/notification-context"
 import axi from "@/utils/api"
 import Diogram from "@/components/diogram/diogram"
+import PenaltyDeleteDialog from '@/components/penaltydeletedialog/penaltydeletedialog'
+import PenaltyFormDialog from '@/components/penaltyformdialog/penaltyformdialog'
 
 interface Penalty {
   id: number
@@ -151,7 +153,7 @@ export default function AnaliticsSection() {
       {/* Диаграмма */}
       <Diogram penalties2024={penalties2024} penalties2025={penalties2025} />
 
-      <Card className="w-full max-w-[1200px] mx-auto">
+      <Card className="w-full max-w-[900px] mx-auto">
         <CardHeader>
           <CardTitle>Просмотр данных</CardTitle>
           <CardDescription>
@@ -190,34 +192,35 @@ export default function AnaliticsSection() {
               Всего записей: {penalties.length}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Дата</TableHead>
-                    <TableHead>Нарушения</TableHead>
-                    <TableHead>Постановления</TableHead>
-                    <TableHead>Наложенные штрафы</TableHead>
-                    <TableHead>Взысканные штрафы</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {penalties.map((penalty) => (
-                    <TableRow key={penalty.id}>
-                      <TableCell className="font-medium">
-                        {formatDate(penalty.date)}
-                      </TableCell>
-                      <TableCell>{formatNumber(penalty.violations_cumulative)}</TableCell>
-                      <TableCell>{formatNumber(penalty.decrees_cumulative)}</TableCell>
-                      <TableCell>{formatNumber(penalty.fines_imposed_cumulative)} ₽</TableCell>
-                      <TableCell>{formatNumber(penalty.fines_collected_cumulative)} ₽</TableCell>
+            <CardContent>
+              <div className="flex justify-end mb-4">
+                <PenaltyFormDialog onSuccess={fetchPenalties} />
+              </div>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Дата</TableHead>
+                      <TableHead>Нарушения</TableHead>
+                      <TableHead>Постановления</TableHead>
+                      <TableHead>Наложенные штрафы</TableHead>
+                      <TableHead>Взысканные штрафы</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
+                  </TableHeader>
+                  <TableBody>
+                    {penalties.map((penalty) => (
+                      <TableRow key={penalty.id}>
+                        <TableCell className="font-medium">{formatDate(penalty.date)}</TableCell>
+                        <TableCell>{formatNumber(penalty.violations_cumulative)}</TableCell>
+                        <TableCell>{formatNumber(penalty.decrees_cumulative)}</TableCell>
+                        <TableCell>{formatNumber(penalty.fines_imposed_cumulative)} ₽</TableCell>
+                        <TableCell>{formatNumber(penalty.fines_collected_cumulative)} ₽</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
         </Card>
       )}
     </div>
