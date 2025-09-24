@@ -7,7 +7,7 @@ class Reports(models.Model):
     file = models.FileField(unique=True)
 
     def __str__(self):
-        return str(self.file)
+        return str(self.id)+" "+str(self.file)
     
     
 
@@ -20,8 +20,8 @@ class Penalties(models.Model):
     report = models.ForeignKey(Reports, on_delete=models.CASCADE)
     
     def __str__(self):
-        return str(self.date)
-    
+        return str(self.id) + " " + str(self.date)
+     
     class Meta:
         ordering = ['-date']
 
