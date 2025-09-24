@@ -1,70 +1,87 @@
-import Image from 'next/image';
+import React, { forwardRef } from "react";
+import Image from "next/image";
 
-export default function InfoSection() {
-    return(
-        <div className='flex flex-col lg:flex-row items-center justify-around w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-20 gap-8 lg:gap-12'>
-            {/* Текстовая часть */}
-            <div className='flex flex-col w-full lg:w-[810px] gap-6 lg:gap-8'>
-                <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-                    <div className='flex-shrink-0'>
-                        <Image src="/images/infoSection/infoSection1.svg" alt="Иконка 1" 
-                            width={70} 
-                            height={70}
-                            className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-                        />
-                    </div>
-                    <p className='w-full sm:w-[calc(100%-100px)] lg:w-[720px] text-base lg:text-lg text-gray-700'>
-                        Мы обслуживаем светофорные объекты в Смоленске и районных центрах.
-                    </p>
-                </div>
-                
-                <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-                    <div className='flex-shrink-0'>
-                        <Image src="/images/infoSection/infoSection2.svg" alt="Иконка 2" 
-                            width={70} 
-                            height={70}
-                            className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-                        />
-                    </div>
-                    <p className='w-full sm:w-[calc(100%-100px)] lg:w-[720px] text-base lg:text-lg text-gray-700'>
-                        Мы обеспечиваем работоспособность комплексов фото-видеофиксации административных правонарушений на дорогах общего пользования Смоленской области.
-                    </p>
-                </div>
-                
-                <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-                    <div className='flex-shrink-0'>
-                        <Image src="/images/infoSection/infoSection3.svg" alt="Иконка 3" 
-                            width={70} 
-                            height={70}
-                            className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-                        />
-                    </div>
-                    <p className='w-full sm:w-[calc(100%-100px)] lg:w-[720px] text-base lg:text-lg text-gray-700'>
-                        Мы создали и развиваем автоматизированную систему управления дорожным движением в Смоленске.
-                    </p>
-                </div>
-                
-                <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-                    <div className='flex-shrink-0'>
-                        <Image src="/images/infoSection/infoSection4.svg" alt="Иконка 4" 
-                            width={70} 
-                            height={70}
-                            className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-                        />
-                    </div>
-                    <p className='w-full sm:w-[calc(100%-100px)] lg:w-[720px] text-base lg:text-lg text-gray-700'>
-                        Мы внедряем интеллектуальную транспортную систему.
-                    </p>
-                </div>
-            </div>
-            {/* Изображение */}
-            <div className='flex-shrink-0 w-full sm:w-80 lg:w-96 xl:w-[500px]'>
-                <Image src="/images/infoSection/infoSection.svg" alt="Инфографика" 
-                    width={500} 
-                    height={500}
-                    className="w-full h-auto"
-                />
-            </div>
+const InfoSection = forwardRef<HTMLDivElement>((props, ref) => {
+  return (
+    <div
+      ref={ref}
+      className="w-full px-[2rem] md:px-[4rem] lg:px-[7.5rem] py-10 lg:py-20"
+    >
+      <div className="flex flex-col lg:flex-row items-center justify-around gap-7 lg:gap-12">
+        {/* Блок 1 */}
+        <div className="flex flex-col items-center text-center gap-2 lg:w-1/4">
+          <Image
+            src="/images/infoSection/infoSection1.svg"
+            alt="Иконка 1"
+            width={110}
+            height={110}
+            style={{ width: "6.875rem", height: "6.875rem" }}
+          />
+          <h3 className="font-kadwa font-bold text-[24px] leading-[22px]">
+            Обслуживаем
+          </h3>
+          <p className="font-kadwa font-normal text-[20px] leading-[22px] text-center text-gray-700">
+            Светофорные объекты в Смоленске и районных центрах.
+          </p>
         </div>
-    )
-}
+
+        {/* Блок 2 */}
+        <div className="flex flex-col items-center text-center gap-2 lg:w-1/4">
+          <Image
+            src="/images/infoSection/infoSection2.svg"
+            alt="Иконка 2"
+            width={110}
+            height={110}
+            style={{ width: "6.875rem", height: "6.875rem" }}
+          />
+          <h3 className="font-kadwa font-bold text-[24px] leading-[22px]">
+            Обеспечиваем
+          </h3>
+          <p className="font-kadwa font-normal text-[20px] leading-[22px] text-center text-gray-700">
+            Работоспособность комплексов фото-видеофиксации административных
+            правонарушений.
+          </p>
+        </div>
+
+        {/* Блок 3 */}
+        <div className="flex flex-col items-center text-center gap-2 lg:w-1/4">
+          <Image
+            src="/images/infoSection/infoSection3.svg"
+            alt="Иконка 3"
+            width={110}
+            height={110}
+            style={{ width: "6.875rem", height: "6.875rem" }}
+          />
+          <h3 className="font-kadwa font-bold text-[24px] leading-[22px]">
+            Развиваем
+          </h3>
+          <p className="font-kadwa font-normal text-[20px] leading-[22px] text-center text-gray-700">
+            Автоматизированную систему управления дорожным движением в
+            Смоленске.
+          </p>
+        </div>
+
+        {/* Блок 4 */}
+        <div className="flex flex-col items-center text-center gap-2 lg:w-1/4">
+          <Image
+            src="/images/infoSection/infoSection4.svg"
+            alt="Иконка 4"
+            width={110}
+            height={110}
+            style={{ width: "6.875rem", height: "6.875rem" }}
+          />
+          <h3 className="font-kadwa font-bold text-[24px] leading-[22px]">
+            Внедряем
+          </h3>
+          <p className="font-kadwa font-normal text-[20px] leading-[22px] text-center text-gray-700">
+            Интеллектуальную транспортную систему.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+InfoSection.displayName = "InfoSection";
+
+export default InfoSection;
