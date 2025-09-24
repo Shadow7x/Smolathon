@@ -23,7 +23,11 @@ export default function StreetHighlighter() {
     if (!token) return;
 
     axi
-      .get("analytics/trafficLight/get")
+      .get("analytics/trafficLight/get", {
+        headers: {
+          Accept: "application/json",
+        },
+      })
       .then((res) => {
         // Преобразуем под нашу структуру
         const lights: TrafficLight[] = res.data.map((item: any) => ({
@@ -36,14 +40,17 @@ export default function StreetHighlighter() {
       .catch((err) => console.error("Ошибка при получении светофоров:", err));
   }, []);
 
-  // Геокодим все светофоры, когда YMaps загружен
   useEffect(() => {
     if (!ymaps || trafficLights.length === 0) return;
+
+    // фильтруем только те метки, у которых нет coords
+    const lightsToGeocode = trafficLights.filter((light) => !light.coords);
+    if (lightsToGeocode.length === 0) return; // ничего геокодить не нужно
 
     const geocodeAll = async () => {
       try {
         const results = await Promise.all(
-          trafficLights.map(async (light) => {
+          lightsToGeocode.map(async (light) => {
             const formattedAddress =
               light.address.replace(/\s*\/\s*/g, ", ") + ", Смоленск";
             const res = await ymaps.geocode(formattedAddress);
@@ -58,7 +65,13 @@ export default function StreetHighlighter() {
           })
         );
 
-        setTrafficLights(results); // обновляем один раз
+        // обновляем только геокодированные метки, оставляя остальные
+        setTrafficLights((prev) =>
+          prev.map((light) => {
+            const found = results.find((r) => r.id === light.id);
+            return found ? found : light;
+          })
+        );
       } catch (err) {
         console.error("Ошибка при геокодинге светофоров:", err);
       }
