@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import axi from "@/utils/api"
 import { useNotificationManager } from "@/hooks/notification-context"
+import PenaltyReportDialog from "../penaltyreportdialog/penaltyreportdialog"
 
 interface PenaltyFormDialogProps {
   onSuccess: () => void
-  penalty?: any // если передан, это редактирование
+  penalty?: any
 }
 
 export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDialogProps) {
@@ -31,19 +33,55 @@ export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDia
     decrees_cumulative: 0,
     fines_imposed_cumulative: 0,
     fines_collected_cumulative: 0,
-    report: 1, // по умолчанию первый отчет
   })
+
+  const [reports, setReports] = useState<any[]>([])
+  const [selectedReport, setSelectedReport] = useState<string | null>(null)
+
+  // Загружаем отчёты при открытии
+  const fetchReports = async () => {
+    try {
+      const res = await axi.get("/analytics/reports/get")
+      setReports(res.data)
+    } catch (err) {
+      console.error(err)
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка",
+        description: "Не удалось загрузить отчёты",
+        status: 500,
+        createdAt: new Date().toISOString(),
+      })
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchReports()
+      if (!penalty) {
+        setForm({
+          date: "",
+          violations_cumulative: 0,
+          decrees_cumulative: 0,
+          fines_imposed_cumulative: 0,
+          fines_collected_cumulative: 0,
+        })
+        setSelectedReport(null)
+      }
+    }
+  }, [open])
+
 
   useEffect(() => {
     if (penalty) {
       setForm({
-        date: penalty.date.split("T")[0], // если ISO
+        date: penalty.date.split("T")[0],
         violations_cumulative: penalty.violations_cumulative,
         decrees_cumulative: penalty.decrees_cumulative,
         fines_imposed_cumulative: penalty.fines_imposed_cumulative,
         fines_collected_cumulative: penalty.fines_collected_cumulative,
-        report: penalty.report || 1,
       })
+      setSelectedReport(penalty.report?.id?.toString() || null)
     }
   }, [penalty])
 
@@ -55,13 +93,16 @@ export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDia
   const handleSubmit = async () => {
     try {
       setLoading(true)
-      const payload = {
+      const payload: any = {
         date: form.date,
         violations_cumulative: Number(form.violations_cumulative),
         decrees_cumulative: Number(form.decrees_cumulative),
         fines_imposed_cumulative: Number(form.fines_imposed_cumulative),
         fines_collected_cumulative: Number(form.fines_collected_cumulative),
-        report: form.report,
+      }
+
+      if (!penalty && !selectedReport) {
+        throw new Error("Выберите отчёт или создайте новый")
       }
 
       if (penalty) {
@@ -75,6 +116,7 @@ export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDia
           createdAt: new Date().toISOString(),
         })
       } else {
+        payload["report"] = Number(selectedReport)
         await axi.post("/analytics/penalties/create", payload)
         addNotification({
           id: Date.now().toString(),
@@ -92,7 +134,7 @@ export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDia
       addNotification({
         id: Date.now().toString(),
         title: "Ошибка",
-        description: error.response?.data || "Не удалось сохранить запись",
+        description: error.response?.data || error.message || "Не удалось сохранить запись",
         status: error.response?.status || 500,
         createdAt: new Date().toISOString(),
       })
@@ -131,9 +173,31 @@ export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDia
             <Label htmlFor="fines_collected_cumulative">Взысканные штрафы</Label>
             <Input type="number" id="fines_collected_cumulative" name="fines_collected_cumulative" value={form.fines_collected_cumulative} onChange={handleChange} />
           </div>
+
+          {/* Выбор отчёта */}
+          <div>
+            <Label htmlFor="report">Отчёт</Label>
+            <div className="flex gap-2">
+              <Select value={selectedReport || ""} onValueChange={setSelectedReport}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите отчёт" />
+                </SelectTrigger>
+                <SelectContent>
+                  {reports.map((r) => (
+                    <SelectItem key={r.id} value={r.id.toString()}>
+                      {r.file}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <PenaltyReportDialog onSuccess={fetchReports} />
+            </div>
+          </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={loading}>{loading ? "Сохраняем..." : "Сохранить"}</Button>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading ? "Сохраняем..." : "Сохранить"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
