@@ -68,10 +68,7 @@ def createTrafficLight(request: Request) -> Response:
 def getTrafficLight(request: Request):
     trafficLight = TrafficLight.objects.all()
     try:
-        if request.GET.get('date'):
-            trafficLight = trafficLight.filter(date=request.GET.get('date'))
-        if request.GET.get('date_from') and request.GET.get('date_to'):
-            trafficLight = trafficLight.filter(date__range=[request.GET.get('date_from'), request.GET.get('date_to')])
+        
         if request.GET.get("year"):
             trafficLight = trafficLight.filter(date__year=request.GET.get("year"))
     except Exception as e:
