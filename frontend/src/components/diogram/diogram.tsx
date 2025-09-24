@@ -191,13 +191,13 @@ export default function Diogram({
           {show2024 && (
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[hsl(220,70%,50%)]"></div>
-              <span>2024: {total2024.toLocaleString('ru-RU')}</span>
+              <span>2024</span>
             </div>
           )}
           {show2025 && (
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[hsl(160,70%,50%)]"></div>
-              <span>2025: {total2025.toLocaleString('ru-RU')}</span>
+              <span>2025</span>
             </div>
           )}
           {show2024 && show2025 && growthPercentage !== "0.0" && (
