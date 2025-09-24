@@ -8,6 +8,7 @@ import { useState } from "react";
 import Third from "./third";
 import Foth from "./foth";
 import Five from "./five";
+import OPTION from "./option";
 export default function Home() {
     const { addNotification } = useNotificationManager();
     const [isLoading, setIsLoading] = useState(false);
@@ -89,6 +90,7 @@ export default function Home() {
             <Third />
             <Foth />
             <Five />
+            <OPTION />
         </div>
     );
 }
