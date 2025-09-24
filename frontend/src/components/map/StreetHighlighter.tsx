@@ -1,40 +1,88 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
+import axi from "@/utils/api";
+
+interface TrafficLight {
+  id: number;
+  name: string;
+  address: string; // адрес с бэкенда
+  coords?: [number, number]; // координаты после геокодинга
+}
 
 export default function StreetHighlighter() {
   const [address, setAddress] = useState("");
   const [coords, setCoords] = useState<[number, number] | null>(null);
   const [ymaps, setYmaps] = useState<any>(null);
+  const [trafficLights, setTrafficLights] = useState<TrafficLight[]>([]);
+
+  // Получение всех светофоров
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    axi
+      .get("analytics/trafficLight/get")
+      .then((res) => {
+        // Преобразуем под нашу структуру
+        const lights: TrafficLight[] = res.data.map((item: any) => ({
+          id: item.id,
+          name: item.address || item.name, // если есть address, используем его
+          address: item.address || item.name,
+        }));
+        setTrafficLights(lights);
+      })
+      .catch((err) => console.error("Ошибка при получении светофоров:", err));
+  }, []);
+
+  // Геокодим все светофоры, когда YMaps загружен
+  useEffect(() => {
+    if (!ymaps || trafficLights.length === 0) return;
+
+    const geocodeAll = async () => {
+      try {
+        const results = await Promise.all(
+          trafficLights.map(async (light) => {
+            const formattedAddress =
+              light.address.replace(/\s*\/\s*/g, ", ") + ", Смоленск";
+            const res = await ymaps.geocode(formattedAddress);
+            const firstGeoObject = res.geoObjects.get(0);
+            if (firstGeoObject) {
+              const coords = firstGeoObject.geometry.getCoordinates();
+              return { ...light, coords };
+            } else {
+              console.warn("Адрес не найден:", formattedAddress);
+              return light;
+            }
+          })
+        );
+
+        setTrafficLights(results); // обновляем один раз
+      } catch (err) {
+        console.error("Ошибка при геокодинге светофоров:", err);
+      }
+    };
+
+    geocodeAll();
+  }, [ymaps, trafficLights]);
 
   const handleSearch = () => {
-    if (!address || !ymaps) {
-      console.warn("Нет адреса или YMaps ещё не загрузились");
-      return;
-    }
+    if (!address || !ymaps) return;
 
-    ymaps.geocode(address).then((res: any) => {
+    const formattedAddress = address.replace(/\s*\/\s*/g, ", ") + ", Смоленск";
+    ymaps.geocode(formattedAddress).then((res: any) => {
       const firstGeoObject = res.geoObjects.get(0);
-      if (firstGeoObject) {
-        const newCoords = firstGeoObject.geometry.getCoordinates();
-        console.log("Нашли координаты:", newCoords);
-        setCoords(newCoords);
-      } else {
-        alert("Адрес не найден");
-      }
+      if (firstGeoObject) setCoords(firstGeoObject.geometry.getCoordinates());
+      else alert("Адрес не найден");
     });
   };
 
   return (
     <YMaps
-      query={{
-        apikey: "5547c71f-7034-4404-9cfc-e1a2d8198ea9", // ключ в .env.local
-        lang: "ru_RU",
-      }}
+      query={{ apikey: "5547c71f-7034-4404-9cfc-e1a2d8198ea9", lang: "ru_RU" }}
     >
       <div className="flex flex-col gap-4">
-        {/* Инпут и кнопка */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -51,18 +99,37 @@ export default function StreetHighlighter() {
           </button>
         </div>
 
-        {/* Карта */}
         <Map
-          defaultState={{ center: [55.75, 37.57], zoom: 9 }}
+          defaultState={{ center: [54.7867, 32.0406], zoom: 12 }}
           width="100%"
           height="500px"
-          modules={["geocode"]}
-          onLoad={(ymapsInstance) => {
-            console.log("YMaps загружен", ymapsInstance);
-            setYmaps(ymapsInstance);
-          }}
+          modules={["geocode", "geoObject.addon.balloon"]}
+          onLoad={(ymapsInstance) => setYmaps(ymapsInstance)}
         >
-          {coords && <Placemark geometry={coords} />}
+          {coords && (
+            <Placemark
+              geometry={coords}
+              properties={{ balloonContent: "Ваш адрес" }}
+            />
+          )}
+
+          {/* Метки светофоров через geocode с балунами */}
+          {trafficLights
+            .filter((light) => light.coords)
+            .map((light) => (
+              <Placemark
+                key={light.id}
+                geometry={light.coords}
+                properties={{
+                  hintContent: light.name, // маленькая подсказка при наведении
+                  balloonContentHeader: light.name, // заголовок балуна
+                  balloonContentBody: `Адрес: ${light.address}`, // тело балуна
+                }}
+                options={{
+                  balloonPanelMaxMapArea: 0, // всегда показывать балун
+                }}
+              />
+            ))}
         </Map>
       </div>
     </YMaps>
