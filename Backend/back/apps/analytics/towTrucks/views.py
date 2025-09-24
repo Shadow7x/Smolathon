@@ -76,8 +76,6 @@ def getTowTruck(request: Request):
             towTruck = towTruck.filter(date=request.GET.get('date'))
         if request.GET.get('date_from') and request.GET.get('date_to'):
             towTruck = towTruck.filter(date__range=[request.GET.get('date_from'), request.GET.get('date_to')])
-        if request.GET.get("year"):
-            towTruck = towTruck.filter(date__year=request.GET.get("year"))
     except Exception as e:
         print(e)
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
