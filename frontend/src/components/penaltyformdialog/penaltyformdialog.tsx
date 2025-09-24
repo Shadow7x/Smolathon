@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,9 +17,10 @@ import { useNotificationManager } from "@/hooks/notification-context"
 
 interface PenaltyFormDialogProps {
   onSuccess: () => void
+  penalty?: any // если передан, это редактирование
 }
 
-export default function PenaltyFormDialog({ onSuccess }: PenaltyFormDialogProps) {
+export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { addNotification } = useNotificationManager()
@@ -30,7 +31,21 @@ export default function PenaltyFormDialog({ onSuccess }: PenaltyFormDialogProps)
     decrees_cumulative: 0,
     fines_imposed_cumulative: 0,
     fines_collected_cumulative: 0,
+    report: 1, // по умолчанию первый отчет
   })
+
+  useEffect(() => {
+    if (penalty) {
+      setForm({
+        date: penalty.date.split("T")[0], // если ISO
+        violations_cumulative: penalty.violations_cumulative,
+        decrees_cumulative: penalty.decrees_cumulative,
+        fines_imposed_cumulative: penalty.fines_imposed_cumulative,
+        fines_collected_cumulative: penalty.fines_collected_cumulative,
+        report: penalty.report || 1,
+      })
+    }
+  }, [penalty])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -40,24 +55,44 @@ export default function PenaltyFormDialog({ onSuccess }: PenaltyFormDialogProps)
   const handleSubmit = async () => {
     try {
       setLoading(true)
-      await axi.post("/analytics/penalties/create", form)
+      const payload = {
+        date: form.date,
+        violations_cumulative: Number(form.violations_cumulative),
+        decrees_cumulative: Number(form.decrees_cumulative),
+        fines_imposed_cumulative: Number(form.fines_imposed_cumulative),
+        fines_collected_cumulative: Number(form.fines_collected_cumulative),
+        report: form.report,
+      }
 
-      addNotification({
-        id: Date.now().toString(),
-        title: "Успех",
-        description: "Запись добавлена",
-        status: 201,
-        createdAt: new Date().toISOString(),
-      })
+      if (penalty) {
+        payload["id"] = penalty.id
+        await axi.post("/analytics/penalties/update", payload)
+        addNotification({
+          id: Date.now().toString(),
+          title: "Успех",
+          description: "Запись обновлена",
+          status: 201,
+          createdAt: new Date().toISOString(),
+        })
+      } else {
+        await axi.post("/analytics/penalties/create", payload)
+        addNotification({
+          id: Date.now().toString(),
+          title: "Успех",
+          description: "Запись добавлена",
+          status: 201,
+          createdAt: new Date().toISOString(),
+        })
+      }
 
       setOpen(false)
       onSuccess()
     } catch (error: any) {
-      console.error("Ошибка добавления:", error)
+      console.error(error)
       addNotification({
         id: Date.now().toString(),
         title: "Ошибка",
-        description: error.response?.data || "Не удалось добавить запись",
+        description: error.response?.data || "Не удалось сохранить запись",
         status: error.response?.status || 500,
         createdAt: new Date().toISOString(),
       })
@@ -69,13 +104,12 @@ export default function PenaltyFormDialog({ onSuccess }: PenaltyFormDialogProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Добавить запись</Button>
+        <Button>{penalty ? "Редактировать" : "Добавить запись"}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Новая запись</DialogTitle>
+          <DialogTitle>{penalty ? "Редактирование записи" : "Новая запись"}</DialogTitle>
         </DialogHeader>
-
         <div className="space-y-3">
           <div>
             <Label htmlFor="date">Дата</Label>
@@ -98,11 +132,8 @@ export default function PenaltyFormDialog({ onSuccess }: PenaltyFormDialogProps)
             <Input type="number" id="fines_collected_cumulative" name="fines_collected_cumulative" value={form.fines_collected_cumulative} onChange={handleChange} />
           </div>
         </div>
-
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Сохраняем..." : "Добавить"}
-          </Button>
+          <Button onClick={handleSubmit} disabled={loading}>{loading ? "Сохраняем..." : "Сохранить"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
