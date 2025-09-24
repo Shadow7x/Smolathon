@@ -1,5 +1,5 @@
-'use client'
-import { useState, useEffect } from 'react'
+"use client"
+import { useState, useEffect, useMemo, memo } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +10,8 @@ import axi from "@/utils/api"
 import Diogram from "@/components/diogram/diogram"
 import PenaltyDeleteDialog from '@/components/penaltydeletedialog/penaltydeletedialog'
 import PenaltyFormDialog from '@/components/penaltyformdialog/penaltyformdialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from 'lucide-react'
 
 interface Penalty {
   id: number
@@ -20,14 +22,56 @@ interface Penalty {
   fines_collected_cumulative: number
 }
 
+// Улучшенный компонент строки таблицы
+const PenaltyRow = memo(({ penalty, formatDate, formatNumber, fetchPenalties }: { 
+  penalty: Penalty, 
+  formatDate: (date: string) => string, 
+  formatNumber: (n: number) => string, 
+  fetchPenalties: (year: string) => void 
+}) => (
+  <TableRow className="hover:bg-gray-50/50 transition-colors">
+    <TableCell className="font-medium text-sm py-3">
+      <div className="flex items-center gap-2">
+        <Calendar className="h-4 w-4 text-gray-400" />
+        {formatDate(penalty.date)}
+      </div>
+    </TableCell>
+    <TableCell className="text-sm py-3 text-right font-mono">
+      {formatNumber(penalty.violations_cumulative)}
+    </TableCell>
+    <TableCell className="text-sm py-3 text-right font-mono">
+      {formatNumber(penalty.decrees_cumulative)}
+    </TableCell>
+    <TableCell className="text-sm py-3 text-right font-mono font-semibold text-blue-600">
+      {formatNumber(penalty.fines_imposed_cumulative)} ₽
+    </TableCell>
+    <TableCell className="text-sm py-3 text-right font-mono font-semibold text-green-600">
+      {formatNumber(penalty.fines_collected_cumulative)} ₽
+    </TableCell>
+    <TableCell className="py-3">
+      <div className="flex gap-2 justify-end">
+        <PenaltyFormDialog penalty={penalty} onSuccess={fetchPenalties} />
+        <PenaltyDeleteDialog penaltyId={penalty.id} onSuccess={fetchPenalties} />
+      </div>
+    </TableCell>
+  </TableRow>
+))
+
+PenaltyRow.displayName = 'PenaltyRow'
+
 export default function AnaliticsSection() {
+  const [showTable, setShowTable] = useState(true)
   const [file, setFile] = useState<File | null>(null)
-  const [penalties, setPenalties] = useState<Penalty[]>([])
+  const [allPenalties, setAllPenalties] = useState<Penalty[]>([])
   const [penalties2024, setPenalties2024] = useState<Penalty[]>([])
   const [penalties2025, setPenalties2025] = useState<Penalty[]>([])
   const [loading, setLoading] = useState(false)
   const [yearFilter, setYearFilter] = useState('')
   const { addNotification } = useNotificationManager()
+  const [monthFilter, setMonthFilter] = useState('all')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [penalties, setPenalties] = useState<Penalty[]>([]) 
+  const [inputYear, setInputYear] = useState('')
 
   useEffect(() => {
     fetchPenaltiesByYear()
@@ -37,7 +81,6 @@ export default function AnaliticsSection() {
     try {
       setLoading(true)
       
-      // ПРАВИЛЬНЫЕ ПУТИ - используем /analytics/penalties/
       const [response2024, response2025] = await Promise.all([
         axi.get('/analytics/penalties/get?year=2024').catch(() => ({ data: [] })),
         axi.get('/analytics/penalties/get?year=2025').catch(() => ({ data: [] }))
@@ -59,70 +102,18 @@ export default function AnaliticsSection() {
     }
   }
 
-  // Загрузка файла
-  const handleFileUpload = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!file) {
-      addNotification({
-        id: Date.now().toString(),
-        title: "Ошибка",
-        description: "Выберите файл для загрузки",
-        status: 400,
-        createdAt: new Date().toISOString(),
-      })
-      return
-    }
-
-    setLoading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-
-    try {
-      // ПРАВИЛЬНЫЙ ПУТЬ - /analytics/penalties/create
-      const response = await axi.post('/analytics/penalties/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-
-      if (response.status === 201) {
-        addNotification({
-          id: Date.now().toString(),
-          title: "Успех",
-          description: "Файл успешно загружен",
-          status: 200,
-          createdAt: new Date().toISOString(),
-        })
-        setFile(null)
-        
-        const fileInput = document.getElementById('file-upload') as HTMLInputElement
-        if (fileInput) fileInput.value = ''
-        
-        await fetchPenaltiesByYear()
-      }
-    } catch (error: any) {
-      console.error('Ошибка загрузки:', error)
-      addNotification({
-        id: Date.now().toString(),
-        title: "Ошибка загрузки",
-        description: error.response?.data || "Произошла ошибка при загрузке файла",
-        status: error.response?.status || 500,
-        createdAt: new Date().toISOString(),
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   // Получение данных для таблицы
-  const fetchPenalties = async () => {
+  const fetchPenalties = async (year: string) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (yearFilter) params.append('year', yearFilter)
-
+      if (year) params.append('year', year)
       const response = await axi.get(`/analytics/penalties/get?${params}`)
+      setAllPenalties(response.data)
       setPenalties(response.data)
+      setMonthFilter('all')
+      setSortOrder('desc')
+      setYearFilter(year)
     } catch (error: any) {
       addNotification({
         id: Date.now().toString(),
@@ -136,6 +127,23 @@ export default function AnaliticsSection() {
     }
   }
 
+  useEffect(() => {
+    let filtered = [...allPenalties]
+
+    if (monthFilter !== 'all') {
+      const month = Number(monthFilter)
+      filtered = filtered.filter((p) => new Date(p.date).getMonth() + 1 === month)
+    }
+
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
+    })
+
+    setPenalties(filtered)
+  }, [allPenalties, monthFilter, sortOrder])
+
   // Форматирование даты
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU')
@@ -146,16 +154,30 @@ export default function AnaliticsSection() {
     return new Intl.NumberFormat('ru-RU').format(num)
   }
 
+  const displayedPenalties = useMemo(() => {
+    let filtered = [...allPenalties]
+    if (monthFilter !== 'all') {
+      filtered = filtered.filter((p) => new Date(p.date).getMonth() + 1 === Number(monthFilter))
+    }
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
+    })
+    return filtered
+  }, [allPenalties, monthFilter, sortOrder])
+
   return (
-    <div className="space-y-5 p-4">
-      <h1 className="text-3xl font-bold text-center">Аналитика штрафов</h1>
+    <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
+      <h1 className="text-3xl font-bold text-center text-gray-900">Аналитика штрафов</h1>
 
       {/* Диаграмма */}
       <Diogram penalties2024={penalties2024} penalties2025={penalties2025} />
 
-      <Card className="w-full max-w-[900px] mx-auto">
-        <CardHeader>
-          <CardTitle>Просмотр данных</CardTitle>
+      {/* Загрузка данных */}
+      <Card className="w-full">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">Просмотр данных</CardTitle>
           <CardDescription>
             Загрузите данные о штрафах с возможностью фильтрации по году
           </CardDescription>
@@ -163,18 +185,23 @@ export default function AnaliticsSection() {
         <CardContent>
           <div className="flex gap-4 items-end">
             <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="year-filter">Год</Label>
+              <Label htmlFor="year-filter" className="text-sm font-medium">Год</Label>
               <Input 
                 id="year-filter"
                 type="number"
                 placeholder="Например: 2024"
-                value={yearFilter}
-                onChange={(e) => setYearFilter(e.target.value)}
+                value={inputYear}
+                onChange={(e) => setInputYear(e.target.value)}
                 min="2000"
                 max="2030"
+                className="h-10"
               />
             </div>
-            <Button onClick={fetchPenalties} disabled={loading}>
+            <Button 
+              onClick={() => fetchPenalties(inputYear)} 
+              disabled={loading || !inputYear.trim()}
+              className="h-10"
+            >
               {loading ? "Загрузка..." : "Загрузить данные"}
             </Button>
           </div>
@@ -183,48 +210,113 @@ export default function AnaliticsSection() {
 
       {/* Таблица с данными */}
       {penalties.length > 0 && (
-        <Card className="w-full max-w-[1400px] mx-auto">
-          <CardHeader>
-            <CardTitle>
-              Данные о штрафах {yearFilter && `за ${yearFilter} год`}
-            </CardTitle>
-            <CardDescription>
-              Всего записей: {penalties.length}
-            </CardDescription>
-          </CardHeader>
-            <CardContent>
-              <div className="flex justify-end mb-4">
+        <Card className="w-full">
+          <CardHeader className="pb-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-xl">
+                  Данные о штрафах {yearFilter && `за ${yearFilter} год`}
+                </CardTitle>
+                <CardDescription>
+                  Всего записей: {displayedPenalties.length}
+                </CardDescription>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowTable(!showTable)}
+                  className="flex items-center gap-2 h-9"
+                >
+                  {showTable ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showTable ? "Скрыть таблицу" : "Показать таблицу"}
+                </Button>
                 <PenaltyFormDialog onSuccess={fetchPenalties} />
               </div>
-              <div className="rounded-md border">
+            </div>
+          </CardHeader>
+
+          {showTable && (
+            <CardContent>
+              {/* Панель фильтров и сортировки */}
+              <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">Фильтры:</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-600">Сортировка:</span>
+                  <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as 'asc' | 'desc')}>
+                    <SelectTrigger className="w-[160px] h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desc">Сначала новые</SelectItem>
+                      <SelectItem value="asc">Сначала старые</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-600">Месяц:</span>
+                  <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger className="w-[140px] h-8">
+                      <SelectValue placeholder="Все месяцы" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Все месяцы</SelectItem>
+                      <SelectItem value="1">Январь</SelectItem>
+                      <SelectItem value="2">Февраль</SelectItem>
+                      <SelectItem value="3">Март</SelectItem>
+                      <SelectItem value="4">Апрель</SelectItem>
+                      <SelectItem value="5">Май</SelectItem>
+                      <SelectItem value="6">Июнь</SelectItem>
+                      <SelectItem value="7">Июль</SelectItem>
+                      <SelectItem value="8">Август</SelectItem>
+                      <SelectItem value="9">Сентябрь</SelectItem>
+                      <SelectItem value="10">Октябрь</SelectItem>
+                      <SelectItem value="11">Ноябрь</SelectItem>
+                      <SelectItem value="12">Декабрь</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Таблица */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-gray-50">
                     <TableRow>
-                      <TableHead>Дата</TableHead>
-                      <TableHead>Нарушения</TableHead>
-                      <TableHead>Постановления</TableHead>
-                      <TableHead>Наложенные штрафы</TableHead>
-                      <TableHead>Взысканные штрафы</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Дата</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-right">Нарушения</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-right">Постановления</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-right">Наложенные штрафы</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-right">Взысканные штрафы</TableHead>
+                      <TableHead className="font-semibold text-gray-700 text-right">Действия</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {penalties.map((penalty) => (
-                      <TableRow key={penalty.id}>
-                        <TableCell className="font-medium">{formatDate(penalty.date)}</TableCell>
-                        <TableCell>{formatNumber(penalty.violations_cumulative)}</TableCell>
-                        <TableCell>{formatNumber(penalty.decrees_cumulative)}</TableCell>
-                        <TableCell>{formatNumber(penalty.fines_imposed_cumulative)} ₽</TableCell>
-                        <TableCell>{formatNumber(penalty.fines_collected_cumulative)} ₽</TableCell>
-                        <TableCell className="flex gap-2">
-                          <PenaltyFormDialog penalty={penalty} onSuccess={fetchPenalties} />
-                          <PenaltyDeleteDialog penaltyId={penalty.id} onSuccess={fetchPenalties} />
-                        </TableCell>
-                      </TableRow>
+                    {displayedPenalties.map((penalty) => (
+                      <PenaltyRow 
+                        key={penalty.id} 
+                        penalty={penalty} 
+                        formatDate={formatDate} 
+                        formatNumber={formatNumber} 
+                        fetchPenalties={fetchPenalties} 
+                      />
                     ))}
                   </TableBody>
                 </Table>
               </div>
+
+              {/* Подвал таблицы */}
+              <div className="mt-4 text-sm text-gray-500 text-center">
+                Показано {displayedPenalties.length} из {allPenalties.length} записей
+              </div>
             </CardContent>
+          )}
         </Card>
       )}
     </div>

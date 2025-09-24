@@ -179,13 +179,13 @@ export default function PenaltyFormDialog({ onSuccess, penalty }: PenaltyFormDia
             <Label htmlFor="report">Отчёт</Label>
             <div className="flex gap-2">
               <Select value={selectedReport || ""} onValueChange={setSelectedReport}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Выберите отчёт" />
+                <SelectTrigger className="w-full max-w-[300px]"> {/* ограничиваем ширину */}
+                  <SelectValue placeholder="Выберите отчёт" className="truncate" /> {/* троеточие */}
                 </SelectTrigger>
                 <SelectContent>
                   {reports.map((r) => (
-                    <SelectItem key={r.id} value={r.id.toString()}>
-                      {r.file}
+                    <SelectItem key={r.id} value={r.id.toString()} className="truncate max-w-[280px]">
+                      {r.title || r.file.split("/").pop()}
                     </SelectItem>
                   ))}
                 </SelectContent>
