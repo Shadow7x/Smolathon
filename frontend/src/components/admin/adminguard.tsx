@@ -27,5 +27,9 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     return null
   }
 
+  if (!user.is_superuser) {
+    return null
+  }
+
   return <>{children}</>
 }
