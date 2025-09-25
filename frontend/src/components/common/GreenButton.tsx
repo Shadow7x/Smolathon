@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export const GreenButton = ({
+const GreenButton = ({
   className,
   children,
   href,
@@ -23,3 +23,5 @@ export const GreenButton = ({
     </Button>
   );
 };
+
+export default GreenButton;
