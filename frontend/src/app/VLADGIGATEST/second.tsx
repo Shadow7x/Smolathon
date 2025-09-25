@@ -12,7 +12,7 @@ export default function Second() {
     const file = data.get("file") as File;
     const formData = new FormData();
     formData.append("file", file);
-    axi.post("/analytics/towTrucks/create", formData, {
+    axi.post("/analytics/towTrucks/createFromExcel", formData, {
         headers: {
         "Content-Type": "multipart/form-data",
         }

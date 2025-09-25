@@ -46,37 +46,6 @@ export default function Admin() {
     router.push('/')
   }
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'penalties':
-        return <AnaliticsSection />
-      case 'evacuation':
-        return (
-          <Card>
-            <AnalyticsSectionEvacuation/>
-          </Card>
-        )
-      case 'routes':
-        return (
-          <Card>
-          </Card>
-        )
-      case 'users':
-        return (
-          <Card>
-          
-          </Card>
-        )
-      case 'settings':
-        return (
-          <Card>
-            
-          </Card>
-        )
-      default:
-        return <AnaliticsSection />
-    }
-  }
 
   if (!isClient || isLoading) {
     return (
