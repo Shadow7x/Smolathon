@@ -4,13 +4,17 @@
 import { useUser } from "@/hooks/user-context"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import AnaliticsSection from "@/widgets/analyticsSection/analyticsSection"
+import AnaliticsSection from "@/widgets/analyticsSectionPenalties/analyticsSectionPenalties"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import AnalyticsSectionEvacuation from "@/widgets/analyticsSectionEvacuation/analyticsSectionEvacuation"
+import Link from "next/link"
+
 export default function Admin() {
-  const { user, isLoading } = useUser()
+  const { user, isLoading, logout } = useUser()
   const router = useRouter()
   const [isClient, setIsClient] = useState(false)
+  const [activeSection, setActiveSection] = useState('analytics')
 
   useEffect(() => {
     setIsClient(true)
@@ -20,15 +24,12 @@ export default function Admin() {
     if (!isLoading && isClient) {
       const token = localStorage.getItem("token")
       
-      // Двойная проверка: нет токена И нет пользователя в контексте
       if (!token && !user) {
         router.replace('/not-found')
         return
       }
       
-      // Если есть токен, но пользователь не загрузился (ошибка авторизации)
       if (token && !user) {
-        // Даем дополнительное время на загрузку
         const timeout = setTimeout(() => {
           if (!user) {
             router.replace('/not-found')
@@ -40,16 +41,44 @@ export default function Admin() {
     }
   }, [user, isLoading, router, isClient])
 
-  // Защита от рендеринга на сервере
-  if (!isClient) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    )
+  const handleLogout = () => {
+    logout()
+    router.push('/')
   }
 
-  if (isLoading) {
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'penalties':
+        return <AnaliticsSection />
+      case 'evacuation':
+        return (
+          <Card>
+            <AnalyticsSectionEvacuation/>
+          </Card>
+        )
+      case 'routes':
+        return (
+          <Card>
+          </Card>
+        )
+      case 'users':
+        return (
+          <Card>
+          
+          </Card>
+        )
+      case 'settings':
+        return (
+          <Card>
+            
+          </Card>
+        )
+      default:
+        return <AnaliticsSection />
+    }
+  }
+
+  if (!isClient || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -63,8 +92,6 @@ export default function Admin() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Панель администратора</h1>
-      <p className="text-gray-600 mb-8">Добро пожаловать!</p>
       <AnaliticsSection />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/admin/penalties">
