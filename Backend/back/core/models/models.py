@@ -90,6 +90,16 @@ class DTP(models.Model):
         ordering = ['-year', '-month']
         
 
+class News(models.Model):
+    title = models.TextField()
+    text = models.TextField()
+    date = models.DateField( auto_now_add=True)
+    image = models.FileField()
+    
+    def __str__(self):
+        return str(self.title)
+        
+
 class authorizedToken(Token):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
