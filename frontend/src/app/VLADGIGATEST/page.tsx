@@ -65,7 +65,7 @@ export default function Home() {
     }
 
     return (
-        <div className="">
+        <div className="mt-[200px]">
             <form
                 onSubmit={handleSubmit}
                 className="flex items-center gap-8 h-[calc(100%-50px)]"
