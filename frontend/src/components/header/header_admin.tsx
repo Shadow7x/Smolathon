@@ -19,7 +19,7 @@ export default function Admin_Header() {
      content-center
   `}
     >
-        <img src="./images/LOGO_CODD.png" alt="" />
+        <img src="/images/LOGO_CODD.png" alt="" />
         <h1 className="text-2xl">СОГБУ <span className="text-[#62A744]">"ЦОДД"</span></h1>
         <h1 className="text-2xl font-bold">Панель администратора</h1>
     </header>
