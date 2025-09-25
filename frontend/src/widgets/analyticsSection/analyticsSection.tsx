@@ -1,17 +1,37 @@
 "use client"
-import { useState, useEffect, useMemo, memo } from 'react'
+import { useState, useEffect, useMemo, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { useNotificationManager } from "@/hooks/notification-context"
 import axi from "@/utils/api"
-import Diogram from "@/components/diogram/diogram"
-import PenaltyDeleteDialog from '@/components/penaltydeletedialog/penaltydeletedialog'
-import PenaltyFormDialog from '@/components/penaltyformdialog/penaltyformdialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from 'lucide-react'
+import Diogram from "@/components/linediogram/linediogram"
+import PenaltyDeleteDialog from "@/components/penaltydeletedialog/penaltydeletedialog"
+import PenaltyFormDialog from "@/components/penaltyformdialog/penaltyformdialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react"
+import Piediogram from "@/components/piediogram/piediogram"
 
 interface Penalty {
   id: number
@@ -22,57 +42,76 @@ interface Penalty {
   fines_collected_cumulative: number
 }
 
-// Улучшенный компонент строки таблицы
-const PenaltyRow = memo(({ penalty, formatDate, formatNumber, fetchPenalties }: { 
-  penalty: Penalty, 
-  formatDate: (date: string) => string, 
-  formatNumber: (n: number) => string, 
-  fetchPenalties: (year: string) => void 
-}) => (
-  <TableRow className="hover:bg-gray-50/50 transition-colors">
-    <TableCell className="font-medium text-sm py-3">
-      <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-gray-400" />
-        {formatDate(penalty.date)}
-      </div>
-    </TableCell>
-    <TableCell className="text-sm py-3 text-right font-mono">
-      {formatNumber(penalty.violations_cumulative)}
-    </TableCell>
-    <TableCell className="text-sm py-3 text-right font-mono">
-      {formatNumber(penalty.decrees_cumulative)}
-    </TableCell>
-    <TableCell className="text-sm py-3 text-right font-mono font-semibold text-blue-600">
-      {formatNumber(penalty.fines_imposed_cumulative)} ₽
-    </TableCell>
-    <TableCell className="text-sm py-3 text-right font-mono font-semibold text-green-600">
-      {formatNumber(penalty.fines_collected_cumulative)} ₽
-    </TableCell>
-    <TableCell className="py-3">
-      <div className="flex gap-2 justify-end">
-        <PenaltyFormDialog penalty={penalty} onSuccess={fetchPenalties} />
-        <PenaltyDeleteDialog penaltyId={penalty.id} onSuccess={fetchPenalties} />
-      </div>
-    </TableCell>
-  </TableRow>
-))
+// --- Компонент строки таблицы ---
+const PenaltyRow = memo(
+  ({
+    penalty,
+    formatDate,
+    formatNumber,
+    fetchPenalties,
+  }: {
+    penalty: Penalty
+    formatDate: (date: string) => string
+    formatNumber: (n: number) => string
+    fetchPenalties: (year: string) => void
+  }) => (
+    <TableRow className="hover:bg-gray-50/50 transition-colors">
+      <TableCell className="font-medium text-sm py-3">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-400" />
+          {formatDate(penalty.date)}
+        </div>
+      </TableCell>
+      <TableCell className="text-sm py-3 text-right font-mono">
+        {formatNumber(penalty.violations_cumulative)}
+      </TableCell>
+      <TableCell className="text-sm py-3 text-right font-mono">
+        {formatNumber(penalty.decrees_cumulative)}
+      </TableCell>
+      <TableCell className="text-sm py-3 text-right font-mono font-semibold text-blue-600">
+        {formatNumber(penalty.fines_imposed_cumulative)} ₽
+      </TableCell>
+      <TableCell className="text-sm py-3 text-right font-mono font-semibold text-green-600">
+        {formatNumber(penalty.fines_collected_cumulative)} ₽
+      </TableCell>
+      <TableCell className="py-3">
+        <div className="flex gap-2 justify-end">
+          <PenaltyFormDialog penalty={penalty} onSuccess={fetchPenalties} />
+          <PenaltyDeleteDialog
+            penaltyId={penalty.id}
+            onSuccess={fetchPenalties}
+          />
+        </div>
+      </TableCell>
+    </TableRow>
+  )
+)
+PenaltyRow.displayName = "PenaltyRow"
 
-PenaltyRow.displayName = 'PenaltyRow'
-
+// --- Основной компонент ---
 export default function AnaliticsSection() {
   const [showTable, setShowTable] = useState(true)
-  const [file, setFile] = useState<File | null>(null)
   const [allPenalties, setAllPenalties] = useState<Penalty[]>([])
   const [penalties2024, setPenalties2024] = useState<Penalty[]>([])
   const [penalties2025, setPenalties2025] = useState<Penalty[]>([])
   const [loading, setLoading] = useState(false)
-  const [yearFilter, setYearFilter] = useState('')
+  const [yearFilter, setYearFilter] = useState("")
   const { addNotification } = useNotificationManager()
-  const [monthFilter, setMonthFilter] = useState('all')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-  const [penalties, setPenalties] = useState<Penalty[]>([]) 
-  const [inputYear, setInputYear] = useState('')
+  const [monthFilter, setMonthFilter] = useState("all")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [penalties, setPenalties] = useState<Penalty[]>([])
+  const [inputYear, setInputYear] = useState("")
 
+  // состояния для графиков
+  const [show2024, setShow2024] = useState(true)
+  const [show2025, setShow2025] = useState(true)
+  const [metric, setMetric] = useState<
+    "violations" | "decrees" | "fines_imposed" | "fines_collected"
+  >("violations")
+  const [period, setPeriod] = useState<"quarter" | "month">("quarter")
+  const [quarter, setQuarter] = useState<"q1" | "q2" | "q3" | "q4">("q3")
+
+  // --- загрузка данных для графика ---
   useEffect(() => {
     fetchPenaltiesByYear()
   }, [])
@@ -80,16 +119,13 @@ export default function AnaliticsSection() {
   const fetchPenaltiesByYear = async () => {
     try {
       setLoading(true)
-      
       const [response2024, response2025] = await Promise.all([
-        axi.get('/analytics/penalties/get?year=2024').catch(() => ({ data: [] })),
-        axi.get('/analytics/penalties/get?year=2025').catch(() => ({ data: [] }))
+        axi.get("/analytics/penalties/get?year=2024").catch(() => ({ data: [] })),
+        axi.get("/analytics/penalties/get?year=2025").catch(() => ({ data: [] })),
       ])
-      
       setPenalties2024(response2024?.data || [])
       setPenalties2025(response2025?.data || [])
     } catch (error) {
-      console.error('Ошибка загрузки данных для диаграммы:', error)
       addNotification({
         id: Date.now().toString(),
         title: "Ошибка",
@@ -102,17 +138,17 @@ export default function AnaliticsSection() {
     }
   }
 
-  // Получение данных для таблицы
+  // --- загрузка таблицы по году ---
   const fetchPenalties = async (year: string) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (year) params.append('year', year)
+      if (year) params.append("year", year)
       const response = await axi.get(`/analytics/penalties/get?${params}`)
       setAllPenalties(response.data)
       setPenalties(response.data)
-      setMonthFilter('all')
-      setSortOrder('desc')
+      setMonthFilter("all")
+      setSortOrder("desc")
       setYearFilter(year)
     } catch (error: any) {
       addNotification({
@@ -127,54 +163,62 @@ export default function AnaliticsSection() {
     }
   }
 
+  // фильтры и сортировка
   useEffect(() => {
     let filtered = [...allPenalties]
-
-    if (monthFilter !== 'all') {
+    if (monthFilter !== "all") {
       const month = Number(monthFilter)
-      filtered = filtered.filter((p) => new Date(p.date).getMonth() + 1 === month)
+      filtered = filtered.filter(
+        (p) => new Date(p.date).getMonth() + 1 === month
+      )
     }
-
     filtered.sort((a, b) => {
       const dateA = new Date(a.date).getTime()
       const dateB = new Date(b.date).getTime()
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA
     })
-
     setPenalties(filtered)
   }, [allPenalties, monthFilter, sortOrder])
 
-  // Форматирование даты
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ru-RU')
-  }
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("ru-RU")
 
-  // Форматирование чисел
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('ru-RU').format(num)
-  }
+  const formatNumber = (num: number) =>
+    new Intl.NumberFormat("ru-RU").format(num)
 
   const displayedPenalties = useMemo(() => {
     let filtered = [...allPenalties]
-    if (monthFilter !== 'all') {
-      filtered = filtered.filter((p) => new Date(p.date).getMonth() + 1 === Number(monthFilter))
+    if (monthFilter !== "all") {
+      filtered = filtered.filter(
+        (p) => new Date(p.date).getMonth() + 1 === Number(monthFilter)
+      )
     }
     filtered.sort((a, b) => {
       const dateA = new Date(a.date).getTime()
       const dateB = new Date(b.date).getTime()
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA
     })
     return filtered
   }, [allPenalties, monthFilter, sortOrder])
 
   return (
     <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-      <h1 className="text-3xl font-bold text-center text-gray-900">Аналитика штрафов</h1>
-
-      {/* Диаграмма */}
-      <Diogram penalties2024={penalties2024} penalties2025={penalties2025} />
-
-      {/* Загрузка данных */}
+      <h1 className="text-3xl font-bold text-center text-gray-900">
+        Аналитика штрафов
+      </h1>
+      <div className="flex max-w-[1400px] justify-between">
+        <Diogram
+          penalties2024={penalties2024}
+          penalties2025={penalties2025}
+          show2024={show2024}
+          show2025={show2025}
+          metric={metric}
+          period={period}
+          quarter={quarter}
+          />
+        <Piediogram />
+      </div>
+      {/* загрузка данных */}
       <Card className="w-full">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl">Просмотр данных</CardTitle>
@@ -185,8 +229,8 @@ export default function AnaliticsSection() {
         <CardContent>
           <div className="flex gap-4 items-end">
             <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="year-filter" className="text-sm font-medium">Год</Label>
-              <Input 
+              <Label htmlFor="year-filter">Год</Label>
+              <Input
                 id="year-filter"
                 type="number"
                 placeholder="Например: 2024"
@@ -197,8 +241,8 @@ export default function AnaliticsSection() {
                 className="h-10"
               />
             </div>
-            <Button 
-              onClick={() => fetchPenalties(inputYear)} 
+            <Button
+              onClick={() => fetchPenalties(inputYear)}
               disabled={loading || !inputYear.trim()}
               className="h-10"
             >
@@ -208,7 +252,7 @@ export default function AnaliticsSection() {
         </CardContent>
       </Card>
 
-      {/* Таблица с данными */}
+      {/* таблица */}
       {penalties.length > 0 && (
         <Card className="w-full">
           <CardHeader className="pb-4">
@@ -222,12 +266,16 @@ export default function AnaliticsSection() {
                 </CardDescription>
               </div>
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowTable(!showTable)}
                   className="flex items-center gap-2 h-9"
                 >
-                  {showTable ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showTable ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                   {showTable ? "Скрыть таблицу" : "Показать таблицу"}
                 </Button>
                 <PenaltyFormDialog onSuccess={fetchPenalties} />
@@ -237,17 +285,22 @@ export default function AnaliticsSection() {
 
           {showTable && (
             <CardContent>
-              {/* Панель фильтров и сортировки */}
+              {/* фильтры */}
               <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">Фильтры:</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    Фильтры:
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="h-4 w-4 text-gray-600" />
                   <span className="text-sm text-gray-600">Сортировка:</span>
-                  <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as 'asc' | 'desc')}>
+                  <Select
+                    value={sortOrder}
+                    onValueChange={(v) => setSortOrder(v as "asc" | "desc")}
+                  >
                     <SelectTrigger className="w-[160px] h-8">
                       <SelectValue />
                     </SelectTrigger>
@@ -284,36 +337,40 @@ export default function AnaliticsSection() {
                 </div>
               </div>
 
-              {/* Таблица */}
+              {/* таблица */}
               <div className="rounded-lg border border-gray-200 overflow-hidden">
                 <Table>
                   <TableHeader className="bg-gray-50">
                     <TableRow>
-                      <TableHead className="font-semibold text-gray-700">Дата</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-right">Нарушения</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-right">Постановления</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-right">Наложенные штрафы</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-right">Взысканные штрафы</TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-right">Действия</TableHead>
+                      <TableHead>Дата</TableHead>
+                      <TableHead className="text-right">Нарушения</TableHead>
+                      <TableHead className="text-right">Постановления</TableHead>
+                      <TableHead className="text-right">
+                        Наложенные штрафы
+                      </TableHead>
+                      <TableHead className="text-right">
+                        Взысканные штрафы
+                      </TableHead>
+                      <TableHead className="text-right">Действия</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {displayedPenalties.map((penalty) => (
-                      <PenaltyRow 
-                        key={penalty.id} 
-                        penalty={penalty} 
-                        formatDate={formatDate} 
-                        formatNumber={formatNumber} 
-                        fetchPenalties={fetchPenalties} 
+                      <PenaltyRow
+                        key={penalty.id}
+                        penalty={penalty}
+                        formatDate={formatDate}
+                        formatNumber={formatNumber}
+                        fetchPenalties={fetchPenalties}
                       />
                     ))}
                   </TableBody>
                 </Table>
               </div>
 
-              {/* Подвал таблицы */}
               <div className="mt-4 text-sm text-gray-500 text-center">
-                Показано {displayedPenalties.length} из {allPenalties.length} записей
+                Показано {displayedPenalties.length} записей из{" "}
+                {allPenalties.length}
               </div>
             </CardContent>
           )}
