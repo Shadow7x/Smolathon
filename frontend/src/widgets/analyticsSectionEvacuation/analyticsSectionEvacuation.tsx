@@ -21,6 +21,7 @@ import {
 import { useNotificationManager } from "@/hooks/notification-context"
 import axi from "@/utils/api"
 import EvacuationDiagram from "@/components/diogramEvacuation/linediogramEvacuation/linediogramEvacuation"
+import EvacuationPieDiagram, { EvacuationData } from "@/components/diogramEvacuation/piediogramEvacuation/piediogramEvacuation"
 import EvacuationDeleteDialog from "@/components/evacuationDialog/evacuationdeleatdialog/evacuationdeletedialog"
 import EvacuationFormDialog from "@/components/evacuationDialog/evacuationformdialog/evacuationformdialog"
 import {
@@ -31,7 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react"
-import EvacuationPieDiagram from "@/components/diogramEvacuation/piediogramEvacuation/piediogramEvacuation"
 
 interface TowTruck {
   id: number
@@ -42,15 +42,26 @@ interface TowTruck {
   summary_of_parking_lot: number
 }
 
-// --- маппинг данных для графика ---
+// --- маппинг данных для графиков ---
 const mapForDiagram = (trucks: TowTruck[]) =>
   trucks.map((t) => ({
     date: t.date,
-    routes_planned: t.count_departures,       // кол-во выездов
-    routes_completed: t.count_evacuations,   // кол-во эвакуаций
-    towtrucks_involved: t.tow_truck_in_line, // эвакуаторов на линии
-    time_spent: t.summary_of_parking_lot,    // сумма по штрафстоянке (пока сюда)
+    routes_planned: t.count_departures,
+    routes_completed: t.count_evacuations,
+    towtrucks_involved: t.tow_truck_in_line,
+    time_spent: t.summary_of_parking_lot,
   }))
+
+const mapForPieDiagram = (trucks: TowTruck[]): EvacuationData[] => {
+  const totalDepartures = trucks.reduce((acc, t) => acc + t.count_departures, 0)
+  const totalCompleted = trucks.reduce((acc, t) => acc + t.count_evacuations, 0)
+  const totalInProgress = totalDepartures - totalCompleted
+
+  return [
+    { name: "Завершено", value: totalCompleted, fill: "#4CAF50" },
+    { name: "В процессе", value: totalInProgress, fill: "#FF9800" },
+  ]
+}
 
 // --- Компонент строки таблицы ---
 const EvacuationRow = memo(
@@ -58,12 +69,10 @@ const EvacuationRow = memo(
     truck,
     formatDate,
     formatNumber,
-    fetchTrucks,
   }: {
     truck: TowTruck
     formatDate: (date: string) => string
     formatNumber: (n: number) => string
-    fetchTrucks: (year: string) => void
   }) => (
     <TableRow className="hover:bg-gray-50/50 transition-colors">
       <TableCell className="font-medium text-sm py-3">
@@ -86,8 +95,8 @@ const EvacuationRow = memo(
       </TableCell>
       <TableCell className="py-3">
         <div className="flex gap-2 justify-end">
-          <EvacuationFormDialog truck={truck} onSuccess={fetchTrucks} />
-          <EvacuationDeleteDialog truckId={truck.id} onSuccess={fetchTrucks} />
+          <EvacuationFormDialog truck={truck} onSuccess={() => {}} />
+          <EvacuationDeleteDialog truckId={truck.id} onSuccess={() => {}} />
         </div>
       </TableCell>
     </TableRow>
@@ -101,15 +110,19 @@ export default function AnalyticsSectionEvacuation() {
   const [allTrucks, setAllTrucks] = useState<TowTruck[]>([])
   const [trucks2024, setTrucks2024] = useState<TowTruck[]>([])
   const [trucks2025, setTrucks2025] = useState<TowTruck[]>([])
+  const [count_departures2024, setCountDepartures2024] = useState<number>(0)
+  const [count_departures2025, setCountDepartures2025] = useState<number>(0)
+  const [count_evacuations2024, setCountEvacuations2024] = useState<number>(0)
+  const [count_evacuations2025, setCountEvacuations2025] = useState<number>(0)
   const [loading, setLoading] = useState(false)
   const [yearFilter, setYearFilter] = useState("")
   const { addNotification } = useNotificationManager()
   const [monthFilter, setMonthFilter] = useState("all")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [trucks, setTrucks] = useState<TowTruck[]>([])
+  const [displayedTrucks, setDisplayedTrucks] = useState<TowTruck[]>([])
   const [inputYear, setInputYear] = useState("")
 
-  // --- загрузка данных для графика ---
+  // --- загрузка данных по годам ---
   useEffect(() => {
     fetchTrucksByYear()
   }, [])
@@ -123,6 +136,8 @@ export default function AnalyticsSectionEvacuation() {
       ])
       setTrucks2024(response2024?.data || [])
       setTrucks2025(response2025?.data || [])
+    response2024?.data.map((t) => {setCountDepartures2024(count_departures2024 + t.count_departures ); setCountEvacuations2024(count_evacuations2024 + t.count_evacuations)})
+    response2025?.data.map((t) => {setCountDepartures2025(count_departures2025 + t.count_departures ); setCountEvacuations2025(count_evacuations2025 + t.count_evacuations)})
     } catch (error) {
       addNotification({
         id: Date.now().toString(),
@@ -144,7 +159,6 @@ export default function AnalyticsSectionEvacuation() {
       if (year) params.append("year", year)
       const response = await axi.get(`/analytics/towTrucks/get?${params}`)
       setAllTrucks(response.data)
-      setTrucks(response.data)
       setMonthFilter("all")
       setSortOrder("desc")
       setYearFilter(year)
@@ -161,21 +175,19 @@ export default function AnalyticsSectionEvacuation() {
     }
   }
 
-  // фильтры и сортировка
+  // --- фильтры и сортировка ---
   useEffect(() => {
     let filtered = [...allTrucks]
     if (monthFilter !== "all") {
       const month = Number(monthFilter)
-      filtered = filtered.filter(
-        (p) => new Date(p.date).getMonth() + 1 === month
-      )
+      filtered = filtered.filter((p) => new Date(p.date).getMonth() + 1 === month)
     }
     filtered.sort((a, b) => {
       const dateA = new Date(a.date).getTime()
       const dateB = new Date(b.date).getTime()
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA
     })
-    setTrucks(filtered)
+    setDisplayedTrucks(filtered)
   }, [allTrucks, monthFilter, sortOrder])
 
   const formatDate = (dateString: string) =>
@@ -183,34 +195,42 @@ export default function AnalyticsSectionEvacuation() {
 
   const formatNumber = (num: number) =>
     new Intl.NumberFormat("ru-RU").format(num)
-
-  const displayedTrucks = useMemo(() => {
-    let filtered = [...allTrucks]
-    if (monthFilter !== "all") {
-      filtered = filtered.filter(
-        (p) => new Date(p.date).getMonth() + 1 === Number(monthFilter)
-      )
-    }
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.date).getTime()
-      const dateB = new Date(b.date).getTime()
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA
-    })
-    return filtered
-  }, [allTrucks, monthFilter, sortOrder])
-
+  console.log(count_departures2025)
+  console.log(count_departures2024)
   return (
     <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
       <h1 className="text-3xl font-bold text-center text-gray-900">
         Аналитика эвакуаторов
       </h1>
-      <div className="flex max-w-[1400px] justify-between">
+
+      {/* Диаграммы */}
+      {/* Диаграммы */}
+        <div className="flex max-w-[1400px] justify-between gap-8"> {/* <- добавлен gap-6 */}
         <EvacuationDiagram
-          evacuation2024={mapForDiagram(trucks2024)}
-          evacuation2025={mapForDiagram(trucks2025)}
+            evacuation2024={mapForDiagram(trucks2024)}
+            evacuation2025={mapForDiagram(trucks2025)}
         />
-        <EvacuationPieDiagram />
-      </div>
+        <EvacuationPieDiagram
+            evacuation2024={[
+                { name: "departures", value: count_departures2024, fill: "#FF9800" },
+                { name: "evacuations", value: count_evacuations2024, fill: "#4CAF50" },
+            ]}
+            evacuation2025={[
+                {
+                name: "departures",
+                value: trucks2025.reduce((a, b) => a + b.count_departures, 0),
+                fill: "#FF9800",
+                },
+                {
+                name: "evacuations",
+                value: trucks2025.reduce((a, b) => a + b.count_evacuations, 0),
+                fill: "#4CAF50",
+                },
+            ]}
+            />
+        </div>
+
+
       {/* загрузка данных */}
       <Card className="w-full">
         <CardHeader className="pb-4">
@@ -246,33 +266,27 @@ export default function AnalyticsSectionEvacuation() {
       </Card>
 
       {/* таблица */}
-      {trucks.length > 0 && (
+      {displayedTrucks.length > 0 && (
         <Card className="w-full">
-          <CardHeader className="pb-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-xl">
-                  Данные об эвакуаторах {yearFilter && `за ${yearFilter} год`}
-                </CardTitle>
-                <CardDescription>
-                  Всего записей: {displayedTrucks.length}
-                </CardDescription>
-              </div>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowTable(!showTable)}
-                  className="flex items-center gap-2 h-9"
-                >
-                  {showTable ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                  {showTable ? "Скрыть таблицу" : "Показать таблицу"}
-                </Button>
-                <EvacuationFormDialog onSuccess={fetchTrucks} />
-              </div>
+          <CardHeader className="pb-4 flex justify-between items-center">
+            <div>
+              <CardTitle className="text-xl">
+                Данные об эвакуаторах {yearFilter && `за ${yearFilter} год`}
+              </CardTitle>
+              <CardDescription>
+                Всего записей: {displayedTrucks.length}
+              </CardDescription>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowTable(!showTable)}
+                className="flex items-center gap-2 h-9"
+              >
+                {showTable ? <><EyeOff className="h-4 w-4" /> Скрыть таблицу</> :
+                  <><Eye className="h-4 w-4" /> Показать таблицу</>}
+              </Button>
+              <EvacuationFormDialog onSuccess={() => {}} />
             </div>
           </CardHeader>
 
@@ -282,9 +296,7 @@ export default function AnalyticsSectionEvacuation() {
               <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Фильтры:
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">Фильтры:</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -329,14 +341,10 @@ export default function AnalyticsSectionEvacuation() {
                   <TableHeader className="bg-gray-50">
                     <TableRow>
                       <TableHead>Дата</TableHead>
-                      <TableHead className="text-right">
-                        Эвакуаторов на линии
-                      </TableHead>
+                      <TableHead className="text-right">Эвакуаторов на линии</TableHead>
                       <TableHead className="text-right">Выезды</TableHead>
                       <TableHead className="text-right">Эвакуации</TableHead>
-                      <TableHead className="text-right">
-                        Сумма по штрафстоянке
-                      </TableHead>
+                      <TableHead className="text-right">Сумма по штрафстоянке</TableHead>
                       <TableHead className="text-right">Действия</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -347,7 +355,6 @@ export default function AnalyticsSectionEvacuation() {
                         truck={truck}
                         formatDate={formatDate}
                         formatNumber={formatNumber}
-                        fetchTrucks={fetchTrucks}
                       />
                     ))}
                   </TableBody>
