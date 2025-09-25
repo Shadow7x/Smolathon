@@ -253,10 +253,12 @@ export default function EvacuationDiagram({
             <span>2025</span>
           </div>
         )}
-        {show2024 && show2025 && growthPercentage !== "0.0" && (
+        {show2024 && show2025 && (
           <div className="flex items-center gap-1 ml-auto">
             <TrendingUp className="h-4 w-4" />
-            <span>{growthPercentage}%</span>
+            <span>
+              {growthPercentage}% 
+            </span>
           </div>
         )}
       </CardFooter>
