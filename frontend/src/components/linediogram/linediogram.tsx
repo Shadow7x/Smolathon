@@ -162,7 +162,7 @@ export default function Diogram({
         <div className="flex items-center gap-2">
           <span>Метрика:</span>
           <Select value={selectedField} onValueChange={(v) => setSelectedField(v as keyof Penalty)}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[190px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               {Object.entries(fieldOptions).map(([key, label]) => (
                 <SelectItem key={key} value={key}>{label}</SelectItem>
