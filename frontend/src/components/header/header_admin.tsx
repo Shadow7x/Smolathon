@@ -1,15 +1,8 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import Image from "next/image";
 
 export default function Admin_Header() {
- 
-
   return (
     <header
       className={`
@@ -19,9 +12,19 @@ export default function Admin_Header() {
      content-center
   `}
     >
-        <img src="./images/LOGO_CODD.png" alt="" />
-        <h1 className="text-2xl">СОГБУ <span className="text-[#62A744]">"ЦОДД"</span></h1>
-        <h1 className="text-2xl font-bold">Панель администратора</h1>
+      <div className="relative w-[6.625rem] h-[3.125rem] flex-shrink-0">
+        <Image
+          src="/icons/colorLogoIcon.svg"
+          alt="СОГБУ ЦОДД"
+          fill
+          className="object-contain"
+        />
+      </div>
+
+      <h1 className="text-2xl">
+        СОГБУ <span className="text-[#62A744]">"ЦОДД"</span>
+      </h1>
+      <h1 className="text-2xl font-bold">Панель администратора</h1>
     </header>
   );
 }

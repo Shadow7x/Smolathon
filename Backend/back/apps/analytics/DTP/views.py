@@ -69,7 +69,7 @@ def getDTP(request: Request):
     dtp = DTP.objects.all()
     try:
         if request.GET.get("year"):
-            dtp = dtp.filter(date__year=request.GET.get("year"))        
+            dtp = dtp.filter(year=request.GET.get("year"))        
         if request.GET.get("month"):
             dtp = dtp.filter(month=request.GET.get("month"))
         if request.GET.get("type"):
