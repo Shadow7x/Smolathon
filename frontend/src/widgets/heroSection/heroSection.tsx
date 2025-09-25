@@ -13,7 +13,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ scrollToInfo }) => {
       w-full
       flex flex-col justify-between
       pb-[2rem] md:pb-[4rem]
-      bg-cover bg-center text-white px-[2rem] md:px-[4rem] lg:px-[7.5rem]
+      bg-cover bg-center text-white px-[clamp(2rem,5vw,10rem)]
       lg:h-screen  
     "
       style={{

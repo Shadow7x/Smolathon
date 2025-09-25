@@ -5,7 +5,7 @@ const InfoSection = forwardRef<HTMLDivElement>((props, ref) => {
   return (
     <div
       ref={ref}
-      className="w-full px-6 sm:px-8 md:px-16 lg:px-[3.125rem] py-8 lg:pt-[3.125rem] text-white"
+      className="w-full px-[clamp(2rem,5vw,10rem)] py-8 lg:pt-[3.125rem] text-white"
     >
       {/* Большой прямоугольник с градиентом */}
       <div className="bg-[linear-gradient(103.07deg,#C3CC4C_0%,#62A744_67.79%)] rounded-[20px] p-4 sm:p-6 lg:p-[3.125rem] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-12">

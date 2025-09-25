@@ -1,16 +1,13 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
-
-  const isHome = pathname === "/";
 
   const navLinks = [
     { href: "/news", label: "Новости" },
@@ -22,78 +19,64 @@ export default function Header() {
   ];
 
   return (
-    <header
-      className={`
-    flex flex-wrap items-center gap-3.5 
-    px-[2rem] md:px-[4rem] lg:px-[7.5rem] z-50
-    ${
-      isHome
-        ? "absolute top-0 left-0 right-0 bg-transparent text-white h-[6rem] md:h-[12.5rem] pt-[1rem] md:pt-[3.125rem]"
-        : "relative bg-white text-black py-[1rem] md:py-[3.125rem]"
-    }
-  `}
-    >
-      <div className="flex justify-between w-full items-start">
-        <div className="flex flex-row h-full items-end gap-2.5">
-          <Link href="/">
-            <div className="w-[3.5rem] h-[3.5rem] sm:w-[12.5rem] sm:h-[12.5rem] bg-gray-200"></div>
+    <header className="absolute top-0 left-0 right-0 flex items-center justify-between py-5 px-[clamp(2rem,5vw,10rem)] bg-black/30 z-50">
+      <Link href="/" className="flex items-center gap-6 text-white ">
+        <div className="relative w-32 h-15 sm:w-50 sm:h-24 md:max-w-[12.5rem] md:max-h-[6rem] flex-shrink-0">
+          <Image
+            src="/icons/logoIcon.svg"
+            alt="СОГБУ ЦОДД"
+            fill
+            className="object-contain"
+          />
+        </div>
+
+        <p className="hidden sm:block text-[32px] font-normal mt-7">
+          СОГБУ <span className="font-bold">“ЦОДД”</span>
+        </p>
+      </Link>
+
+      <nav className="hidden lg:flex items-center gap-[clamp(1rem,2vw,3.25rem)]">
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="relative group whitespace-nowrap flex-shrink-0"
+          >
+            <div className="text-white text-[20px] font-bold text-center hover:text-[#62A744] transition-all duration-300">
+              {link.label}
+            </div>
+            <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#62A744] group-hover:w-full transition-all duration-300 origin-left"></span>
           </Link>
-          <p className="hidden sm:block font-[400] text-[0.9375rem] leading-[1.25rem]">
-            Центр организации дорожного <br />
-            движения смоленской области
-          </p>
-        </div>
+        ))}
+      </nav>
 
-        <div className="flex flex-1 items-center justify-end">
-          <nav className="hidden lg:flex items-center space-x-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`font-semibold text-[1rem] transition-colors whitespace-nowrap
-                  ${
-                    isHome
-                      ? "text-white hover:text-[#62A744]"
-                      : "text-black hover:text-[#62A744]"
-                  }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+      <div className="lg:hidden">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" className="bg-transparent p-2">
+              <Menu
+                className="text-white"
+                style={{ width: "30px", height: "30px" }}
+              />
+              <span className="sr-only">Открыть меню</span>
+            </Button>
+          </SheetTrigger>
 
-          <div className="lg:hidden ml-4">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" className="bg-transparent p-2 md:p-0">
-                  <Menu
-                    style={{ width: "30px", height: "30px" }}
-                    className={isHome ? "text-white" : "text-black"}
-                  />
-                  <span className="sr-only">Открыть меню</span>
-                </Button>
-              </SheetTrigger>
-
-              <SheetContent
-                side="left"
-                className="w-[300px] sm:w-[400px] bg-white"
-              >
-                <div className="flex flex-col space-y-4 mt-12 items-center">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-lg font-semibold text-gray-700 hover:text-gray-900 transition-colors py-2"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
+          <SheetContent side="left" className="w-72 sm:w-100 bg-white">
+            <div className="flex flex-col space-y-4 mt-12 items-center">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-lg font-bold text-gray-700 hover:text-gray-900 transition-colors py-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );
