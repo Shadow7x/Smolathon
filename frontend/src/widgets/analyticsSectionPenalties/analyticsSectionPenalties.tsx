@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/table"
 import { useNotificationManager } from "@/hooks/notification-context"
 import axi from "@/utils/api"
-import Diogram from "@/components/linediogram/linediogram"
-import PenaltyDeleteDialog from "@/components/penaltydeletedialog/penaltydeletedialog"
-import PenaltyFormDialog from "@/components/penaltyformdialog/penaltyformdialog"
+import Diogram from "@/components/diogramPenalty/linediogramPenalties/linediogramPenalties"
+import PenaltyDeleteDialog from "@/components/penaltyDialog/penaltydeletedialog/penaltydeletedialog"
+import PenaltyFormDialog from "@/components/penaltyDialog/penaltyformdialog/penaltyformdialog"
 import {
   Select,
   SelectContent,
@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react"
-import Piediogram from "@/components/piediogram/piediogram"
+import Piediogram from "@/components/diogramPenalty/piediogramPenalties/piediogramPenalties"
 
 interface Penalty {
   id: number

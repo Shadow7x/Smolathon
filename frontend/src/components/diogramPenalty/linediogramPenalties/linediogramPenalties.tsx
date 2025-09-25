@@ -50,7 +50,7 @@ const quarterOptions = [
   { value: 3, label: "Третий квартал (Июль–Сентябрь)" },
 ]
 
-export default function Diogram({
+export default function Penaltydiаgram({
   penalties2024 = [],
   penalties2025 = []
 }: DiogramProps) {
