@@ -17,22 +17,20 @@ import axi from "@/utils/api"
 import { useNotificationManager } from "@/hooks/notification-context"
 import PenaltyReportDialog from "@/components/penaltyDialog/penaltyreportdialog/penaltyreportdialog"
 
-interface PenaltyFormDialogProps {
+interface DTPFormDialogProps {
   onSuccess: () => void
-  penalty?: any
+  DTP?: any
 }
 
-export default function DTPFormDialog({ onSuccess, penalty }: PenaltyFormDialogProps) {
+export default function DTPFormDialog({ onSuccess, DTP }: DTPFormDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { addNotification } = useNotificationManager()
 
   const [form, setForm] = useState({
-    date: "",
-    violations_cumulative: 0,
-    decrees_cumulative: 0,
-    fines_imposed_cumulative: 0,
-    fines_collected_cumulative: 0,
+    year: Date.now().toString().split("T")[0],
+    month: "",
+    
   })
 
   const [reports, setReports] = useState<any[]>([])

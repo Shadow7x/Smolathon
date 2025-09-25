@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useMemo, memo, use } from "react"
+import { useState, useEffect, useMemo, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,8 +21,7 @@ import {
 import { useNotificationManager } from "@/hooks/notification-context"
 import axi from "@/utils/api"
 import DTPLineDiagram from "@/components/Diagrams/DTP/Line"
-import DTPDeleteDialog from "@/components/Dialog/DTP/Delete"
-import DTPFormDialog from "@/components/Dialog/DTP/Form"
+import DTPPieDiagram from "@/components/Diagrams/DTP/Pie"
 import {
   Select,
   SelectContent,
@@ -30,112 +29,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Eye, EyeOff, Calendar, Filter, ArrowUpDown, Import } from "lucide-react"
-import DTPPieDiagram from "@/components/Diagrams/DTP/Pie"
+import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react"
 
-interface Penalty {
+interface DTP {
   id: number
-  date: string
-  violations_cumulative: number
-  decrees_cumulative: number
-  fines_imposed_cumulative: number
-  fines_collected_cumulative: number
+  point_FPSR: string
+  statistical_factor: string
+  count: number
+  month: string
+  year: number
 }
 
-interface DTP{
+const monthNames = [
+  "январь", "февраль", "март", "апрель", "май", "июнь",
+  "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
+]
 
+const normalizeMonth = (m: string): number => {
+  const idx = monthNames.findIndex(mm => mm.toLowerCase() === m.toLowerCase())
+  return idx >= 0 ? idx + 1 : 0
 }
 
 // --- Компонент строки таблицы ---
-const PenaltyRow = memo(
-  ({
-    penalty,
-    formatDate,
-    formatNumber,
-    fetchPenalties,
-  }: {
-    penalty: Penalty
-    formatDate: (date: string) => string
-    formatNumber: (n: number) => string
-    fetchPenalties: (year: string) => void
-  }) => (
-    <TableRow className="hover:bg-gray-50/50 transition-colors">
-      <TableCell className="font-medium text-sm py-3">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          {formatDate(penalty.date)}
-        </div>
-      </TableCell>
-      <TableCell className="text-sm py-3 text-right font-mono">
-        {formatNumber(penalty.violations_cumulative)}
-      </TableCell>
-      <TableCell className="text-sm py-3 text-right font-mono">
-        {formatNumber(penalty.decrees_cumulative)}
-      </TableCell>
-      <TableCell className="text-sm py-3 text-right font-mono font-semibold text-blue-600">
-        {formatNumber(penalty.fines_imposed_cumulative)} ₽
-      </TableCell>
-      <TableCell className="text-sm py-3 text-right font-mono font-semibold text-green-600">
-        {formatNumber(penalty.fines_collected_cumulative)} ₽
-      </TableCell>
-      <TableCell className="py-3">
-        <div className="flex gap-2 justify-end">
-          <DTPFormDialog penalty={penalty} onSuccess={fetchPenalties} />
-          <DTPDeleteDialog
-            penaltyId={penalty.id}
-            onSuccess={fetchPenalties}
-          />
-        </div>
-      </TableCell>
-    </TableRow>
-  )
-)
-PenaltyRow.displayName = "PenaltyRow"
+const DTPRow = memo(({ item }: { item: DTP }) => (
+  <TableRow className="hover:bg-gray-50/50 transition-colors">
+    <TableCell className="font-medium text-sm py-3">{item.year}</TableCell>
+    <TableCell className="text-sm py-3 text-right font-mono">
+      {monthNames[normalizeMonth(item.month) - 1] || item.month}
+    </TableCell>
+    <TableCell className="text-sm py-3 text-right">{item.point_FPSR}</TableCell>
+    <TableCell className="text-sm py-3">{item.statistical_factor}</TableCell>
+    <TableCell className="text-sm py-3 text-right font-mono font-semibold text-green-600">
+      {item.count.toFixed(1)}
+    </TableCell>
+  </TableRow>
+))
+DTPRow.displayName = "DTPRow"
 
 // --- Основной компонент ---
 export default function DTPAnalitics() {
   const [showTable, setShowTable] = useState(true)
-  const [allPenalties, setAllPenalties] = useState<Penalty[]>([])
-  const [penalties2024, setPenalties2024] = useState<Penalty[]>([])
-  const [penalties2025, setPenalties2025] = useState<Penalty[]>([])
+  const [allDTP, setAllDTP] = useState<DTP[]>([])
+  const [DTP2024, setDTP2024] = useState<DTP[]>([])
+  const [DTP2025, setDTP2025] = useState<DTP[]>([])
   const [loading, setLoading] = useState(false)
   const [yearFilter, setYearFilter] = useState("")
   const { addNotification } = useNotificationManager()
   const [monthFilter, setMonthFilter] = useState("all")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [penalties, setPenalties] = useState<Penalty[]>([])
+  const [displayedDTP, setDisplayedDTP] = useState<DTP[]>([])
   const [inputYear, setInputYear] = useState("")
 
-  useEffect (() => {
-    axi.get("/analytics/DTP/get").then((res) => {
-      console.log(res.data)
-    }).catch((err) => console.log(err))
-  }, [])
-
-
-  // состояния для графиков
-  const [show2024, setShow2024] = useState(true)
-  const [show2025, setShow2025] = useState(true)
-  const [metric, setMetric] = useState<
-    "violations" | "decrees" | "fines_imposed" | "fines_collected"
-  >("violations")
-  const [period, setPeriod] = useState<"quarter" | "month">("quarter")
-  const [quarter, setQuarter] = useState<"q1" | "q2" | "q3" | "q4">("q3")
-
-  // --- загрузка данных для графика ---
+  // --- загрузка данных для графиков ---
   useEffect(() => {
-    fetchPenaltiesByYear()
+    fetchDTPByYear()
   }, [])
 
-  const fetchPenaltiesByYear = async () => {
+  const fetchDTPByYear = async () => {
     try {
       setLoading(true)
       const [response2024, response2025] = await Promise.all([
-        axi.get("/analytics/penalties/get?year=2024").catch(() => ({ data: [] })),
-        axi.get("/analytics/penalties/get?year=2025").catch(() => ({ data: [] })),
+        axi.get("/analytics/DTP/get?year=2024").catch(() => ({ data: [] })),
+        axi.get("/analytics/DTP/get?year=2025").catch(() => ({ data: [] })),
       ])
-      setPenalties2024(response2024?.data || [])
-      setPenalties2025(response2025?.data || [])
+      setDTP2024(response2024?.data || [])
+      setDTP2025(response2025?.data || [])
     } catch (error) {
       addNotification({
         id: Date.now().toString(),
@@ -150,14 +108,13 @@ export default function DTPAnalitics() {
   }
 
   // --- загрузка таблицы по году ---
-  const fetchPenalties = async (year: string) => {
+  const fetchDTP = async (year: string) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
       if (year) params.append("year", year)
-      const response = await axi.get(`/analytics/penalties/get?${params}`)
-      setAllPenalties(response.data)
-      setPenalties(response.data)
+      const response = await axi.get(`/analytics/DTP/get?${params}`)
+      setAllDTP(response.data)
       setMonthFilter("all")
       setSortOrder("desc")
       setYearFilter(year)
@@ -174,67 +131,38 @@ export default function DTPAnalitics() {
     }
   }
 
-  // фильтры и сортировка
+  // --- фильтры и сортировка ---
   useEffect(() => {
-    let filtered = [...allPenalties]
+    let filtered = [...allDTP]
     if (monthFilter !== "all") {
-      const month = Number(monthFilter)
-      filtered = filtered.filter(
-        (p) => new Date(p.date).getMonth() + 1 === month
-      )
+      filtered = filtered.filter((p) => normalizeMonth(p.month) === Number(monthFilter))
     }
     filtered.sort((a, b) => {
-      const dateA = new Date(a.date).getTime()
-      const dateB = new Date(b.date).getTime()
+      const dateA = new Date(a.year, normalizeMonth(a.month) - 1).getTime()
+      const dateB = new Date(b.year, normalizeMonth(b.month) - 1).getTime()
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA
     })
-    setPenalties(filtered)
-  }, [allPenalties, monthFilter, sortOrder])
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("ru-RU")
-
-  const formatNumber = (num: number) =>
-    new Intl.NumberFormat("ru-RU").format(num)
-
-  const displayedPenalties = useMemo(() => {
-    let filtered = [...allPenalties]
-    if (monthFilter !== "all") {
-      filtered = filtered.filter(
-        (p) => new Date(p.date).getMonth() + 1 === Number(monthFilter)
-      )
-    }
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.date).getTime()
-      const dateB = new Date(b.date).getTime()
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA
-    })
-    return filtered
-  }, [allPenalties, monthFilter, sortOrder])
+    setDisplayedDTP(filtered)
+  }, [allDTP, monthFilter, sortOrder])
 
   return (
     <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
       <h1 className="text-3xl font-bold text-center text-gray-900">
-        Аналитика штрафов
+        Аналитика ДТП
       </h1>
+
+      {/* Диаграммы */}
       <div className="flex max-w-[1400px] justify-between">
-        <DTPLineDiagram
-          penalties2024={penalties2024}
-          penalties2025={penalties2025}
-          show2024={show2024}
-          show2025={show2025}
-          metric={metric}
-          period={period}
-          quarter={quarter}
-          />
-        <DTPPieDiagram />
+        <DTPLineDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
+        <DTPPieDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
       </div>
+
       {/* загрузка данных */}
       <Card className="w-full">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl">Просмотр данных</CardTitle>
           <CardDescription>
-            Загрузите данные о штрафах с возможностью фильтрации по году
+            Загрузите данные о ДТП с возможностью фильтрации по году
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -253,7 +181,7 @@ export default function DTPAnalitics() {
               />
             </div>
             <Button
-              onClick={() => fetchPenalties(inputYear)}
+              onClick={() => fetchDTP(inputYear)}
               disabled={loading || !inputYear.trim()}
               className="h-10"
             >
@@ -264,32 +192,34 @@ export default function DTPAnalitics() {
       </Card>
 
       {/* таблица */}
-      {penalties.length > 0 && (
+      {displayedDTP.length > 0 && (
         <Card className="w-full">
           <CardHeader className="pb-4">
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="text-xl">
-                  Данные о штрафах {yearFilter && `за ${yearFilter} год`}
+                  Данные о ДТП {yearFilter && `за ${yearFilter} год`}
                 </CardTitle>
                 <CardDescription>
-                  Всего записей: {displayedPenalties.length}
+                  Всего записей: {displayedDTP.length}
                 </CardDescription>
               </div>
-              <div className="flex gap-3">
+              <div>
                 <Button
                   variant="outline"
                   onClick={() => setShowTable(!showTable)}
                   className="flex items-center gap-2 h-9"
                 >
                   {showTable ? (
-                    <EyeOff className="h-4 w-4" />
+                    <>
+                      <EyeOff className="h-4 w-4" /> Скрыть таблицу
+                    </>
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <>
+                      <Eye className="h-4 w-4" /> Показать таблицу
+                    </>
                   )}
-                  {showTable ? "Скрыть таблицу" : "Показать таблицу"}
                 </Button>
-                <DTPFormDialog onSuccess={fetchPenalties} />
               </div>
             </div>
           </CardHeader>
@@ -300,9 +230,7 @@ export default function DTPAnalitics() {
               <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Фильтры:
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">Фильтры:</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -331,18 +259,11 @@ export default function DTPAnalitics() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Все месяцы</SelectItem>
-                      <SelectItem value="1">Январь</SelectItem>
-                      <SelectItem value="2">Февраль</SelectItem>
-                      <SelectItem value="3">Март</SelectItem>
-                      <SelectItem value="4">Апрель</SelectItem>
-                      <SelectItem value="5">Май</SelectItem>
-                      <SelectItem value="6">Июнь</SelectItem>
-                      <SelectItem value="7">Июль</SelectItem>
-                      <SelectItem value="8">Август</SelectItem>
-                      <SelectItem value="9">Сентябрь</SelectItem>
-                      <SelectItem value="10">Октябрь</SelectItem>
-                      <SelectItem value="11">Ноябрь</SelectItem>
-                      <SelectItem value="12">Декабрь</SelectItem>
+                      {monthNames.map((m, idx) => (
+                        <SelectItem key={idx + 1} value={(idx + 1).toString()}>
+                          {m[0].toUpperCase() + m.slice(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -353,35 +274,23 @@ export default function DTPAnalitics() {
                 <Table>
                   <TableHeader className="bg-gray-50">
                     <TableRow>
-                      <TableHead>Дата</TableHead>
-                      <TableHead className="text-right">Нарушения</TableHead>
-                      <TableHead className="text-right">Постановления</TableHead>
-                      <TableHead className="text-right">
-                        Наложенные штрафы
-                      </TableHead>
-                      <TableHead className="text-right">
-                        Взысканные штрафы
-                      </TableHead>
-                      <TableHead className="text-right">Действия</TableHead>
+                      <TableHead>Год</TableHead>
+                      <TableHead>Месяц</TableHead>
+                      <TableHead>Точка ФПСР</TableHead>
+                      <TableHead>Фактор</TableHead>
+                      <TableHead className="text-right">Значение</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {displayedPenalties.map((penalty) => (
-                      <PenaltyRow
-                        key={penalty.id}
-                        penalty={penalty}
-                        formatDate={formatDate}
-                        formatNumber={formatNumber}
-                        fetchPenalties={fetchPenalties}
-                      />
+                    {displayedDTP.map((item) => (
+                      <DTPRow key={item.id} item={item} />
                     ))}
                   </TableBody>
                 </Table>
               </div>
 
               <div className="mt-4 text-sm text-gray-500 text-center">
-                Показано {displayedPenalties.length} записей из{" "}
-                {allPenalties.length}
+                Показано {displayedDTP.length} записей из {allDTP.length}
               </div>
             </CardContent>
           )}

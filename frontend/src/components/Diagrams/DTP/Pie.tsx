@@ -1,68 +1,59 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Pie, PieChart } from "recharts"
-
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle
 } from "@/components/ui/card"
 import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
+  ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent
 } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export const description = "Диаграмма штрафов"
+interface DTP {
+  id: number
+  statistical_factor: string
+  count: number
+  month: string
+  year: number
+}
 
-const dataByYear = {
-  2024: [
-    { name: "Невыплаченные", value: 47, fill: "#8BC34A" },
-    { name: "Выплаченные", value: 53, fill: "#4CAF50" },
-  ],
-  2025: [
-    { name: "Невыплаченные", value: 40, fill: "#8BC34A" },
-    { name: "Выплаченные", value: 60, fill: "#4CAF50" },
-  ],
+interface Props {
+  DTP2024?: DTP[]
+  DTP2025?: DTP[]
 }
 
 const chartConfig = {
-  value: {
-    label: "Штрафы",
-  },
-  unpaid: {
-    label: "Невыплаченные",
-    color: "#8BC34A",
-  },
-  paid: {
-    label: "Выплаченные",
-    color: "#4CAF50",
-  },
+  injured: { label: "Раненые", color: "#4CAF50" },
+  dead: { label: "Погибшие", color: "#F44336" },
 } satisfies ChartConfig
 
-export default function DTPPieDiagram() {
+export default function DTPPieDiagram({ DTP2024 = [], DTP2025 = [] }: Props) {
   const [year, setYear] = useState<"2024" | "2025">("2024")
+
+  const data = useMemo(() => {
+    const dataset = year === "2024" ? DTP2024 : DTP2025
+    const injured = dataset
+      .filter(d => d.statistical_factor.includes("ранения"))
+      .reduce((s, d) => s + d.count, 0)
+    const dead = dataset
+      .filter(d => d.statistical_factor.includes("погибш"))
+      .reduce((s, d) => s + d.count, 0)
+    return [
+      { name: "Раненые", value: injured, fill: chartConfig.injured.color },
+      { name: "Погибшие", value: dead, fill: chartConfig.dead.color },
+    ]
+  }, [year, DTP2024, DTP2025])
+
+  const total = data.reduce((sum, d) => sum + d.value, 0)
 
   return (
     <Card className="flex flex-col max-w-[400px]">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Соотношение штрафов</CardTitle>
+        <CardTitle>Соотношение раненых и погибших</CardTitle>
         <CardDescription>
-          <Select value={year} onValueChange={(val) => setYear(val as "2024" | "2025")}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Выберите год" />
-            </SelectTrigger>
+          <Select value={year} onValueChange={v => setYear(v as "2024" | "2025")}>
+            <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="2024">2024</SelectItem>
               <SelectItem value="2025">2025</SelectItem>
@@ -71,30 +62,30 @@ export default function DTPPieDiagram() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
+      <CardContent>
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
           <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie data={dataByYear[year]} dataKey="value" nameKey="name" />
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <Pie data={data} dataKey="value" nameKey="name" />
           </PieChart>
         </ChartContainer>
 
         <div className="flex justify-around mt-4">
-          {dataByYear[year].map((item) => (
-            <div key={item.name} className="flex items-center gap-2">
-              <span
-                className="h-3 w-3 rounded-full"
-                style={{ background: item.fill }}
-              />
-              {item.name} <b>{item.value}%</b>
-            </div>
-          ))}
+          {data.map((item) => {
+            const percent = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0.0"
+            return (
+              <div key={item.name} className="flex flex-col items-center gap-1 text-center">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ background: item.fill }}
+                  />
+                  {item.name}: <b>{item.value.toFixed(1)}</b>
+                </div>
+                <span className="text-xs text-gray-500">({percent}%)</span>
+              </div>
+            )
+          })}
         </div>
       </CardContent>
     </Card>
