@@ -1,22 +1,10 @@
 "use client";
-import MapHeatmap from "@/components/map/MapHeatmap";
+import DTPAnalitics from "@/widgets/analiticsSection/DTP/DTPAnalitics";
 
 export default function StatisticsPage() {
   return (
-    <main className="flex flex-col gap-6 p-6">
-      <header>
-        <h1 className="text-2xl font-bold text-[#62a744]">
-          Статистика дорожного движения
-        </h1>
-        <p className="text-gray-600">
-          На карте показаны ДТП, камеры и светофоры города Смоленска.
-        </p>
-      </header>
-
-      <section className="rounded-2xl shadow p-2 border border-gray-200">
-        <h2 className="text-lg font-semibold mb-2">Карта Смоленска</h2>
-        <MapHeatmap />
-      </section>
-    </main>
+    <div className="mt-[8rem]">
+      <DTPAnalitics/>
+    </div>
   );
 }

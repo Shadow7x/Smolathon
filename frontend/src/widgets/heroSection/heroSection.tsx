@@ -1,6 +1,6 @@
 import * as React from "react";
 import Image from "next/image";
-import { GreenButton } from "@/components/common/GreenButton";
+import GreenButton from "@/components/common/GreenButton";
 
 interface HeroSectionProps {
   scrollToInfo: () => void;
@@ -12,7 +12,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ scrollToInfo }) => {
       className="
       w-full
       flex flex-col justify-between
-      pb-[2rem] md:pb-[4rem]
+      pb-8 md:16
       bg-cover bg-center text-white px-[clamp(2rem,5vw,10rem)]
       lg:h-screen  
     "
