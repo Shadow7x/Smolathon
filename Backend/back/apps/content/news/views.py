@@ -32,8 +32,45 @@ def createNews(request: Request):
         else:
             return Response('Неверный формат файла', status=status.HTTP_400_BAD_REQUEST)
         
-        news = News.objects.create(title=title, text=text, image=image)
+        News.objects.create(title=title, text=text, image=image)
         return Response('Новость успешно создана', status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response( 'Новость не создана', status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@token_required
+def deleteNews(request: Request):
+    try:
+        data = request.data
+        news = News.objects.get(id=data['id'])
+        news.delete()
+        return Response("Успешно удалено", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@token_required
+def updateNews(request: Request):
+    try:
+        data = request.data
+        news = News.objects.get(id=data['id'])
+        news.title = data.get('title', news.title)
+        news.text = data.get('text', news.text)
+        if request.FILES.get('image'):
+            img = request.FILES.get('image')
+            if img.name.endswith('.png') or img.name.endswith('.jpg') or img.name.endswith('.jpeg'):
+                news.image.delete()
+                news.image = img
+            
+            else:
+                return Response('Неверный формат файла', status=status.HTTP_400_BAD_REQUEST)
+            
+        news.save()
+        return Response("Успешно обновленно", status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
