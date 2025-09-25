@@ -5,7 +5,7 @@ export default function RootLayout({
 
   return (
     <div className=" flex flex-row">
-        <LeftSidePanel />
+        <LeftSidePanel/>
         {children}
     </div>
   );
