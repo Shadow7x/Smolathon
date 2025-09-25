@@ -141,14 +141,14 @@ export default function Diogram({
     : "0.0"
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full max-w-[950px]">
       <CardHeader>
         <CardTitle>Динамика штрафов</CardTitle>
         <CardDescription>Сравнение данных за 2024 и 2025 годы</CardDescription>
       </CardHeader>
 
       {/* Фильтры */}
-      <CardContent className="flex flex-wrap gap-4 mb-4">
+      <CardContent className="flex flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <Checkbox id="year2024" checked={show2024} onCheckedChange={(v) => setShow2024(!!v)} />
           <label htmlFor="year2024">Показать 2024</label>
@@ -162,7 +162,7 @@ export default function Diogram({
         <div className="flex items-center gap-2">
           <span>Метрика:</span>
           <Select value={selectedField} onValueChange={(v) => setSelectedField(v as keyof Penalty)}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[190px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               {Object.entries(fieldOptions).map(([key, label]) => (
                 <SelectItem key={key} value={key}>{label}</SelectItem>
@@ -231,7 +231,7 @@ export default function Diogram({
             fines_2024: { label: "2024", color: "hsl(220, 70%, 50%)" },
             fines_2025: { label: "2025", color: "hsl(160, 70%, 50%)" },
           }}
-          className="h-[300px] w-full"
+          className="h-[200px] w-full"
         >
           <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
