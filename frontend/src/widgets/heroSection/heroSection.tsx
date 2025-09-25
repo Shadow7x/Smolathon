@@ -29,7 +29,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ scrollToInfo }) => {
         flex flex-col gap-8 md:gap-12
       "
       >
-        <h1 className="text-[2.5rem] leading-[3rem] sm:text-[5rem] sm:leading-[5.5rem] md:text-[6rem] md:leading-[5.5rem] lg:text-[8rem] lg:leading-[6.6875rem] font-[700] tracking-[0%] align-middle font-bold">
+        <h1 className="text-[2.5rem] leading-[3rem] sm:text-[5rem] sm:leading-[5.5rem] md:text-[6rem] md:leading-[5.5rem] lg:text-[6rem] lg:leading-[5.5rem] xl:text-[8rem] xl:leading-[6.6875rem] font-[700] tracking-[0%] align-middle font-bold">
           Забота о вашей <br />
           безопасности <br />
           на дорогах
