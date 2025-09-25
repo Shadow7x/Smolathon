@@ -9,6 +9,7 @@ import AnaliticsSection from "@/widgets/analyticsSectionPenalties/analyticsSecti
 import AdminSidebar from "@/components/adminsidebar/adminsidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import AnalyticsSectionEvacuation from "@/widgets/analyticsSectionEvacuation/analyticsSectionEvacuation"
+import Link from "next/link"
 
 export default function Admin() {
   const { user, isLoading, logout } = useUser()
@@ -91,29 +92,18 @@ export default function Admin() {
   }
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Боковая панель */}
-      <AdminSidebar 
-        activeSection={activeSection} 
-        onSectionChange={setActiveSection}
-      />
-      
-      {/* Основной контент */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Шапка */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Панель администратора</h1>
-              <p className="text-gray-600">Добро пожаловать, {user.name}!</p>
-            </div>
-          </div>
-        </header>
-
-        {/* Контент */}
-        <main className="flex-1 overflow-auto p-6 bg-gray-50">
-          {renderContent()}
-        </main>
+    <div className="container mx-auto p-6">
+      <AnaliticsSection />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link href="/admin/penalties">
+          <Button className="w-full h-32 text-lg">Штрафы</Button>
+        </Link>
+        <Link href="/admin/evacuationRoutes">
+          <Button className="w-full h-32 text-lg">Маршруты эвакуации</Button>
+        </Link>
+        <Link href="/admin/users">
+          <Button className="w-full h-32 text-lg">Пользователи</Button>
+        </Link>
       </div>
     </div>
   )
