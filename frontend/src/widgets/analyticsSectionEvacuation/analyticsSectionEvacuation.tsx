@@ -136,8 +136,8 @@ export default function AnalyticsSectionEvacuation() {
       ])
       setTrucks2024(response2024?.data || [])
       setTrucks2025(response2025?.data || [])
-    response2024?.data.map((t) => {setCountDepartures2024(count_departures2024 + t.count_departures ); setCountEvacuations2024(count_evacuations2024 + t.count_evacuations)})
-    response2025?.data.map((t) => {setCountDepartures2025(count_departures2025 + t.count_departures ); setCountEvacuations2025(count_evacuations2025 + t.count_evacuations)})
+      console.log(response2024?.data)
+      console.log(response2025?.data)
     } catch (error) {
       addNotification({
         id: Date.now().toString(),
@@ -211,23 +211,10 @@ export default function AnalyticsSectionEvacuation() {
             evacuation2025={mapForDiagram(trucks2025)}
         />
         <EvacuationPieDiagram
-            evacuation2024={[
-                { name: "departures", value: count_departures2024, fill: "#FF9800" },
-                { name: "evacuations", value: count_evacuations2024, fill: "#4CAF50" },
-            ]}
-            evacuation2025={[
-                {
-                name: "departures",
-                value: trucks2025.reduce((a, b) => a + b.count_departures, 0),
-                fill: "#FF9800",
-                },
-                {
-                name: "evacuations",
-                value: trucks2025.reduce((a, b) => a + b.count_evacuations, 0),
-                fill: "#4CAF50",
-                },
-            ]}
-            />
+          evacuation2024={trucks2024}   // весь массив объектов из API
+          evacuation2025={trucks2025}
+        />
+
         </div>
 
 

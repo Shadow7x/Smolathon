@@ -34,7 +34,7 @@ class EvacuationRouteSerializer(serializers.ModelSerializer):
     report = ReportsSerializer()
     routes = RoutesSerializer(many=True)
     class Meta:
-        model = TowTrucks
+        model = EvacuationRoute
         fields = '__all__'
         
 class TrafficLightSerializer(serializers.ModelSerializer):

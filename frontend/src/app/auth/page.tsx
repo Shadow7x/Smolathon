@@ -1,16 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogPortal,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@/hooks/user-context";
@@ -18,10 +8,10 @@ import Logout from "@/components/logout/logout";
 import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 
-export default function Authentication() {
+export default function AuthenticationPage() {
   const { user, fetchUser } = useUser();
   const { addNotification } = useNotificationManager();
-  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,8 +21,13 @@ export default function Authentication() {
     formData.append("password", data.get("password") as string);
 
     try {
-      const res = await axi.post("/account/login", formData);
-      if (res.status === 200) {
+      setLoading(true);
+      const res = await axi.post("/account/login", formData, {
+        validateStatus: () => true,
+      });
+
+      if (res.status === 200 && res.data.token) {
+        // Успешная авторизация
         localStorage.setItem("token", res.data.token);
         await fetchUser?.();
 
@@ -44,83 +39,74 @@ export default function Authentication() {
           createdAt: new Date().toISOString(),
         });
 
-        setIsOpen(false);
         e.currentTarget.reset();
+      } else {
+        addNotification({
+          id: Date.now().toString(),
+          title: "Ошибка авторизации",
+          description: res.data?.message || "Неверный логин или пароль",
+          status: res.status,
+          createdAt: new Date().toISOString(),
+        });
       }
     } catch (err: any) {
-      console.log(err);
+      console.error("Network error:", err);
       addNotification({
         id: Date.now().toString(),
         title: "Ошибка авторизации",
-        description: err.response?.data || "Произошла ошибка",
-        status: err.response?.status || 500,
+        description: err.message || "Произошла ошибка сети",
+        status: 500,
         createdAt: new Date().toISOString(),
       });
+    } finally {
+      setLoading(false);
     }
   };
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-  }, [isOpen]);
 
   if (user) {
     return (
-      <div className="mt-40">
+      <div className="flex justify-center items-center min-h-screen">
         <Logout />
       </div>
     );
   }
 
   return (
-    <div className="mt-40">
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="text-black">
-            Аутентификация
-          </Button>
-        </DialogTrigger>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">Авторизация</h2>
 
-        <DialogPortal>
-          <DialogContent className="sm:max-w-[425px]">
-            <form onSubmit={handleSubmit} key={isOpen ? "open" : "closed"}>
-              <DialogHeader>
-                <DialogTitle className="text-black">Hello...</DialogTitle>
-                <DialogDescription>Авторизация</DialogDescription>
-              </DialogHeader>
+        <div className="mb-4">
+          <Label htmlFor="login">Username</Label>
+          <Input
+            name="login"
+            type="text"
+            placeholder="Введите имя пользователя"
+            className="mt-1"
+            autoComplete="off"
+            required
+          />
+        </div>
 
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="login" className="text-black">
-                    Username
-                  </Label>
-                  <Input
-                    name="login"
-                    type="text"
-                    placeholder="Name"
-                    className="text-gray-800"
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password" className="text-black">
-                    Password
-                  </Label>
-                  <Input
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    className="text-gray-800"
-                    autoComplete="new-password"
-                  />
-                </div>
-              </div>
+        <div className="mb-6">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            name="password"
+            type="password"
+            placeholder="Введите пароль"
+            className="mt-1"
+            autoComplete="new-password"
+            required
+          />
+        </div>
 
-              <DialogFooter>
-                <Button type="submit">Войти</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </DialogPortal>
-      </Dialog>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Входим..." : "Войти"}
+        </Button>
+      </form>
     </div>
   );
 }
