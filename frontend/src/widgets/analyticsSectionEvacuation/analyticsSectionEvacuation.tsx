@@ -1,5 +1,6 @@
 "use client"
-import { useState, useEffect, useMemo, memo } from "react"
+
+import { useState, useEffect, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -42,7 +43,6 @@ interface TowTruck {
   summary_of_parking_lot: number
 }
 
-// --- маппинг данных для графиков ---
 const mapForDiagram = (trucks: TowTruck[]) =>
   trucks.map((t) => ({
     date: t.date,
@@ -63,7 +63,6 @@ const mapForPieDiagram = (trucks: TowTruck[]): EvacuationData[] => {
   ]
 }
 
-// --- Компонент строки таблицы ---
 const EvacuationRow = memo(
   ({
     truck,
@@ -94,7 +93,7 @@ const EvacuationRow = memo(
         {formatNumber(truck.summary_of_parking_lot)} ₽
       </TableCell>
       <TableCell className="py-3">
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-2 justify-end flex-wrap">
           <EvacuationFormDialog truck={truck} onSuccess={() => {}} />
           <EvacuationDeleteDialog truckId={truck.id} onSuccess={() => {}} />
         </div>
@@ -104,16 +103,11 @@ const EvacuationRow = memo(
 )
 EvacuationRow.displayName = "EvacuationRow"
 
-// --- Основной компонент ---
 export default function AnalyticsSectionEvacuation() {
   const [showTable, setShowTable] = useState(true)
   const [allTrucks, setAllTrucks] = useState<TowTruck[]>([])
   const [trucks2024, setTrucks2024] = useState<TowTruck[]>([])
   const [trucks2025, setTrucks2025] = useState<TowTruck[]>([])
-  const [count_departures2024, setCountDepartures2024] = useState<number>(0)
-  const [count_departures2025, setCountDepartures2025] = useState<number>(0)
-  const [count_evacuations2024, setCountEvacuations2024] = useState<number>(0)
-  const [count_evacuations2025, setCountEvacuations2025] = useState<number>(0)
   const [loading, setLoading] = useState(false)
   const [yearFilter, setYearFilter] = useState("")
   const { addNotification } = useNotificationManager()
@@ -122,7 +116,6 @@ export default function AnalyticsSectionEvacuation() {
   const [displayedTrucks, setDisplayedTrucks] = useState<TowTruck[]>([])
   const [inputYear, setInputYear] = useState("")
 
-  // --- загрузка данных по годам ---
   useEffect(() => {
     fetchTrucksByYear()
   }, [])
@@ -136,8 +129,6 @@ export default function AnalyticsSectionEvacuation() {
       ])
       setTrucks2024(response2024?.data || [])
       setTrucks2025(response2025?.data || [])
-      console.log(response2024?.data)
-      console.log(response2025?.data)
     } catch (error) {
       addNotification({
         id: Date.now().toString(),
@@ -151,7 +142,6 @@ export default function AnalyticsSectionEvacuation() {
     }
   }
 
-  // --- загрузка таблицы по году ---
   const fetchTrucks = async (year: string) => {
     setLoading(true)
     try {
@@ -175,7 +165,6 @@ export default function AnalyticsSectionEvacuation() {
     }
   }
 
-  // --- фильтры и сортировка ---
   useEffect(() => {
     let filtered = [...allTrucks]
     if (monthFilter !== "all") {
@@ -195,30 +184,45 @@ export default function AnalyticsSectionEvacuation() {
 
   const formatNumber = (num: number) =>
     new Intl.NumberFormat("ru-RU").format(num)
-  console.log(count_departures2025)
-  console.log(count_departures2024)
+
   return (
-    <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
+    <div className="space-y-6 p-4 max-w-[1400px] mx-auto pt-[6rem]">
       <h1 className="text-3xl font-bold text-center text-gray-900">
         Аналитика эвакуаторов
       </h1>
 
       {/* Диаграммы */}
-      {/* Диаграммы */}
-        <div className="flex max-w-[1400px] justify-between gap-8"> {/* <- добавлен gap-6 */}
-        <EvacuationDiagram
-            evacuation2024={mapForDiagram(trucks2024)}
-            evacuation2025={mapForDiagram(trucks2025)}
-        />
-        <EvacuationPieDiagram
-          evacuation2024={trucks2024}   // весь массив объектов из API
-          evacuation2025={trucks2025}
-        />
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Динамика эвакуаций</CardTitle>
+              <CardDescription>Сравнение по месяцам (2024 vs 2025)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EvacuationDiagram
+                evacuation2024={mapForDiagram(trucks2024)}
+                evacuation2025={mapForDiagram(trucks2025)}/>
+            </CardContent>
+          </Card>
         </div>
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Статус эвакуаций</CardTitle>
+              <CardDescription>Завершённые и в процессе</CardDescription>
+              <EvacuationPieDiagram
+                evacuation2024={trucks2024}
+                evacuation2025={trucks2025}
+              />
+            </CardHeader>
+            <CardContent className="flex justify-center">
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
-
-      {/* загрузка данных */}
+      {/* Загрузка данных */}
       <Card className="w-full">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl">Просмотр данных</CardTitle>
@@ -227,8 +231,8 @@ export default function AnalyticsSectionEvacuation() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="grid w-full max-w-sm items-center gap-1.5">
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="grid w-full sm:max-w-sm items-center gap-1.5">
               <Label htmlFor="year-filter">Год</Label>
               <Input
                 id="year-filter"
@@ -244,7 +248,7 @@ export default function AnalyticsSectionEvacuation() {
             <Button
               onClick={() => fetchTrucks(inputYear)}
               disabled={loading || !inputYear.trim()}
-              className="h-10"
+              className="h-10 w-full sm:w-auto"
             >
               {loading ? "Загрузка..." : "Загрузить данные"}
             </Button>
@@ -252,10 +256,11 @@ export default function AnalyticsSectionEvacuation() {
         </CardContent>
       </Card>
 
-      {/* таблица */}
+      {/* Таблица */}
       {displayedTrucks.length > 0 && (
+        <div>
         <Card className="w-full">
-          <CardHeader className="pb-4 flex justify-between items-center">
+          <CardHeader className="pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div>
               <CardTitle className="text-xl">
                 Данные об эвакуаторах {yearFilter && `за ${yearFilter} год`}
@@ -264,96 +269,135 @@ export default function AnalyticsSectionEvacuation() {
                 Всего записей: {displayedTrucks.length}
               </CardDescription>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button
                 variant="outline"
                 onClick={() => setShowTable(!showTable)}
                 className="flex items-center gap-2 h-9"
               >
-                {showTable ? <><EyeOff className="h-4 w-4" /> Скрыть таблицу</> :
-                  <><Eye className="h-4 w-4" /> Показать таблицу</>}
+                {showTable ? (
+                  <>
+                    <EyeOff className="h-4 w-4" /> Скрыть таблицу
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" /> Показать таблицу
+                  </>
+                )}
               </Button>
               <EvacuationFormDialog onSuccess={() => {}} />
             </div>
           </CardHeader>
 
-          {showTable && (
-            <CardContent>
-              {/* фильтры */}
-              <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">Фильтры:</span>
+          <CardContent>
+            {showTable && (
+              <>
+                {/* фильтры */}
+                <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm text-gray-600">Сортировка:</span>
+                    <Select
+                      value={sortOrder}
+                      onValueChange={(v) => setSortOrder(v as "asc" | "desc")}
+                    >
+                      <SelectTrigger className="w-[160px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="desc">Сначала новые</SelectItem>
+                        <SelectItem value="asc">Сначала старые</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm text-gray-600">Месяц:</span>
+                    <Select value={monthFilter} onValueChange={setMonthFilter}>
+                      <SelectTrigger className="w-[140px] h-8">
+                        <SelectValue placeholder="Все месяцы" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Все месяцы</SelectItem>
+                        {[...Array(12)].map((_, i) => (
+                          <SelectItem key={i + 1} value={(i + 1).toString()}>
+                            {new Date(0, i).toLocaleString("ru-RU", { month: "long" })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <ArrowUpDown className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Сортировка:</span>
-                  <Select
-                    value={sortOrder}
-                    onValueChange={(v) => setSortOrder(v as "asc" | "desc")}
-                  >
-                    <SelectTrigger className="w-[160px] h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="desc">Сначала новые</SelectItem>
-                      <SelectItem value="asc">Сначала старые</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* если данных нет */}
+                {displayedTrucks.length === 0 ? (
+                  <div className="w-full min-h-[150px] flex items-center justify-center text-gray-500">
+                    📭 Нет данных за выбранный период
+                  </div>
+                ) : (
+                  <>
+                    {/* таблица (desktop) */}
+                    <div className="hidden md:block rounded-lg border border-gray-200 overflow-x-auto">
+                      <Table>
+                        <TableHeader className="bg-gray-50">
+                          <TableRow>
+                            <TableHead>Дата</TableHead>
+                            <TableHead className="text-right">Эвакуаторов на линии</TableHead>
+                            <TableHead className="text-right">Выезды</TableHead>
+                            <TableHead className="text-right">Эвакуации</TableHead>
+                            <TableHead className="text-right">Сумма по штрафстоянке</TableHead>
+                            <TableHead className="text-right">Действия</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {displayedTrucks.map((truck) => (
+                            <EvacuationRow
+                              key={truck.id}
+                              truck={truck}
+                              formatDate={formatDate}
+                              formatNumber={formatNumber}
+                            />
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
 
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Месяц:</span>
-                  <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger className="w-[140px] h-8">
-                      <SelectValue placeholder="Все месяцы" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Все месяцы</SelectItem>
-                      {[...Array(12)].map((_, i) => (
-                        <SelectItem key={i + 1} value={(i + 1).toString()}>
-                          {new Date(0, i).toLocaleString("ru-RU", { month: "long" })}
-                        </SelectItem>
+                    {/* карточки (mobile) */}
+                    <div className="grid gap-4 md:hidden">
+                      {displayedTrucks.map((t) => (
+                        <div
+                          key={t.id}
+                          className="border rounded-lg p-4 shadow-sm bg-white flex flex-col gap-2 text-sm"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium text-gray-800">{formatDate(t.date)}</span>
+                            <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs">
+                              {t.tow_truck_in_line} эвакуаторов
+                            </span>
+                          </div>
+                          <div className="text-gray-700">Выезды: {t.count_departures}</div>
+                          <div className="text-blue-600 font-medium">Эвакуации: {t.count_evacuations}</div>
+                          <div className="text-green-600 font-medium">
+                            Сумма: {formatNumber(t.summary_of_parking_lot)} ₽
+                          </div>
+                          <div className="flex gap-2 justify-between mt-2">
+                            <EvacuationFormDialog truck={t} onSuccess={() => {}} />
+                            <EvacuationDeleteDialog truckId={t.id} onSuccess={() => {}} />
+                          </div>
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* таблица */}
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <Table>
-                  <TableHeader className="bg-gray-50">
-                    <TableRow>
-                      <TableHead>Дата</TableHead>
-                      <TableHead className="text-right">Эвакуаторов на линии</TableHead>
-                      <TableHead className="text-right">Выезды</TableHead>
-                      <TableHead className="text-right">Эвакуации</TableHead>
-                      <TableHead className="text-right">Сумма по штрафстоянке</TableHead>
-                      <TableHead className="text-right">Действия</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {displayedTrucks.map((truck) => (
-                      <EvacuationRow
-                        key={truck.id}
-                        truck={truck}
-                        formatDate={formatDate}
-                        formatNumber={formatNumber}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <div className="mt-4 text-sm text-gray-500 text-center">
-                Показано {displayedTrucks.length} записей из {allTrucks.length}
-              </div>
-            </CardContent>
-          )}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+            <div className="mt-4 text-sm text-gray-500 text-center">
+              Показано {displayedTrucks.length} записей из {allTrucks.length}
+            </div>
+          </CardContent>
         </Card>
+      </div>
       )}
     </div>
   )

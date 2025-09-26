@@ -3,13 +3,6 @@
 import { useState, useMemo } from "react"
 import { Pie, PieChart } from "recharts"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
@@ -49,8 +42,7 @@ export default function EvacuationPieDiagram({
 
   const data = useMemo(() => {
     const dataset = year === "2024" ? evacuation2024 : evacuation2025
-    console.log(evacuation2024)
-    console.log(evacuation2025)
+
     const totalDepartures = dataset.reduce(
       (s, d) => s + Number(d.count_departures ?? 0),
       0
@@ -79,58 +71,56 @@ export default function EvacuationPieDiagram({
   const total = data.reduce((s, d) => s + d.value, 0)
 
   return (
-    <Card className="flex flex-col max-w-[400px]">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Доля эвакуированных</CardTitle>
-        <CardDescription>
-          <Select
-            value={year}
-            onValueChange={(v) => setYear(v as "2024" | "2025")}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2025">2025</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+    <div className="w-full flex flex-col items-center">
+      {/* Заголовок + селект */}
+      <div className="flex sm:flex-row items-center justify-between gap-2 w-full mb-4">
+        <Select
+          value={year}
+          onValueChange={(v) => setYear(v as "2024" | "2025")}
         >
-          <PieChart>
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <Pie data={data} dataKey="value" nameKey="name" />
-          </PieChart>
-        </ChartContainer>
+          <SelectTrigger className="w-[120px] h-9 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="2024">2024</SelectItem>
+            <SelectItem value="2025">2025</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="flex justify-around mt-4">
-          {data.map((item) => {
-            const percent =
-              total > 0 ? ((item.value / total) * 100).toFixed(1) : "0.0"
-            return (
-              <div
-                key={item.name}
-                className="flex flex-col items-center gap-1 text-center"
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-3 w-3 rounded-full"
-                    style={{ background: item.fill }}
-                  />
-                  {item.name}: <b>{item.value.toFixed(1)}</b>
-                </div>
-                <span className="text-xs text-gray-500">({percent}%)</span>
+      {/* Круговая диаграмма */}
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto aspect-square w-full max-h-[220px] sm:max-h-[280px]"
+      >
+        <PieChart>
+          <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+          <Pie data={data} dataKey="value" nameKey="name" />
+        </PieChart>
+      </ChartContainer>
+
+      {/* Легенда */}
+      <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 mt-4 w-full">
+        {data.map((item) => {
+          const percent =
+            total > 0 ? ((item.value / total) * 100).toFixed(1) : "0.0"
+          return (
+            <div
+              key={item.name}
+              className="flex flex-col items-center text-center text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={{ background: item.fill }}
+                />
+                {item.name}: <b>{item.value.toFixed(0)}</b>
               </div>
-            )
-          })}
-        </div>
-      </CardContent>
-    </Card>
+              <span className="text-xs text-gray-500">({percent}%)</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
