@@ -3,9 +3,8 @@
 import IconButton from "@/components/common/IconButton";
 import TransparentButton from "@/components/common/TransparentButton";
 import Image from "next/image";
-import { formatDate } from "@/utils/formatDate";
+import { formatDateV1 } from "@/utils/formatDateV1";
 import { MEDIA_URL } from "@/index";
-import GreenButton from "@/components/common/GreenButton";
 import WhiteButton from "@/components/common/whiteButton";
 
 const MainNewSection = ({ news, user }) => {
@@ -27,10 +26,10 @@ const MainNewSection = ({ news, user }) => {
         }')`,
       }}
     >
-      <div className="flex-1 flex flex-col gap-8 md:gap-12 mt-[6rem] sm:mt-[10rem] md:mt-[14rem] lg:mt-[20rem]">
+      <div className="flex-1 flex flex-col gap-8 md:gap-12 mt-[7rem] sm:mt-[10rem] md:mt-[14rem] lg:mt-[20rem]">
         <div className="flex flex-col gap-6 sm:gap-8">
           <p className="font-sans font-normal text-[clamp(1rem,2vw,1.5rem)] leading-[1.2] tracking-[0]">
-            {formatDate(news.date)}
+            {formatDateV1(news.date)}
           </p>
           <h2 className="font-sans font-bold text-[clamp(1.5rem,4vw,3rem)] leading-[1.1] tracking-[0]">
             {news.title}
