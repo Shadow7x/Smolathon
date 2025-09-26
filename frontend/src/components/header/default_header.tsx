@@ -16,7 +16,7 @@ export default function Default_Header() {
     { href: "/news", label: "Новости" },
     { href: "/statistics", label: "Статистика" },
     { href: "/contacts", label: "Контакты" },
-    { href: "/projects", label: "Проекты" },
+    { href: "/docs", label: "Документы" },
     { href: "/about", label: "О нас" },
   ];
 
