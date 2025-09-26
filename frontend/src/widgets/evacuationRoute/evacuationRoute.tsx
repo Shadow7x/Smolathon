@@ -159,109 +159,115 @@ export default function EvacuationRoutePage() {
     }
   }
 
-return (
-  <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4">
-    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
-      Маршруты эвакуации
-    </h1>
-    
-    {/* Карточка с управлением */}
-    <Card className="mb-6 w-full">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <div>
-            <CardTitle className="text-xl">Данные о маршрутах</CardTitle>
-            <CardDescription>Всего записей: {displayed.length}</CardDescription>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setSortOrder((s) => (s === "asc" ? "desc" : "asc"))}
-              className="flex items-center gap-2 h-9"
-            >
-              <ArrowUpDown className="h-4 w-4" />
-              {sortOrder === "asc" ? "Сначала старые" : "Сначала новые"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowTable(!showTable)}
-              className="flex items-center gap-2 h-9"
-            >
-              {showTable ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              {showTable ? "Скрыть таблицу" : "Показать таблицу"}
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-    
-      <CardContent>
-        <div className="flex flex-col sm:flex-row gap-4 items-end">
-          <div className="flex-1">
-            <label htmlFor="search" className="text-sm font-medium mb-2 block">
-              Поиск по году, месяцу, улице или отчёту
-            </label>
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-gray-600 shrink-0" />
-              <Input
-                id="search"
-                placeholder="Введите запрос для поиска..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-10"
-              />
+  return (
+    // **prefer 1400px but allow shrinking on small screens**
+    <div className="w-[1400px] max-w-full mx-auto px-2 sm:px-4">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6">
+        Маршруты эвакуации
+      </h1>
+
+      {/* Управление */}
+      <Card className="mb-6 w-full">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+            <div>
+              <CardTitle className="text-xl">Данные о маршрутах</CardTitle>
+              <CardDescription>Всего записей: {displayed.length}</CardDescription>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setSortOrder((s) => (s === "asc" ? "desc" : "asc"))}
+                className="flex items-center gap-2 h-9"
+              >
+                <ArrowUpDown className="h-4 w-4" />
+                {sortOrder === "asc" ? "Сначала старые" : "Сначала новые"}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setShowTable((s) => !s)}
+                className="flex items-center gap-2 h-9"
+              >
+                {showTable ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showTable ? "Скрыть таблицу" : "Показать таблицу"}
+              </Button>
             </div>
           </div>
-          <Button
-            onClick={() => fetchRoutes()}
-            disabled={loading}
-            className="h-10"
+        </CardHeader>
+
+        <CardContent className="w-full">
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="flex-1">
+              <label htmlFor="search" className="text-sm font-medium mb-2 block">
+                Поиск по году, месяцу, улице или отчёту
+              </label>
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-gray-600 shrink-0" />
+                <Input
+                  id="search"
+                  placeholder="Введите запрос для поиска..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+            </div>
+
+            <Button onClick={() => fetchRoutes()} disabled={loading} className="h-10">
+              {loading ? "Загрузка..." : "Обновить данные"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Таблица — card занимает всегда ширину, а содержимое анимируется по высоте */}
+      <Card className="w-full">
+        {/* CardContent держит структуру: min-height + flex-col, чтобы карточка не "схлопывалась" */}
+        <CardContent className="w-full flex flex-col min-h-[260px]">
+          {/* animated area: меняем только высоту (max-h) */}
+          <div
+            className={`w-full transition-[max-height,opacity] duration-500 ease-in-out overflow-hidden
+              ${showTable ? "max-h-[1200px] opacity-100" : "max-h-[260px] opacity-80"}
+            `}
           >
-            {loading ? "Загрузка..." : "Обновить данные"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            {/* если таблица видима — показываем таблицу */}
+            {showTable ? (
+              <div className="rounded-lg border border-gray-200 overflow-x-auto">
+                {/* min-w задаёт минимальную ширину таблицы (desktop) — при узком экране появится горизонтальный скролл */}
+                <Table className="w-full min-w-[700px]">
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead className="w-[100px]">Год</TableHead>
+                      <TableHead className="w-[120px]">Месяц</TableHead>
+                      <TableHead>Маршрут</TableHead>
+                      <TableHead className="w-[200px]">Отчёт</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayed.map((r) => (
+                      <RouteRow key={r.id} r={r} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              /* placeholder — имеет ту же ширину родителя и минимальную высоту,
+                 поэтому карточка НЕ схлопывается по ширине при скрытии */
+              <div className="w-full min-h-[260px] flex flex-col items-center justify-center text-gray-400 px-6">
+                <EyeOff className="h-12 w-12 mb-3 opacity-50" />
+                <p className="text-center">Таблица скрыта. Нажмите «Показать таблицу».</p>
+              </div>
+            )}
+          </div>
 
-    {/* Таблица */}
-<Card className="w-full">
-  <CardContent className="w-full">
-    {showTable ? (
-      <div
-        className={`
-          w-full transition-all duration-500 overflow-hidden
-          ${showTable ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}
-        `}
-      >
-        <div className="rounded-lg border border-gray-200 overflow-x-auto">
-          <Table className="w-full min-w-[600px]">
-            <TableHeader className="bg-gray-50">
-              <TableRow>
-                <TableHead className="w-[100px]">Год</TableHead>
-                <TableHead className="w-[120px]">Месяц</TableHead>
-                <TableHead>Маршрут</TableHead>
-                <TableHead className="w-[200px]">Отчёт</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayed.map((r) => (
-                <RouteRow key={r.id} r={r} />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    ) : (
-      <div className="w-[1400px] min-h-[200px] flex flex-col items-center justify-center text-gray-400">
-        <EyeOff className="h-12 w-12 mx-auto mb-2 opacity-50" />
-        <p>Таблица скрыта. Нажмите "Показать таблицу".</p>
-      </div>
-    )}
-  </CardContent>
-</Card>
-
-
-  </div>
-)
-
-
+          {/* дополнительная инфа/футер карточки — всегда внизу карточки */}
+          <div className="mt-4 text-sm text-gray-500 text-center">
+            Показано {displayed.length} маршрутов из {routes.length}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
