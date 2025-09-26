@@ -17,8 +17,8 @@ const GreenButton = ({
         items-center
         justify-center
         text-center
-        bg-[#62A744]
-        text-white
+        hover:bg-white
+        hover:text-[#62A744]
         font-bold
         text-[16px]
         leading-[100%]
@@ -28,6 +28,11 @@ const GreenButton = ({
         min-h-[44px]
         whitespace-normal
         break-words
+        transition
+        duration-300
+        ease-in-out
+        bg-[#62A744]
+        text-white
         ${className}
       `}
     >

@@ -49,15 +49,7 @@ export default function AuthenticationPage() {
           createdAt: new Date().toISOString(),
         });
       }
-    } catch (err: any) {
-      console.error("Network error:", err);
-      addNotification({
-        id: Date.now().toString(),
-        title: "Ошибка авторизации",
-        description: err.message || "Произошла ошибка сети",
-        status: 500,
-        createdAt: new Date().toISOString(),
-      });
+    
     } finally {
       setLoading(false);
     }
