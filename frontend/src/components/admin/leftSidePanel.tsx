@@ -2,53 +2,47 @@
 import { useState } from "react"
 import { Card, CardContent, CardFooter } from "../ui/card"
 import { usePathname, useRouter } from "next/navigation"
+import { Menu, X } from "lucide-react"
 
 export default function LeftSidePanel() {
   const pathname = usePathname()
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const isActive = (path: string) => pathname === path
-  const handleClick = (path: string) => router.push(path)
+  const handleClick = (path: string) => {
+    router.push(path)
+    setMobileOpen(false) // закрываем меню после перехода на мобилке
+  }
 
-  // Общий класс для элементов меню
   const menuItemClass = `flex items-center gap-1 ${isCollapsed ? "justify-center" : "justify-start"}`
 
-  return (
-    <div className={`mt-[6.2rem] ml-[2rem] transition-all ${isCollapsed ? "w-16" : "w-64"}`}>
-      <Card>
-
-        {/* Штрафы */}
-        <CardContent className={`${menuItemClass} group`}>
-          <div className="w-10 flex justify-center">
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-              <path d="M7.58341 22.75V19.5H5.41675V17.3333H7.58341V15.1667H5.41675V13H7.58341V3.25H14.6251C16.2862 3.25 17.6945 3.82778 18.8501 4.98333C20.0056 6.13889 20.5834 7.54722 20.5834 9.20833C20.5834 10.8694 20.0056 12.2778 18.8501 13.4333C17.6945 14.5889 16.2862 15.1667 14.6251 15.1667H9.75008V17.3333H14.0834V19.5H9.75008V22.75H7.58341ZM9.75008 13H14.6251C15.6723 13 16.5661 12.6299 17.3063 11.8896C18.0466 11.1493 18.4167 10.2556 18.4167 9.20833C18.4167 8.16111 18.0466 7.26736 17.3063 6.52708C16.5661 5.78681 15.6723 5.41667 14.6251 5.41667H9.75008V13Z" fill={isActive("/admin") ? "black" :"#636363"} className="group-hover:fill-black"/>
-            </svg>
-          </div>
-          {!isCollapsed && (
-            <button
-              className={`${isActive("/admin") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
-              onClick={() => handleClick("/admin")}
-            >
-              Штрафы
-            </button>
-          )}
-        </CardContent>
-
-        {/* Пути эвакуаторов */}
-        <CardContent className={`${menuItemClass} group`}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M13.25 19.75L6.75 17.475L1.7125 19.425C1.35139 19.5694 1.01736 19.5288 0.710417 19.3031C0.403472 19.0774 0.25 18.775 0.25 18.3958V3.22917C0.25 2.99444 0.317708 2.78681 0.453125 2.60625C0.588542 2.42569 0.773611 2.29028 1.00833 2.2L6.75 0.25L13.25 2.525L18.2875 0.575C18.6486 0.430556 18.9826 0.471181 19.2896 0.696875C19.5965 0.922569 19.75 1.225 19.75 1.60417V16.7708C19.75 17.0056 19.6823 17.2132 19.5469 17.3937C19.4115 17.5743 19.2264 17.7097 18.9917 17.8L13.25 19.75ZM12.1667 17.0958V4.42083L7.83333 2.90417V15.5792L12.1667 17.0958ZM14.3333 17.0958L17.5833 16.0125V3.175L14.3333 4.42083V17.0958ZM2.41667 16.825L5.66667 15.5792V2.90417L2.41667 3.9875V16.825Z" fill={isActive("/admin/EvacuationRoutes") ? "black" :"#636363"} className="group-hover:fill-black" />
+  const MenuItems = () => (
+    <>
+      {/* Штрафы */}
+      <CardContent className={`${menuItemClass} group`}>
+        <button
+          className={`${isActive("/admin") ? "text-black" :"text-[#636363]"} group-hover:text-black flex items-center gap-2`}
+          onClick={() => handleClick("/admin")}
+        >
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <path d="M7.58341 22.75V19.5H5.41675V17.3333H7.58341V15.1667H5.41675V13H7.58341V3.25H14.6251C16.2862 3.25 17.6945 3.82778 18.8501 4.98333C20.0056 6.13889 20.5834 7.54722 20.5834 9.20833C20.5834 10.8694 20.0056 12.2778 18.8501 13.4333C17.6945 14.5889 16.2862 15.1667 14.6251 15.1667H9.75008V17.3333H14.0834V19.5H9.75008V22.75H7.58341ZM9.75008 13H14.6251C15.6723 13 16.5661 12.6299 17.3063 11.8896C18.0466 11.1493 18.4167 10.2556 18.4167 9.20833C18.4167 8.16111 18.0466 7.26736 17.3063 6.52708C16.5661 5.78681 15.6723 5.41667 14.6251 5.41667H9.75008V13Z" fill={isActive("/admin") ? "black" :"#636363"} />
           </svg>
-          {!isCollapsed && (
-            <button
-              className={`${isActive("/admin/EvacuationRoutes") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
-              onClick={() => handleClick("/admin/EvacuationRoutes")}
-            >
-              Пути эвакуаторов
-            </button>
-          )}
-        </CardContent>
+          {!isCollapsed && "Штрафы"}
+        </button>
+      </CardContent>
+
+      {/* Пути эвакуаторов */}
+      <CardContent className={`${menuItemClass} group`}>
+        <button
+          className={`${isActive("/admin/EvacuationRoutes") ? "text-black" :"text-[#636363]"} group-hover:text-black flex items-center gap-2`}
+          onClick={() => handleClick("/admin/EvacuationRoutes")}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13.25 19.75L6.75 17.475..." fill={isActive("/admin/EvacuationRoutes") ? "black" :"#636363"} /></svg>
+          {!isCollapsed && "Пути эвакуаторов"}
+        </button>
+      </CardContent>
 
         {/* Статистика эвакуаций */}
         <CardContent className={`${menuItemClass} group`}>
@@ -109,13 +103,56 @@ export default function LeftSidePanel() {
         {!isCollapsed && <CardContent className="flex items-center gap-1"><div className="h-[2px] bg-[#636363] w-full"></div></CardContent>}
 
         {/* Футер */}
-        <CardFooter className="flex items-center gap-1 cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10.5417 5.66667V14.3333L14.875 10L10.5417 5.66667ZM2.41667 19.75C1.82083 19.75 1.31076 19.5378 0.886458 19.1135C0.462153 18.6892 0.25 18.1792 0.25 17.5833V2.41667C0.25 1.82083 0.462153 1.31076 0.886458 0.886458C1.31076 0.462153 1.82083 0.25 2.41667 0.25H17.5833C18.1792 0.25 18.6892 0.462153 19.1135 0.886458C19.5378 1.31076 19.75 1.82083 19.75 2.41667V17.5833C19.75 18.1792 19.5378 18.6892 19.1135 19.1135C18.6892 19.5378 18.1792 19.75 17.5833 19.75H2.41667ZM5.66667 17.5833V2.41667H2.41667V17.5833H5.66667ZM7.83333 17.5833H17.5833V2.41667H7.83333V17.5833Z" fill={isActive("/admin") ? "black" :"#636363"}  />
-          </svg>
-          {!isCollapsed && <button className="text-left">Скрыть контент</button>}
-        </CardFooter>
-      </Card>
-    </div>
+        {/* Футер */}
+      <CardFooter
+        className="flex items-center gap-1 cursor-pointer"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10.5417 5.66667V14.3333L14.875 10L10.5417 5.66667Z" fill="#636363" />
+        </svg>
+        {!isCollapsed && <span>Скрыть</span>}
+      </CardFooter>
+    </>
+  )
+
+  return (
+    <>
+      {/* Бургер только на мобилке */}
+      <div className="fixed top-4 left-4 z-50 md:hidden">
+        <button
+          className="p-2 rounded-md bg-gray-100"
+          onClick={() => setMobileOpen(true)}
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Десктопная панель */}
+      <div className={`mt-[6.2rem] ml-[2rem] transition-all hidden md:block ${isCollapsed ? "w-16" : "w-64"}`}>
+        <Card>
+          {MenuItems()}
+        </Card>
+      </div>
+
+      {/* Мобильное меню (оверлей) */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 md:hidden" onClick={() => setMobileOpen(false)}>
+          <div
+            className="absolute top-0 left-0 h-full w-64 bg-white shadow-lg p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end p-2">
+              <button onClick={() => setMobileOpen(false)}>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <Card>
+              {MenuItems()}
+            </Card>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
