@@ -43,6 +43,17 @@ class TrafficLightSerializer(serializers.ModelSerializer):
         model = TrafficLight
         fields = '__all__'
         
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = '__all__'
+        
+class DocsSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='file.name')
+    class Meta:
+        model = Docs
+        fields = '__all__'
+        
 class DTPSerializer(serializers.ModelSerializer):
     report = ReportsSerializer()
     class Meta:

@@ -98,6 +98,10 @@ class News(models.Model):
     
     def __str__(self):
         return str(self.title)
+    
+class Docs(models.Model):
+    file = models.FileField( upload_to='documents/')
+    updated_at = models.DateTimeField( auto_now=True)
         
 
 class authorizedToken(Token):

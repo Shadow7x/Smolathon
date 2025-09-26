@@ -15,6 +15,13 @@ def delete_report_file(sender, instance, **kwargs):
             os.remove(instance.file.path)
 # Register your models here.
 
+@receiver(post_delete, sender=Docs)
+def delete_docs_file(sender, instance, **kwargs):
+
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)
+
 admin.site.register(Reports)
 admin.site.register(Penalties)
 admin.site.register(TowTrucks) 
@@ -22,6 +29,8 @@ admin.site.register(EvacuationRoute)
 admin.site.register(Route)
 admin.site.register(TrafficLight)
 admin.site.register(DTP)
+admin.site.register(News) 
+admin.site.register(Docs) 
 admin.site.register(authorizedToken)
 
 
