@@ -1,6 +1,5 @@
-
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Nunito} from "next/font/google";
+import { Geist, Geist_Mono, Nunito } from "next/font/google";
 import { UserProvider } from "@/hooks/user-context";
 import { NotificationManagerProvider } from "@/hooks/notification-context";
 import { GEOProvider } from "@/hooks/geo-context";
@@ -32,12 +31,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${nunito.variable}  antialiased`}
-        style = {{fontFamily: "var(--font-nunito)"}}
+        style={{ fontFamily: "var(--font-nunito)" }}
       >
         <GEOProvider>
           <UserProvider>
@@ -51,9 +49,11 @@ export default function RootLayout({
             />
 
             <NotificationManagerProvider>
-              <Header />
-              <Notifications />
-              {children}
+              <div className="relative min-h-screen">
+                <Header />
+                <Notifications />
+                <main>{children}</main>
+              </div>
             </NotificationManagerProvider>
           </UserProvider>
         </GEOProvider>
