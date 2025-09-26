@@ -4,14 +4,6 @@ import { useState, useMemo } from "react"
 import { TrendingUp, Calendar } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -30,12 +22,12 @@ interface TowTruck {
   routes_planned: number
   routes_completed: number
   towtrucks_involved: number
-  time_spent: number // суммарное время (например, в минутах)
+  time_spent: number
 }
 
 interface DiagramProps {
-  evacuation2024?: TowTruck []
-  evacuation2025?: TowTruck []
+  evacuation2024?: TowTruck[]
+  evacuation2025?: TowTruck[]
 }
 
 const fieldOptions = {
@@ -46,8 +38,8 @@ const fieldOptions = {
 }
 
 const monthNames = [
-  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+  "Январь","Февраль","Март","Апрель","Май","Июнь",
+  "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
 ]
 
 const quarterOptions = [
@@ -62,7 +54,7 @@ export default function EvacuationDiagram({
 }: DiagramProps) {
   const [show2024, setShow2024] = useState(true)
   const [show2025, setShow2025] = useState(true)
-  const [selectedField, setSelectedField] = useState<keyof Evacuation>("routes_completed")
+  const [selectedField, setSelectedField] = useState<keyof TowTruck>("routes_completed")
   const [period, setPeriod] = useState<"day" | "month" | "quarter">("month")
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [selectedQuarter, setSelectedQuarter] = useState<number>(1)
@@ -147,121 +139,109 @@ export default function EvacuationDiagram({
     : "0.0"
 
   return (
-    <Card className="w-full max-w-[950px]">
-      <CardHeader>
-        <CardTitle>Динамика эвакуации</CardTitle>
-        <CardDescription>Сравнение данных за 2024 и 2025 годы</CardDescription>
-      </CardHeader>
+    <div className="w-full space-y-4">
+  {/* фильтры */}
+  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
+    {/* чекбоксы */}
+    <div className="flex items-center gap-2 text-sm">
+      <Checkbox id="year2024" checked={show2024} onCheckedChange={(v) => setShow2024(!!v)} />
+      <label htmlFor="year2024" className="whitespace-nowrap">2024</label>
+    </div>
+    <div className="flex items-center gap-2 text-sm">
+      <Checkbox id="year2025" checked={show2025} onCheckedChange={(v) => setShow2025(!!v)} />
+      <label htmlFor="year2025" className="whitespace-nowrap">2025</label>
+    </div>
 
-      {/* фильтры */}
-      <CardContent className="flex flex-wrap gap-4">
-        <div className="flex items-center gap-2">
-          <Checkbox id="year2024" checked={show2024} onCheckedChange={(v) => setShow2024(!!v)} />
-          <label htmlFor="year2024">Показать 2024</label>
-        </div>
+    {/* метрика */}
+    <Select value={selectedField} onValueChange={(v) => setSelectedField(v as keyof TowTruck)}>
+      <SelectTrigger className="h-8 w-full sm:w-[200px] text-xs">
+        <SelectValue placeholder="Метрика" />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(fieldOptions).map(([key, label]) => (
+          <SelectItem key={key} value={key}>{label}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
 
-        <div className="flex items-center gap-2">
-          <Checkbox id="year2025" checked={show2025} onCheckedChange={(v) => setShow2025(!!v)} />
-          <label htmlFor="year2025">Показать 2025</label>
-        </div>
+    {/* период */}
+    <Select value={period} onValueChange={(v) => setPeriod(v as "day" | "month" | "quarter")}>
+      <SelectTrigger className="h-8 w-full sm:w-[120px] text-xs">
+        <SelectValue placeholder="Период" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="day">День</SelectItem>
+        <SelectItem value="month">Месяц</SelectItem>
+        <SelectItem value="quarter">Квартал</SelectItem>
+      </SelectContent>
+    </Select>
 
-        <div className="flex items-center gap-2">
-          <span>Метрика:</span>
-          <Select value={selectedField} onValueChange={(v) => setSelectedField(v as keyof Evacuation)}>
-            <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {Object.entries(fieldOptions).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    {/* месяц / квартал */}
+    {period === "day" && (
+      <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+        <SelectTrigger className="h-8 w-full sm:w-[140px] text-xs">
+          <SelectValue placeholder="Месяц" />
+        </SelectTrigger>
+        <SelectContent>
+          {availableMonths.map(month => (
+            <SelectItem key={month} value={month.toString()}>{monthNames[month - 1]}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )}
+    {period === "quarter" && (
+      <Select value={selectedQuarter.toString()} onValueChange={(v) => setSelectedQuarter(parseInt(v))}>
+        <SelectTrigger className="h-8 w-full sm:w-[160px] text-xs">
+          <SelectValue placeholder="Квартал" />
+        </SelectTrigger>
+        <SelectContent>
+          {quarterOptions.map(q => (
+            <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )}
+  </div>
 
-        <div className="flex items-center gap-2">
-          <span>Период:</span>
-          <Select value={period} onValueChange={(v) => setPeriod(v as "day" | "month" | "quarter")}>
-            <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="day">День</SelectItem>
-              <SelectItem value="month">Месяц</SelectItem>
-              <SelectItem value="quarter">Квартал</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  {/* график */}
+  <ChartContainer
+    config={{
+      value2024: { label: "2024", color: "hsl(220, 70%, 50%)" },
+      value2025: { label: "2025", color: "hsl(160, 70%, 50%)" },
+    }}
+    className="h-[220px] sm:h-[300px] w-full"
+  >
+    <LineChart data={chartData} margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="period" tick={{ fontSize: 10 }} />
+      <YAxis tick={{ fontSize: 10 }} />
+      <ChartTooltip content={<ChartTooltipContent />} />
+      {show2024 && <Line type="monotone" dataKey="value2024" stroke="var(--color-value2024)" strokeWidth={2} dot={{ r: 2 }} />}
+      {show2025 && <Line type="monotone" dataKey="value2025" stroke="var(--color-value2025)" strokeWidth={2} dot={{ r: 2 }} />}
+    </LineChart>
+  </ChartContainer>
 
-        {period === "day" && (
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>Месяц:</span>
-            <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
-              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {availableMonths.map(month => (
-                  <SelectItem key={month} value={month.toString()}>{monthNames[month - 1]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        {period === "quarter" && (
-          <div className="flex items-center gap-2">
-            <span>Квартал:</span>
-            <Select value={selectedQuarter.toString()} onValueChange={(v) => setSelectedQuarter(parseInt(v))}>
-              <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {quarterOptions.map(q => (
-                  <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </CardContent>
-
-      {/* график */}
-      <CardContent>
-        <ChartContainer
-          config={{
-            value2024: { label: "2024", color: "hsl(220, 70%, 50%)" },
-            value2025: { label: "2025", color: "hsl(160, 70%, 50%)" },
-          }}
-          className="h-[200px] w-full"
-        >
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            {show2024 && <Line type="monotone" dataKey="value2024" stroke="var(--color-value2024)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />}
-            {show2025 && <Line type="monotone" dataKey="value2025" stroke="var(--color-value2025)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />}
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-
-      {/* итоги */}
-      <CardFooter className="flex flex-wrap items-center gap-4 text-sm">
-        {show2024 && (
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[hsl(220,70%,50%)]"></div>
-            <span>2024</span>
-          </div>
-        )}
-        {show2025 && (
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[hsl(160,70%,50%)]"></div>
-            <span>2025</span>
-          </div>
-        )}
-        {show2024 && show2025 && (
-          <div className="flex items-center gap-1 ml-auto">
-            <TrendingUp className="h-4 w-4" />
-            <span>
-              {growthPercentage}% 
-            </span>
-          </div>
-        )}
-      </CardFooter>
-    </Card>
+  {/* итоги */}
+  <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+    {show2024 && (
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 rounded-full bg-[hsl(220,70%,50%)]"></div>
+        <span>2024</span>
+      </div>
+    )}
+    {show2025 && (
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 rounded-full bg-[hsl(160,70%,50%)]"></div>
+        <span>2025</span>
+      </div>
+    )}
+    {show2024 && show2025 && (
+      <div className="flex items-center gap-1 ml-auto font-medium">
+        <TrendingUp className="h-4 w-4" />
+        <span>{growthPercentage}%</span>
+      </div>
+    )}
+  </div>
+</div>
   )
 }
