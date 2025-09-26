@@ -59,5 +59,17 @@ class DTPSerializer(serializers.ModelSerializer):
     class Meta:
         model = DTP
         fields = '__all__'
+        
+        
+class ImageForMeritsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageForMerits
+        fields = '__all__'
 
+class MeritsSerializer(serializers.ModelSerializer):
+    images_first_block = ImageForMeritsSerializer(many=True)
+    images_second_block = ImageForMeritsSerializer(many=True)
+    class Meta:
+        model = Merits
+        fields = '__all__'
 

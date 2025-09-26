@@ -31,14 +31,26 @@ const MainNewSection = () => {
           Власти выделили для этого...
         </h2>
 
-        <IconButton size={60} bgColor="#62A744">
-          <Image
-            src="/icons/whiteLeftArrowIcon.svg"
-            alt="Arrow"
-            width={52}
-            height={52}
-            priority
-          />
+        <IconButton
+          size={60}
+          className="flex-shrink-0 group bg-[#62A744] hover:bg-white transition duration-300"
+        >
+          <div className="relative w-[3.25rem] h-[3.25rem]">
+            <Image
+              src="/icons/whiteLeftArrowIcon.svg"
+              alt="Arrow"
+              fill
+              priority
+              className="object-contain opacity-100 group-hover:opacity-0 transition duration-300"
+            />
+            <Image
+              src="/icons/greenLeftArrowIcon.svg"
+              alt="Arrow"
+              fill
+              priority
+              className="object-contain opacity-0 group-hover:opacity-100 transition duration-300"
+            />
+          </div>
         </IconButton>
       </div>
     </section>
