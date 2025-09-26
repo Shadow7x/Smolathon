@@ -35,7 +35,7 @@ interface EvacuationRoute {
   year: number
   month: string
   routes: { id: number; street: string }[]
-  report?: { id: number; file: string }
+  report?: { id: number; name: string }
 }
 
 const RouteRow = memo(({ r }: { r: EvacuationRoute }) => (
@@ -45,7 +45,7 @@ const RouteRow = memo(({ r }: { r: EvacuationRoute }) => (
     <TableCell className="text-sm py-3">
       {r.routes.map(rt => rt.street).join(" → ")}
     </TableCell>
-    <TableCell className="text-sm py-3">{r.report?.file}</TableCell>
+    <TableCell className="text-sm py-3">{r.report?.name || "—"}</TableCell>
   </TableRow>
 ))
 RouteRow.displayName = "RouteRow"
@@ -94,7 +94,7 @@ export default function EvacuationRoutePage() {
       const q = search.toLowerCase()
       tmp = tmp.filter(r =>
         r.routes.some(rt => rt.street.toLowerCase().includes(q)) ||
-        (r.report?.file || "").toLowerCase().includes(q) ||
+        (r.report?.name || "").toLowerCase().includes(q) ||
         String(r.year).includes(q) ||
         r.month.toLowerCase().includes(q)
       )
@@ -107,7 +107,7 @@ export default function EvacuationRoutePage() {
     setDisplayed(tmp)
   }, [routes, sortOrder, search])
 
-  // Обработчик выбора файла для загрузки
+  // выбор файла
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0])
@@ -116,7 +116,7 @@ export default function EvacuationRoutePage() {
     }
   }
 
-  // Отправка файла на бэк
+  // загрузка файла
   const handleUpload = async () => {
     if (!file) {
       addNotification({
@@ -159,115 +159,109 @@ export default function EvacuationRoutePage() {
     }
   }
 
-  return (
-    <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-      <h1 className="text-3xl font-bold text-center text-gray-900">Маршруты эвакуации</h1>
-
-      <Card className="w-full">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-xl">Управление маршрутами</CardTitle>
-              <CardDescription>Загрузить новый отчёт или просмотреть существующие</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-                <DialogTrigger asChild>
-                  <Button>Загрузить отчёт</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Загрузка Excel-отчёта</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-3">
-                    <Input
-                      id="file"
-                      type="file"
-                      accept=".xlsx,.xls"
-                      onChange={handleFileChange}
-                    />
-                    {file && (
-                      <p className="text-sm text-gray-600">Выбран файл: {file.name}</p>
-                    )}
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleUpload} disabled={uploading}>
-                      {uploading ? "Загружаем..." : "Загрузить"}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
+return (
+  <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4">
+    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
+      Маршруты эвакуации
+    </h1>
+    
+    {/* Карточка с управлением */}
+    <Card className="mb-6 w-full">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <CardTitle className="text-xl">Данные о маршрутах</CardTitle>
+            <CardDescription>Всего записей: {displayed.length}</CardDescription>
           </div>
-        </CardHeader>
-
-        <CardContent>
-          <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setSortOrder((s) => (s === "asc" ? "desc" : "asc"))}
+              className="flex items-center gap-2 h-9"
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              {sortOrder === "asc" ? "Сначала старые" : "Сначала новые"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowTable(!showTable)}
+              className="flex items-center gap-2 h-9"
+            >
+              {showTable ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showTable ? "Скрыть таблицу" : "Показать таблицу"}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+    
+      <CardContent>
+        <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="flex-1">
+            <label htmlFor="search" className="text-sm font-medium mb-2 block">
+              Поиск по году, месяцу, улице или отчёту
+            </label>
             <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-gray-600" />
+              <Search className="h-4 w-4 text-gray-600 shrink-0" />
               <Input
-                placeholder="Поиск по году, месяцу, улице или отчёту"
+                id="search"
+                placeholder="Введите запрос для поиска..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                className="h-10"
               />
             </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <ArrowUpDown className="h-4 w-4 text-gray-600" />
-              <span className="text-sm text-gray-600">Сортировка:</span>
-              <Button
-                variant="outline"
-                onClick={() => setSortOrder(s => (s === "asc" ? "desc" : "asc"))}
-                className="h-8"
-              >
-                {sortOrder === "asc" ? "Сначала старые" : "Сначала новые"}
-              </Button>
-            </div>
-            <div>
-              <Button
-                variant="outline"
-                onClick={() => setShowTable(s => !s)}
-                className="flex items-center gap-2 h-9"
-              >
-                {showTable ? (
-                  <>
-                    <EyeOff className="h-4 w-4" /> Скрыть таблицу
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" /> Показать таблицу
-                  </>
-                )}
-              </Button>
-            </div>
           </div>
+          <Button
+            onClick={() => fetchRoutes()}
+            disabled={loading}
+            className="h-10"
+          >
+            {loading ? "Загрузка..." : "Обновить данные"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
 
-          {showTable && (
-            <>
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <Table>
-                  <TableHeader className="bg-gray-50">
-                    <TableRow>
-                      <TableHead>Год</TableHead>
-                      <TableHead>Месяц</TableHead>
-                      <TableHead>Маршрут</TableHead>
-                      <TableHead>Отчёт</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {displayed.map(r => (
-                      <RouteRow key={r.id} r={r} />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+    {/* Таблица */}
+<Card className="w-full">
+  <CardContent className="w-full">
+    {showTable ? (
+      <div
+        className={`
+          w-full transition-all duration-500 overflow-hidden
+          ${showTable ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}
+        `}
+      >
+        <div className="rounded-lg border border-gray-200 overflow-x-auto">
+          <Table className="w-full min-w-[600px]">
+            <TableHeader className="bg-gray-50">
+              <TableRow>
+                <TableHead className="w-[100px]">Год</TableHead>
+                <TableHead className="w-[120px]">Месяц</TableHead>
+                <TableHead>Маршрут</TableHead>
+                <TableHead className="w-[200px]">Отчёт</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {displayed.map((r) => (
+                <RouteRow key={r.id} r={r} />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    ) : (
+      <div className="w-[1400px] min-h-[200px] flex flex-col items-center justify-center text-gray-400">
+        <EyeOff className="h-12 w-12 mx-auto mb-2 opacity-50" />
+        <p>Таблица скрыта. Нажмите "Показать таблицу".</p>
+      </div>
+    )}
+  </CardContent>
+</Card>
 
-              <div className="mt-4 text-sm text-gray-500 text-center">
-                Показано {displayed.length} маршрутов из {routes.length}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  )
+
+  </div>
+)
+
+
 }
