@@ -40,11 +40,11 @@ export default function EvacuationReportDialog({ onSuccess }: EvacuationReportDi
     try {
       setLoading(true)
 
-      const filename = reportName.endsWith(".xlsx")
+      const name = reportName.endsWith(".xlsx")
         ? reportName
         : `${reportName}.xlsx`
 
-      const res = await axi.post("/analytics/reports/create", { filename })
+      const res = await axi.post("/analytics/reports/create", { name })
 
       addNotification({
         id: Date.now().toString(),
