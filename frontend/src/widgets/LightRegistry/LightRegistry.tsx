@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
-import { Eye, EyeOff, Filter, ArrowUpDown } from "lucide-react";
+import { Eye, EyeOff, Filter, ArrowUpDown, Upload } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -123,7 +123,90 @@ export default function LightRegistry() {
           Реестр светофоров
         </h1>
 
-        {/* форма загрузки */}
+        {/* форма загрузки Excel */}
+        <Card className="w-full mb-6">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+              <Upload className="w-5 h-5 text-blue-600" />
+              Добавление новых данных
+            </CardTitle>
+            <CardDescription>
+              Загрузите Excel (.xlsx) со светофорами для добавления в реестр
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const data = new FormData(e.target as HTMLFormElement);
+                const file = data.get("file") as File;
+
+                if (!file) {
+                  addNotification({
+                    id: Date.now().toString(),
+                    title: "Ошибка",
+                    description: "Файл не выбран",
+                    status: 400,
+                    createdAt: new Date().toISOString(),
+                  });
+                  return;
+                }
+
+                try {
+                  const formData = new FormData();
+                  formData.append("file", file);
+
+                  const res = await axi.post(
+                    "/analytics/trafficLight/createFromExcel",
+                    formData,
+                    {
+                      headers: { "Content-Type": "multipart/form-data" },
+                    }
+                  );
+
+                  addNotification({
+                    id: Date.now().toString(),
+                    title: "Успешно",
+                    description: res.data?.message || "Файл загружен",
+                    status: res.status,
+                    createdAt: new Date().toISOString(),
+                  });
+
+                  fetchTrafficLights(inputYear);
+                } catch (err: any) {
+                  addNotification({
+                    id: Date.now().toString(),
+                    title: "Ошибка данных",
+                    description: err.response?.data || "Не удалось загрузить файл",
+                    status: err.response?.status || 500,
+                    createdAt: new Date().toISOString(),
+                  });
+                }
+              }}
+              className="flex flex-col sm:flex-row items-center gap-4"
+            >
+              <div className="grid w-full sm:max-w-sm items-center gap-1.5">
+                <Label htmlFor="file">Выберите файл</Label>
+                <Input
+                  id="file"
+                  type="file"
+                  name="file"
+                  accept=".xlsx"
+                  className="h-10"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="h-10 w-full sm:w-auto"
+                variant="default"
+              >
+                Загрузить
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* форма фильтрации */}
         <Card className="w-full mb-6">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg md:text-xl">Просмотр данных</CardTitle>
