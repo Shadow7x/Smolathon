@@ -10,17 +10,20 @@ interface IconButtonProps {
 }
 
 const IconButton: React.FC<IconButtonProps> = ({
-  bgColor = "#62A744",
   size = 60,
   children,
   onClick,
   className = "",
 }) => {
+  const remSize = `${size / 16}rem`;
+
   return (
     <button
       onClick={onClick}
       className={`flex items-center justify-center rounded-[0.5rem] ${className}`}
-      style={{ backgroundColor: bgColor, width: size, height: size }}
+      style={{ width: remSize, height: remSize }}
+      aria-label="icon-button"
+      type="button"
     >
       {children}
     </button>
