@@ -60,7 +60,7 @@ def createPenaltiesFromExcel(request: Request) -> Response:
                 
             except Exception as e:
                 print(e)
-                
+
                 report.delete()
                 return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

@@ -37,7 +37,7 @@ export default function Home() {
         formData.append("file", file);
 
         try {
-            const res = await axi.post("/analytics/penalties/create", formData, {
+            const res = await axi.post("/analytics/penalties/createFromExcel", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }

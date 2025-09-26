@@ -12,7 +12,7 @@ export default function Foth() {
     const file = data.get("file") as File;
     const formData = new FormData();
     formData.append("file", file);
-    axi.post("/analytics/trafficLight/create", formData, {
+    axi.post("/analytics/trafficLight/createFromExcel", formData, {
         headers: {
         "Content-Type": "multipart/form-data",
         }
