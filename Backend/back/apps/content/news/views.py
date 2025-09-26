@@ -5,15 +5,15 @@ from rest_framework.decorators import api_view
 from core.models.models import News
 from django.db import transaction
 from core.utils.auth_decor import token_required
-from core.utils.serializers import DTPSerializer
+from core.utils.serializers import NewsSerializer
 
 
 @api_view(['GET'])
 def getNews(request: Request):
-    news = DTP.objects.all()
+    news = News.objects.all()
     if request.GET.get("id"):
         news = news.filter(id=request.GET.get("id"))
-    serializer = DTPSerializer(news, many=True)
+    serializer = NewsSerializer(news, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
