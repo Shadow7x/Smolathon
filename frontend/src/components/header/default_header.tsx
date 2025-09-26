@@ -5,6 +5,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import EvacuationPopup from "../evacuationPopup/EvacuationPopup";
 
 export default function Default_Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +20,6 @@ export default function Default_Header() {
   const navLinks = [
     { href: "/news", label: "Новости" },
     { href: "/statistics", label: "Статистика" },
-    { href: "/services", label: "Услуги" },
     { href: "/contacts", label: "Контакты" },
     { href: "/projects", label: "Проекты" },
     { href: "/about", label: "О нас" },
@@ -48,6 +55,7 @@ export default function Default_Header() {
             <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#62A744] group-hover:w-full transition-all duration-300 origin-left"></span>
           </Link>
         ))}
+        <EvacuationPopup triggerClass="relative group whitespace-nowrap flex-shrink-0 text-white text-[20px] font-bold text-center hover:text-[#62A744] transition-all duration-300" />
       </nav>
 
       <div className="lg:hidden">
@@ -74,6 +82,7 @@ export default function Default_Header() {
                   {link.label}
                 </Link>
               ))}
+              <EvacuationPopup triggerClass="text-lg font-bold text-gray-700 hover:text-gray-900 transition-colors py-2" />
             </div>
           </SheetContent>
         </Sheet>
