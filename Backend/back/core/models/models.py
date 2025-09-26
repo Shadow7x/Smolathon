@@ -94,7 +94,7 @@ class News(models.Model):
     title = models.TextField()
     text = models.TextField()
     date = models.DateField( auto_now_add=True)
-    image = models.FileField()
+    image = models.FileField(upload_to='news/')
     
     def __str__(self):
         return str(self.title)
@@ -102,7 +102,23 @@ class News(models.Model):
 class Docs(models.Model):
     file = models.FileField( upload_to='documents/')
     updated_at = models.DateTimeField( auto_now=True)
-        
+
+
+class ImageForMerits(models.Model):
+    image = models.FileField(upload_to='merits/images/')
+
+class Merits(models.Model):
+    logo_first_block = models.FileField(upload_to='merits/logo/')
+    title = models.CharField(max_length=10, unique=True)
+    decode = models.TextField()
+    images_first_block = models.ManyToManyField(ImageForMerits, related_name="images_first_block")
+    purposes = models.TextField()
+    logo_second_block = models.FileField(upload_to='merits/logo/')
+    images_second_block = models.ManyToManyField(ImageForMerits, related_name="images_second_block")
+    parents_name = models.TextField()
+    parents_phone = models.TextField()
+    parents_email = models.EmailField()
+    address = models.TextField()
 
 class authorizedToken(Token):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
