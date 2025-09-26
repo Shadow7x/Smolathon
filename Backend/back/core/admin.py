@@ -31,6 +31,8 @@ admin.site.register(TrafficLight)
 admin.site.register(DTP)
 admin.site.register(News) 
 admin.site.register(Docs) 
+admin.site.register(Merits)
+admin.site.register(ImageForMerits)
 admin.site.register(authorizedToken)
 
 
