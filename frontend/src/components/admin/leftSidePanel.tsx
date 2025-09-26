@@ -66,8 +66,8 @@ export default function LeftSidePanel() {
           </svg>
           {!isCollapsed && (
             <button
-              className={`${isActive("/admin/TrafficLights") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
-              onClick={() => handleClick("/admin/TrafficLights")}
+              className={`${isActive("/admin/TrafficLightRegistry") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
+              onClick={() => handleClick("/admin/TrafficLightRegistry")}
             >
               Реестр светофоров
             </button>

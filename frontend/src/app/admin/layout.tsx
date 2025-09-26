@@ -56,9 +56,12 @@ export default function RootLayout({
   }
 
   return (
-    <div className=" flex flex-row">
-        <LeftSidePanel/>
-        {children}
+    <div className="flex min-h-screen">
+      {/* Левая панель */}
+      <LeftSidePanel />
+
+      {/* Контент */}
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
