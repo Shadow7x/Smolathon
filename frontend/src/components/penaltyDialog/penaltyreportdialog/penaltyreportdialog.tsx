@@ -41,11 +41,11 @@ export default function PenaltyReportDialog({ onSuccess }: PenaltyReportDialogPr
       setLoading(true)
 
       // добавляем расширение .xlsx
-      const filename = reportName.endsWith(".xlsx")
+      const name = reportName.endsWith(".xlsx")
         ? reportName
         : `${reportName}.xlsx`
 
-      const res = await axi.post("/analytics/reports/create", { filename })
+      const res = await axi.post("/analytics/reports/create", { name })
 
       addNotification({
         id: Date.now().toString(),
