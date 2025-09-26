@@ -71,7 +71,7 @@ export default function EvacuationPieDiagram({
   const total = data.reduce((s, d) => s + d.value, 0)
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center min-h-[300px]">
       {/* Заголовок + селект */}
       <div className="flex sm:flex-row items-center justify-between gap-2 w-full mb-4">
         <Select

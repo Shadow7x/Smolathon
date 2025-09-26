@@ -149,11 +149,11 @@ export default function EvacuationFormDialog({ onSuccess, route }: EvacuationFor
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>{route ? "Редактировать маршрут" : "Добавить маршрут"}</Button>
+        <Button>{route ? "Редактировать" : "Добавить маршрут"}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{route ? "Редактирование маршрута" : "Новый маршрут"}</DialogTitle>
+          <DialogTitle>{route ? "Редактирование" : "Новый маршрут"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div>
@@ -194,21 +194,28 @@ export default function EvacuationFormDialog({ onSuccess, route }: EvacuationFor
           {/* выбор отчёта */}
           <div>
             <Label htmlFor="report">Отчёт</Label>
-            <div className="flex gap-2">
-              <Select value={selectedReport || ""} onValueChange={setSelectedReport}>
-                <SelectTrigger className="w-full max-w-[300px]">
-                  <SelectValue placeholder="Выберите отчёт" className="truncate" />
-                </SelectTrigger>
-                <SelectContent>
-                  {reports.map((r) => (
-                    <SelectItem key={r.id} value={r.id.toString()} className="truncate max-w-[280px]">
-                      {r.title || r.file.split("/").pop()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <EvacuationReportDialog onSuccess={fetchReports} />
-            </div>
+              <div className="flex gap-2 w-full">
+                <Select value={selectedReport || ""} onValueChange={setSelectedReport}>
+                  <SelectTrigger className="w-full max-w-[170px] truncate">
+                    <SelectValue
+                      placeholder="Выберите отчёт"
+                      className="truncate"
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[300px]">
+                    {reports.map((r) => (
+                      <SelectItem
+                        key={r.id}
+                        value={r.id.toString()}
+                        className="truncate max-w-[280px]"
+                      >
+                        {r.title || r.file.split("/").pop()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <EvacuationReportDialog onSuccess={fetchReports} />
+              </div>
           </div>
         </div>
         <DialogFooter>

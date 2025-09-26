@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react"
+import { Eye, EyeOff, Calendar, ArrowUpDown, Upload } from "lucide-react"
 
 interface TowTruck {
   id: number
@@ -109,6 +109,7 @@ export default function AnalyticsSectionEvacuation() {
   const [trucks2024, setTrucks2024] = useState<TowTruck[]>([])
   const [trucks2025, setTrucks2025] = useState<TowTruck[]>([])
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [yearFilter, setYearFilter] = useState("")
   const { addNotification } = useNotificationManager()
   const [monthFilter, setMonthFilter] = useState("all")
@@ -165,6 +166,43 @@ export default function AnalyticsSectionEvacuation() {
     }
   }
 
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const data = new FormData(e.target as HTMLFormElement)
+    const file = data.get("file") as File
+    if (!file) return
+
+    try {
+      setUploading(true)
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const res = await axi.post("/analytics/towTrucks/createFromExcel", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
+      addNotification({
+        id: Date.now().toString(),
+        title: "Успешно",
+        description: "Файл загружен",
+        status: res.status || 200,
+        createdAt: new Date().toISOString(),
+      })
+
+      fetchTrucksByYear()
+    } catch (err: any) {
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка данных",
+        description: err.response?.data || "Не удалось загрузить файл",
+        status: err.response?.status || 500,
+        createdAt: new Date().toISOString(),
+      })
+    } finally {
+      setUploading(false)
+    }
+  }
+
   useEffect(() => {
     let filtered = [...allTrucks]
     if (monthFilter !== "all") {
@@ -202,7 +240,8 @@ export default function AnalyticsSectionEvacuation() {
             <CardContent>
               <EvacuationDiagram
                 evacuation2024={mapForDiagram(trucks2024)}
-                evacuation2025={mapForDiagram(trucks2025)}/>
+                evacuation2025={mapForDiagram(trucks2025)}
+              />
             </CardContent>
           </Card>
         </div>
@@ -211,18 +250,43 @@ export default function AnalyticsSectionEvacuation() {
             <CardHeader>
               <CardTitle className="text-lg">Статус эвакуаций</CardTitle>
               <CardDescription>Завершённые и в процессе</CardDescription>
-              <EvacuationPieDiagram
-                evacuation2024={trucks2024}
-                evacuation2025={trucks2025}
-              />
+              <EvacuationPieDiagram evacuation2024={trucks2024} evacuation2025={trucks2025} />
             </CardHeader>
-            <CardContent className="flex justify-center">
-            </CardContent>
+            <CardContent className="flex justify-center"></CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Загрузка данных */}
+      {/* Форма загрузки Excel */}
+      <Card className="w-full mb-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+            <Upload className="w-5 h-5 text-blue-600" />
+            Загрузка данных
+          </CardTitle>
+          <CardDescription>
+            Добавьте файл эвакуаций в формате <code>.xlsx</code>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={handleUpload}
+            className="flex flex-col sm:flex-row gap-4 items-end"
+          >
+            <Input type="file" name="file" accept=".xlsx" className="h-10" />
+            <Button
+              type="submit"
+              disabled={uploading}
+              className="h-10 w-full sm:w-auto flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {uploading ? "Отправка..." : "Загрузить"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Просмотр данных */}
       <Card className="w-full">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl">Просмотр данных</CardTitle>
@@ -258,7 +322,6 @@ export default function AnalyticsSectionEvacuation() {
 
       {/* Таблица */}
       {displayedTrucks.length > 0 && (
-        <div>
         <Card className="w-full">
           <CardHeader className="pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div>
@@ -322,7 +385,9 @@ export default function AnalyticsSectionEvacuation() {
                         <SelectItem value="all">Все месяцы</SelectItem>
                         {[...Array(12)].map((_, i) => (
                           <SelectItem key={i + 1} value={(i + 1).toString()}>
-                            {new Date(0, i).toLocaleString("ru-RU", { month: "long" })}
+                            {new Date(0, i).toLocaleString("ru-RU", {
+                              month: "long",
+                            })}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -330,7 +395,6 @@ export default function AnalyticsSectionEvacuation() {
                   </div>
                 </div>
 
-                {/* если данных нет */}
                 {displayedTrucks.length === 0 ? (
                   <div className="w-full min-h-[150px] flex items-center justify-center text-gray-500">
                     📭 Нет данных за выбранный период
@@ -343,10 +407,14 @@ export default function AnalyticsSectionEvacuation() {
                         <TableHeader className="bg-gray-50">
                           <TableRow>
                             <TableHead>Дата</TableHead>
-                            <TableHead className="text-right">Эвакуаторов на линии</TableHead>
+                            <TableHead className="text-right">
+                              Эвакуаторов на линии
+                            </TableHead>
                             <TableHead className="text-right">Выезды</TableHead>
                             <TableHead className="text-right">Эвакуации</TableHead>
-                            <TableHead className="text-right">Сумма по штрафстоянке</TableHead>
+                            <TableHead className="text-right">
+                              Сумма по штрафстоянке
+                            </TableHead>
                             <TableHead className="text-right">Действия</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -364,25 +432,29 @@ export default function AnalyticsSectionEvacuation() {
                     </div>
 
                     {/* карточки (mobile) */}
-                    <div className="grid gap-4 md:hidden">
+                    <div className="gap-4 md:hidden w-full flex flex-col">
                       {displayedTrucks.map((t) => (
                         <div
                           key={t.id}
-                          className="border rounded-lg p-4 shadow-sm bg-white flex flex-col gap-2 text-sm"
+                          className="w-full max-w-full border rounded-xl p-4 shadow-sm bg-white flex flex-col gap-2 text-sm"
                         >
                           <div className="flex justify-between items-center">
-                            <span className="font-medium text-gray-800">{formatDate(t.date)}</span>
+                            <span className="font-medium text-gray-800">
+                              {formatDate(t.date)}
+                            </span>
                             <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs">
                               {t.tow_truck_in_line} эвакуаторов
                             </span>
                           </div>
                           <div className="text-gray-700">Выезды: {t.count_departures}</div>
-                          <div className="text-blue-600 font-medium">Эвакуации: {t.count_evacuations}</div>
+                          <div className="text-blue-600 font-medium">
+                            Эвакуации: {t.count_evacuations}
+                          </div>
                           <div className="text-green-600 font-medium">
                             Сумма: {formatNumber(t.summary_of_parking_lot)} ₽
                           </div>
                           <div className="flex gap-2 justify-between mt-2">
-                            <EvacuationFormDialog truck={t} onSuccess={() => {}} />
+                            <EvacuationFormDialog route={t} onSuccess={() => {}} />
                             <EvacuationDeleteDialog truckId={t.id} onSuccess={() => {}} />
                           </div>
                         </div>
@@ -397,7 +469,6 @@ export default function AnalyticsSectionEvacuation() {
             </div>
           </CardContent>
         </Card>
-      </div>
       )}
     </div>
   )
