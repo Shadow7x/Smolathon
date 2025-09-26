@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import GreenButton from "../common/GreenButton";
 
 export default function EvacuationPopup({
   triggerClass,
@@ -90,7 +91,9 @@ export default function EvacuationPopup({
                   </p>
                 </div>
               </div>
-              <div></div>
+              <div>
+                <GreenButton>Отправить заявку</GreenButton>
+              </div>
             </div>
 
             <div className="hidden md:block w-1/2 relative min-h-[200px] md:min-h-0">

@@ -10,8 +10,8 @@ const TransparentButton = ({
       {...props}
       className={`
         relative
-        self-start 
-        inline-flex 
+        self-start
+        inline-flex
         rounded-[8px]
         border-[3px]
         border-[#62A744]
@@ -23,6 +23,8 @@ const TransparentButton = ({
         hover:border-white
         px-[1.875rem]
         py-[0.875rem]
+        whitespace-normal
+        break-words
         ${className}
       `}
     >
