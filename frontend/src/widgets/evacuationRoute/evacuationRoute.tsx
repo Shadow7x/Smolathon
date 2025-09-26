@@ -190,8 +190,6 @@ export default function EvacuationRoutePage() {
             </form>
           </CardContent>
         </Card>
-
-        {/* таблица / карточки */}
 {/* таблица / карточки */}
 <Card className="w-full">
   <CardHeader className="pb-4">

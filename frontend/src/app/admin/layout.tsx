@@ -61,7 +61,12 @@ export default function RootLayout({
       <LeftSidePanel />
 
       {/* Контент */}
-      <main className="flex-1">{children}</main>
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{ scrollbarGutter: "stable" }}
+      >
+        {children}
+      </main>
     </div>
   );
 }
