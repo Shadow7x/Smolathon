@@ -1,0 +1,66 @@
+# version: '3.8'
+
+services:
+
+  db:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=Smolathon
+    
+    networks:
+      - app_network
+    
+  back:
+    build: .\Backend\
+    command: python manage.py runserver 0.0.0.0:80
+    volumes:
+      - ./Backend:/app
+      - ./Backend/static:/app/static
+    environment:
+      - PYTHONPATH=/app/Backend
+      - DATABASE_URL=postgres://postgres:admin@db:5432/Smolathon
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    networks:
+      - app_network
+
+  front:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - back
+    networks:
+      - app_network
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://back/v1/
+      - NEXT_PUBLIC_MEDIA_URL=http://back
+
+
+
+  # nginx:
+  #   image: nginx:1.21
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./texstrelka/static:/app/static
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - back
+  #   networks:
+  #     - app_network
+
+volumes:
+  postgres_data:
+  static_volume:
+
+networks:
+  app_network:
