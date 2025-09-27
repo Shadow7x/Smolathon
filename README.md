@@ -14,7 +14,19 @@
 3. cd frontend
 4. npm i --legacy-peer-deps
 5. npm run dev
-6. по ссылке http://localhost:3000 откроется веб сервер
+6. по ссылке http://localhost:3000 откроется веб сервер  
+
+Для Докера
+1. docker load -i full_stack.tar
+2. docker compose up -d
+
+
+сайт фронт: http://64.188.71.22:3000
+Сайт бэк: http://64.188.71.22
+
+авторизация:http://64.188.71.22:3000/auth
+админ панель:http://64.188.71.22:3000/admin
+так же админ панель backend:http://64.188.71.22/admin
 
 Аккаунт с правами суперюзера
 login: admin
