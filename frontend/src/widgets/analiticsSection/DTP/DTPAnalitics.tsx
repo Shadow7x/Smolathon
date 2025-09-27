@@ -1,8 +1,6 @@
 "use client";
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -22,14 +20,8 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 import DTPLineDiagram from "@/components/Diagrams/DTP/Line";
 import DTPPieDiagram from "@/components/Diagrams/DTP/Pie";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react";
+import { Eye, EyeOff, ArrowUpDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface DTP {
   id: number;
@@ -62,23 +54,35 @@ const normalizeMonth = (m: string): number => {
   return idx >= 0 ? idx + 1 : 0;
 };
 
-// --- Компонент строки таблицы ---
+// --- строка таблицы (desktop) ---
 const DTPRow = memo(({ item }: { item: DTP }) => (
   <TableRow className="hover:bg-gray-50/50 transition-colors">
-    <TableCell className="font-medium text-sm py-3">{item.year}</TableCell>
-    <TableCell className="text-sm py-3 text-right font-mono">
-      {monthNames[normalizeMonth(item.month) - 1] || item.month}
-    </TableCell>
-    <TableCell className="text-sm py-3 text-right">{item.point_FPSR}</TableCell>
+    <TableCell className="text-sm py-3">{item.year}</TableCell>
+    <TableCell className="text-sm py-3">{item.month}</TableCell>
+    <TableCell className="text-sm py-3">{item.point_FPSR}</TableCell>
     <TableCell className="text-sm py-3">{item.statistical_factor}</TableCell>
-    <TableCell className="text-sm py-3 text-right font-mono font-semibold text-green-600">
+    <TableCell className="text-sm py-3 text-right font-semibold text-green-600">
       {item.count.toFixed(1)}
     </TableCell>
   </TableRow>
 ));
 DTPRow.displayName = "DTPRow";
 
-// --- Основной компонент ---
+// --- карточка (mobile) ---
+const DTPCard = ({ item }: { item: DTP }) => (
+  <div className="border rounded-lg p-4 shadow-sm bg-white flex flex-col gap-2 text-sm">
+    <div className="flex justify-between items-center">
+      <span className="font-medium text-gray-800">{item.year}</span>
+      <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs">
+        {item.month}
+      </span>
+    </div>
+    <div className="text-gray-700">Точка: {item.point_FPSR}</div>
+    <div className="text-gray-500 text-xs">Фактор: {item.statistical_factor}</div>
+    <div className="text-gray-900 font-bold text-right">{item.count}</div>
+  </div>
+);
+
 export default function DTPAnalitics() {
   const [showTable, setShowTable] = useState(true);
   const [allDTP, setAllDTP] = useState<DTP[]>([]);
@@ -87,12 +91,10 @@ export default function DTPAnalitics() {
   const [loading, setLoading] = useState(false);
   const [yearFilter, setYearFilter] = useState("");
   const { addNotification } = useNotificationManager();
-  const [monthFilter, setMonthFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [monthFilter, setMonthFilter] = useState("");
   const [displayedDTP, setDisplayedDTP] = useState<DTP[]>([]);
-  const [inputYear, setInputYear] = useState("");
 
-  // --- загрузка данных для графиков ---
   useEffect(() => {
     fetchDTPByYear();
   }, []);
@@ -106,7 +108,7 @@ export default function DTPAnalitics() {
       ]);
       setDTP2024(response2024?.data || []);
       setDTP2025(response2025?.data || []);
-    } catch (error) {
+    } catch {
       addNotification({
         id: Date.now().toString(),
         title: "Ошибка",
@@ -119,15 +121,13 @@ export default function DTPAnalitics() {
     }
   };
 
-  // --- загрузка таблицы по году ---
   const fetchDTP = async (year: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (year) params.append("year", year);
       const response = await axi.get(`/analytics/DTP/get?${params}`);
-      setAllDTP(response.data);
-      setMonthFilter("all");
+      setAllDTP(response.data || []);
       setSortOrder("desc");
       setYearFilter(year);
     } catch (error: any) {
@@ -143,179 +143,237 @@ export default function DTPAnalitics() {
     }
   };
 
-  // --- фильтры и сортировка ---
+  // загрузка файла отчёта
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+    const file = data.get("file") as File;
+
+    if (!file) {
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка",
+        description: "Файл не выбран",
+        status: 400,
+        createdAt: new Date().toISOString(),
+      });
+      return;
+    }
+
+    try {
+      await axi.post("/analytics/DTP/create", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      addNotification({
+        id: Date.now().toString(),
+        title: "Успешно",
+        description: "Файл загружен",
+        status: 200,
+        createdAt: new Date().toISOString(),
+      });
+      // перезагружаем данные
+      if (yearFilter) fetchDTP(yearFilter);
+      else fetchDTPByYear();
+    } catch (err: any) {
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка данных",
+        description: err.response?.data || "Не удалось загрузить файл",
+        status: err.response?.status || 500,
+        createdAt: new Date().toISOString(),
+      });
+    }
+  };
+
+  // сортировка и фильтрация
   useEffect(() => {
     let filtered = [...allDTP];
-    if (monthFilter !== "all") {
+
+    if (monthFilter) {
       filtered = filtered.filter(
-        (p) => normalizeMonth(p.month) === Number(monthFilter)
+        (item) => item.month.toLowerCase() === monthFilter.toLowerCase()
       );
     }
+
     filtered.sort((a, b) => {
       const dateA = new Date(a.year, normalizeMonth(a.month) - 1).getTime();
       const dateB = new Date(b.year, normalizeMonth(b.month) - 1).getTime();
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
+
     setDisplayedDTP(filtered);
-  }, [allDTP, monthFilter, sortOrder]);
+  }, [allDTP, sortOrder, monthFilter]);
 
   return (
-    <div className="pt-[8rem]  ">
+    <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
         <h1 className="text-3xl font-bold text-center text-gray-900">
           Аналитика ДТП
         </h1>
 
         {/* Диаграммы */}
-        <div className="flex max-w-[1400px] justify-between">
-          <DTPLineDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
-          <DTPPieDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="shadow-md rounded-2xl lg:col-span-2">
+            <CardContent>
+              <DTPLineDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
+            </CardContent>
+          </Card>
+          <Card className="shadow-md rounded-2xl">
+            <CardContent className="flex justify-center">
+              <DTPPieDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* загрузка данных */}
+        {/* блок ввода года + загрузка отчётов */}
         <Card className="w-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Просмотр данных</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">Загрузка отчётов</CardTitle>
             <CardDescription>
-              Загрузите данные о ДТП с возможностью фильтрации по году
+              Добавьте CSV-файл (.csv) с данными о ДТП
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 items-end">
-              <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="year-filter">Год</Label>
-                <Input
-                  id="year-filter"
-                  type="number"
-                  placeholder="Например: 2024"
-                  value={inputYear}
-                  onChange={(e) => setInputYear(e.target.value)}
-                  min="2000"
-                  max="2030"
-                  className="h-10"
+            <form
+              onSubmit={handleUpload}
+              className="flex flex-col sm:flex-row items-start sm:items-end gap-3"
+            >
+              <div className="flex-1 w-full">
+                <label className="block text-sm text-gray-700 mb-1">Файл CSV</label>
+                <input
+                  type="file"
+                  name="file"
+                  accept=".csv"
+                  className="w-full text-sm border rounded-[10px] px-3 py-2"
                 />
               </div>
-              <Button
-                onClick={() => fetchDTP(inputYear)}
-                disabled={loading || !inputYear.trim()}
-                className="h-10"
-              >
-                {loading ? "Загрузка..." : "Загрузить данные"}
+              <Button type="submit" className="h-10 px-6">
+                Отправить
               </Button>
-            </div>
+            </form>
           </CardContent>
         </Card>
-
-        {/* таблица */}
-        {displayedDTP.length > 0 && (
-          <Card className="w-full">
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-xl">
-                    Данные о ДТП {yearFilter && `за ${yearFilter} год`}
-                  </CardTitle>
-                  <CardDescription>
-                    Всего записей: {displayedDTP.length}
-                  </CardDescription>
-                </div>
-                <div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowTable(!showTable)}
-                    className="flex items-center gap-2 h-9"
-                  >
-                    {showTable ? (
-                      <>
-                        <EyeOff className="h-4 w-4" /> Скрыть таблицу
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" /> Показать таблицу
-                      </>
-                    )}
-                  </Button>
-                </div>
+        {/* таблица / карточки */}
+        <Card className="w-full">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg md:text-xl">
+                  Данные о ДТП{" "}
+                  {monthFilter && yearFilter
+                    ? `за ${monthFilter} ${yearFilter}`
+                    : yearFilter
+                    ? `за ${yearFilter} год`
+                    : ""}
+                </CardTitle>
+                <CardDescription>
+                  Всего записей: {displayedDTP.length}
+                </CardDescription>
               </div>
-            </CardHeader>
+              <Button
+                variant="outline"
+                onClick={() => setShowTable((s) => !s)}
+                className="flex items-center gap-2 h-9 self-start"
+              >
+                {showTable ? (
+                  <>
+                    <EyeOff className="h-4 w-4" /> Скрыть таблицу
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" /> Показать таблицу
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardHeader>
 
+          <CardContent>
             {showTable && (
-              <CardContent>
-                {/* фильтры */}
-                <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      Фильтры:
-                    </span>
-                  </div>
-
+              <>
+                {/* сортировка + фильтр по месяцу */}
+                <div className="min-w-[267px] flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                  {/* сортировка */}
                   <div className="flex items-center gap-2">
                     <ArrowUpDown className="h-4 w-4 text-gray-600" />
                     <span className="text-sm text-gray-600">Сортировка:</span>
-                    <Select
-                      value={sortOrder}
-                      onValueChange={(v) => setSortOrder(v as "asc" | "desc")}
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        setSortOrder((s) => (s === "asc" ? "desc" : "asc"))
+                      }
+                      className="h-8"
                     >
-                      <SelectTrigger className="w-[160px] h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="desc">Сначала новые</SelectItem>
-                        <SelectItem value="asc">Сначала старые</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {sortOrder === "asc"
+                        ? "Сначала старые"
+                        : "Сначала новые"}
+                    </Button>
                   </div>
 
+                  {/* фильтр по месяцу */}
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-600" />
                     <span className="text-sm text-gray-600">Месяц:</span>
-                    <Select value={monthFilter} onValueChange={setMonthFilter}>
-                      <SelectTrigger className="w-[140px] h-8">
-                        <SelectValue placeholder="Все месяцы" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Все месяцы</SelectItem>
-                        {monthNames.map((m, idx) => (
-                          <SelectItem
-                            key={idx + 1}
-                            value={(idx + 1).toString()}
-                          >
-                            {m[0].toUpperCase() + m.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={monthFilter}
+                      onChange={(e) => setMonthFilter(e.target.value)}
+                      className="h-8 border rounded px-2 text-sm"
+                    >
+                      <option value="">Все</option>
+                      {monthNames.map((m, i) => (
+                        <option key={i} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                {/* таблица */}
-                <div className="rounded-lg border border-gray-200 overflow-hidden">
-                  <Table>
-                    <TableHeader className="bg-gray-50">
-                      <TableRow>
-                        <TableHead>Год</TableHead>
-                        <TableHead>Месяц</TableHead>
-                        <TableHead>Точка ФПСР</TableHead>
-                        <TableHead>Фактор</TableHead>
-                        <TableHead className="text-right">Значение</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {displayedDTP.map((item) => (
-                        <DTPRow key={item.id} item={item} />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                {/* данные или сообщение */}
+                {displayedDTP.length > 0 ? (
+                  <>
+                    {/* таблица (desktop) */}
+                    <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gray-50">
+                          <TableRow>
+                            <TableHead>Год</TableHead>
+                            <TableHead>Месяц</TableHead>
+                            <TableHead>Точка ФПСР</TableHead>
+                            <TableHead>Фактор</TableHead>
+                            <TableHead className="text-right">
+                              Значение
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {displayedDTP.map((item) => (
+                            <DTPRow key={item.id} item={item} />
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
 
-                <div className="mt-4 text-sm text-gray-500 text-center">
-                  Показано {displayedDTP.length} записей из {allDTP.length}
-                </div>
-              </CardContent>
+                    {/* карточки (mobile) */}
+                    <div className="grid gap-4 md:hidden">
+                      {displayedDTP.map((item) => (
+                        <DTPCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full min-h-[200px] flex items-center justify-center text-gray-500">
+                    Нет записей
+                  </div>
+                )}
+              </>
             )}
-          </Card>
-        )}
+
+            <div className="mt-4 text-sm text-gray-500 text-center">
+              Показано {displayedDTP.length} записей из {allDTP.length}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

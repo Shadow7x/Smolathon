@@ -279,8 +279,7 @@ export default function AnalyticsSectionEvacuation() {
               disabled={uploading}
               className="h-10 w-full sm:w-auto flex items-center gap-2"
             >
-              <Upload className="h-4 w-4" />
-              {uploading ? "Отправка..." : "Загрузить"}
+              {uploading ? "Загрузка..." : "Отправить"}
             </Button>
           </form>
         </CardContent>

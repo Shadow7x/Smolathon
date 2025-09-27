@@ -39,7 +39,8 @@ export default function LeftSidePanel() {
           className={`${isActive("/admin/EvacuationRoutes") ? "text-black" :"text-[#636363]"} group-hover:text-black flex items-center gap-2`}
           onClick={() => handleClick("/admin/EvacuationRoutes")}
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13.25 19.75L6.75 17.475..." fill={isActive("/admin/EvacuationRoutes") ? "black" :"#636363"} /></svg>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M13.25 19.75L6.75 17.475L1.7125 19.425C1.35139 19.5694 1.01736 19.5288 0.710417 19.3031C0.403472 19.0774 0.25 18.775 0.25 18.3958V3.22917C0.25 2.99444 0.317708 2.78681 0.453125 2.60625C0.588542 2.42569 0.773611 2.29028 1.00833 2.2L6.75 0.25L13.25 2.525L18.2875 0.575C18.6486 0.430556 18.9826 0.471181 19.2896 0.696875C19.5965 0.922569 19.75 1.225 19.75 1.60417V16.7708C19.75 17.0056 19.6823 17.2132 19.5469 17.3937C19.4115 17.5743 19.2264 17.7097 18.9917 17.8L13.25 19.75ZM12.1667 17.0958V4.42083L7.83333 2.90417V15.5792L12.1667 17.0958ZM14.3333 17.0958L17.5833 16.0125V3.175L14.3333 4.42083V17.0958ZM2.41667 16.825L5.66667 15.5792V2.90417L2.41667 3.9875V16.825Z" fill={isActive("/admin/EvacuationRoutes") ? "black" :"#636363"} className="group-hover:fill-black" /></svg>
           {!isCollapsed && "Пути эвакуаторов"}
         </button>
       </CardContent>
@@ -93,7 +94,11 @@ export default function LeftSidePanel() {
         <CardContent className={`${menuItemClass} group`}>
           <img src="" alt="" />
           {!isCollapsed && (
-            <button className="text-[#636363] group-hover:text-black text-left">
+            <button 
+              className={`${isActive("/admin/Downloadingreport") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
+              onClick={() => handleClick("/admin/Downloadingreport")}
+              
+            >
               Скачать отчет
             </button>
           )}

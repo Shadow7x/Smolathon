@@ -85,51 +85,74 @@ export default function DTPLineDiagram({ DTP2024 = [], DTP2025 = [] }: Props) {
   const growth = total2024 > 0 ? (((total2025 - total2024) / total2024) * 100).toFixed(1) : "0.0"
 
   return (
-    <Card className="w-full max-w-[950px]">
+    <div className="w-full space-y-6">
       <CardHeader>
         <CardTitle>Динамика ДТП</CardTitle>
         <CardDescription>Сравнение данных за 2024 и 2025 годы</CardDescription>
       </CardHeader>
 
       {/* фильтры */}
-      <CardContent className="flex flex-wrap gap-4">
-        <div className="flex items-center gap-2">
-          <Checkbox checked={show2024} onCheckedChange={v => setShow2024(!!v)} /> 2024
+      <CardContent className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+        {/* чекбоксы */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Checkbox checked={show2024} onCheckedChange={v => setShow2024(!!v)} /> 2024
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox checked={show2025} onCheckedChange={v => setShow2025(!!v)} /> 2025
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Checkbox checked={show2025} onCheckedChange={v => setShow2025(!!v)} /> 2025
-        </div>
-        <div className="flex items-center gap-2">
-          Метрика:
-          <Select value={selectedFactor} onValueChange={setSelectedFactor}>
-            <SelectTrigger className="w-[250px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {Object.entries(factorOptions).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          Период:
-          <Select value={period} onValueChange={v => setPeriod(v as any)}>
-            <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="month">Месяц</SelectItem>
-              <SelectItem value="quarter">Квартал</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {period === "quarter" && (
-          <Select value={selectedQuarter.toString()} onValueChange={v => setSelectedQuarter(Number(v))}>
-            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">1 квартал (Янв–Мар)</SelectItem>
-              <SelectItem value="2">2 квартал (Апр–Июн)</SelectItem>
-              <SelectItem value="3">3 квартал (Июл–Сен)</SelectItem>
-              <SelectItem value="4">4 квартал (Окт–Дек)</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
+
+        {/* селекторы */}
+{/* селекторы */}
+<div className="flex flex-col sm:flex-row gap-4 w-full">
+  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+    <span className="text-sm font-medium">Метрика</span>
+    <Select value={selectedFactor} onValueChange={setSelectedFactor}>
+      <SelectTrigger className="w-full sm:w-[250px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(factorOptions).map(([k, v]) => (
+          <SelectItem key={k} value={k}>{v}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+
+  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+    <span className="text-sm font-medium">Период</span>
+    <Select value={period} onValueChange={v => setPeriod(v as any)}>
+      <SelectTrigger className="w-full sm:w-[120px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="month">Месяц</SelectItem>
+        <SelectItem value="quarter">Квартал</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {period === "quarter" && (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+      <span className="text-sm font-medium">Квартал</span>
+      <Select value={selectedQuarter.toString()} onValueChange={v => setSelectedQuarter(Number(v))}>
+        <SelectTrigger className="w-full sm:w-[200px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">1 квартал (Янв–Мар)</SelectItem>
+          <SelectItem value="2">2 квартал (Апр–Июн)</SelectItem>
+          <SelectItem value="3">3 квартал (Июл–Сен)</SelectItem>
+          <SelectItem value="4">4 квартал (Окт–Дек)</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  )}
+</div>
+
       </CardContent>
+
 
       {/* график */}
       <CardContent>
@@ -156,6 +179,6 @@ export default function DTPLineDiagram({ DTP2024 = [], DTP2025 = [] }: Props) {
         {show2025 && <span className="flex items-center gap-1"><div className="w-3 h-3 bg-[hsl(160,70%,50%)] rounded-full"></div>2025</span>}
         {show2024 && show2025 && <span className="ml-auto flex items-center gap-1"><TrendingUp className="h-4 w-4" />{growth}%</span>}
       </CardFooter>
-    </Card>
+    </div>
   )
 }

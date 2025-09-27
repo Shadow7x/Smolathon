@@ -48,12 +48,12 @@ export default function DTPPieDiagram({ DTP2024 = [], DTP2025 = [] }: Props) {
   const total = data.reduce((sum, d) => sum + d.value, 0)
 
   return (
-    <Card className="flex flex-col max-w-[400px]">
+    <div className="w-full items-center min-h-[300px]">
       <CardHeader className="items-center pb-0">
         <CardTitle>Соотношение раненых и погибших</CardTitle>
-        <CardDescription>
+        <CardDescription>По выбранному году
           <Select value={year} onValueChange={v => setYear(v as "2024" | "2025")}>
-            <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[120px] mt-2"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="2024">2024</SelectItem>
               <SelectItem value="2025">2025</SelectItem>
@@ -75,7 +75,7 @@ export default function DTPPieDiagram({ DTP2024 = [], DTP2025 = [] }: Props) {
             const percent = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0.0"
             return (
               <div key={item.name} className="flex flex-col items-center gap-1 text-center">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-col">
                   <span
                     className="h-3 w-3 rounded-full"
                     style={{ background: item.fill }}
@@ -88,6 +88,6 @@ export default function DTPPieDiagram({ DTP2024 = [], DTP2025 = [] }: Props) {
           })}
         </div>
       </CardContent>
-    </Card>
+    </div>
   )
 }

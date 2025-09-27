@@ -183,9 +183,9 @@ export default function LightRegistry() {
                   });
                 }
               }}
-              className="flex flex-col sm:flex-row items-center gap-4"
+              className="flex flex-col sm:flex-row items-end gap-4"
             >
-              <div className="grid w-full sm:max-w-sm items-center gap-1.5">
+              <div className="grid w-full sm:max-w-sm items-end gap-1.5">
                 <Label htmlFor="file">Выберите файл</Label>
                 <Input
                   id="file"
@@ -234,6 +234,7 @@ export default function LightRegistry() {
                 disabled={loading || !inputYear.trim()}
                 className="h-10 w-full sm:w-auto"
               >
+                <Upload className="h-4 w-4" />
                 {loading ? "Загрузка..." : "Загрузить данные"}
               </Button>
             </div>

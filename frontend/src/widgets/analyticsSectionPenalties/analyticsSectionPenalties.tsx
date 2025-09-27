@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Eye, EyeOff, Calendar, Filter, ArrowUpDown } from "lucide-react"
+import { Eye, EyeOff, Calendar, Filter, ArrowUpDown, Upload } from "lucide-react"
 import Piediogram from "@/components/diogramPenalty/piediogramPenalties/piediogramPenalties"
 import PenaltyDiagram from "@/components/diogramPenalty/linediogramPenalties/linediogramPenalties"
 
@@ -91,7 +91,10 @@ function PenaltyUploadForm() {
   return (
     <Card className="shadow-md rounded-2xl">
       <CardHeader>
-        <CardTitle className="text-lg">Загрузка штрафов</CardTitle>
+        
+        <CardTitle className="text-lg flex items-center max-w-[190px] justify-between">
+          <Upload className="w-5 h-5 text-blue-600" /> 
+        Загрузка штрафов</CardTitle>
         <CardDescription>Добавьте Excel-файл (.xlsx) с данными о штрафах</CardDescription>
       </CardHeader>
       <CardContent>
@@ -301,7 +304,7 @@ export default function AnaliticsSection() {
       </div>
 
 
-
+      <PenaltyUploadForm />
       {/* фильтр по году */}
       <Card className="shadow-md rounded-2xl">
         <CardHeader>
@@ -331,7 +334,6 @@ export default function AnaliticsSection() {
           </Button>
         </CardContent>
       </Card>
-      <PenaltyUploadForm />
       {/* таблица */}
       {penalties.length > 0 && (
         <Card className="shadow-md rounded-2xl overflow-hidden min-w-[320px]">

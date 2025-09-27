@@ -3,7 +3,6 @@
 import { useEffect, useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -167,7 +166,7 @@ export default function EvacuationRoutePage() {
         <Card className="w-full mb-6">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg md:text-xl flex items-center gap-2">
-              <Upload className="w-5 h-5 text-blue-600" />
+            <Upload className="w-5 h-5 text-blue-600" />
             Загрузка данных</CardTitle>
             <CardDescription>
               Добавьте файл маршрутов эвакуации в формате .xlsx
@@ -184,12 +183,12 @@ export default function EvacuationRoutePage() {
                 disabled={uploading}
                 className="h-10 w-full sm:w-auto flex items-center gap-2"
               >
-                <Upload className="h-4 w-4" />
-                {uploading ? "Отправка..." : "Загрузить"}
+                {uploading ? "Загрузка..." : "Отправить"}
               </Button>
             </form>
           </CardContent>
         </Card>
+
 {/* таблица / карточки */}
 <Card className="w-full">
   <CardHeader className="pb-4">
