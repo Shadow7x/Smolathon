@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/user-context";
 
 import { useState, useEffect, useRef } from "react";
+import axi from "@/utils/api";
 
 interface Merit {
   id: number;
@@ -119,6 +120,38 @@ export default function MeritsMainSection({ merit }: Props) {
     }
   };
 
+  const handleSubmit = () =>{
+    console.log("сохранить на бекенд", editable, newFiles)
+    const logo1 = newFiles.logo_first_block || false;
+    const logo2 = newFiles.logo_second_block || false;
+    const images_first_block = [newFiles["first-0"] || false, newFiles["first-1"] || false];
+    const images_second_block = [newFiles["second-0"] || false, newFiles["second-0"] || false];
+    console.log(images_first_block, images_second_block, logo1, logo2)
+
+    const form = new FormData();
+    form.append('id', editable?.id);
+    form.append("logo_first_block", logo1);
+    form.append("logo_second_block", logo2);
+    form.append("title", editable?.title || "");
+    form.append("decode", editable?.decode || "");
+    form.append("purposes", editable?.purposes || "");
+    form.append("parents_name", editable?.parents_name || "");
+    form.append("parents_phone", editable?.parents_phone || "");
+    form.append("parents_email", editable?.parents_email || "");
+    form.append("address", editable?.address || "");
+    images_first_block.forEach((image, index) => {
+      form.append(`images_first_block[]`, image);
+    })
+    images_second_block.forEach((image, index) => {
+      form.append(`images_second_block[]`, image);
+    })
+
+    axi.post("/content/merits/update", form, {headers: {'Content-Type': 'multipart/form-data'}}).then(() => {
+      setIsEditing(false);
+      window.location.reload();
+    }).catch((e) => console.log(e))
+  }
+
   if (!editable) return null;
 
   return (
@@ -163,7 +196,7 @@ export default function MeritsMainSection({ merit }: Props) {
           {isEditing && (
             <Button
               className="bg-green-600 text-white"
-              onClick={() => console.log("сохранить на бекенд", editable, newFiles)}
+              onClick={handleSubmit} 
             >
               Сохранить
             </Button>

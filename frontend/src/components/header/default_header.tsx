@@ -17,7 +17,7 @@ export default function Default_Header() {
     { href: "/statistics", label: "Статистика" },
     { href: "/merits", label: "Заслуги" },
     { href: "/docs", label: "Документы" },
-    { href: "/about", label: "О нас" },
+    { href: "/", label: "О нас" },
   ];
 
   const isTransparent = pathname === "/" || pathname.startsWith("/news");

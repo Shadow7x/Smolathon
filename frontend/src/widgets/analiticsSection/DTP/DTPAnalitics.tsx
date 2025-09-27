@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation"; //
 import {
   Card,
   CardContent,
@@ -20,7 +21,7 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 import DTPLineDiagram from "@/components/Diagrams/DTP/Line";
 import DTPPieDiagram from "@/components/Diagrams/DTP/Pie";
-import { Eye, EyeOff, ArrowUpDown } from "lucide-react";
+import { Eye, EyeOff, ArrowUpDown, Upload, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface DTP {
@@ -54,7 +55,7 @@ const normalizeMonth = (m: string): number => {
   return idx >= 0 ? idx + 1 : 0;
 };
 
-// --- строка таблицы (desktop) ---
+// строка таблицы (desktop)
 const DTPRow = memo(({ item }: { item: DTP }) => (
   <TableRow className="hover:bg-gray-50/50 transition-colors">
     <TableCell className="text-sm py-3">{item.year}</TableCell>
@@ -68,7 +69,7 @@ const DTPRow = memo(({ item }: { item: DTP }) => (
 ));
 DTPRow.displayName = "DTPRow";
 
-// --- карточка (mobile) ---
+// карточка (mobile)
 const DTPCard = ({ item }: { item: DTP }) => (
   <div className="border rounded-lg p-4 shadow-sm bg-white flex flex-col gap-2 text-sm">
     <div className="flex justify-between items-center">
@@ -94,9 +95,14 @@ export default function DTPAnalitics() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [monthFilter, setMonthFilter] = useState("");
   const [displayedDTP, setDisplayedDTP] = useState<DTP[]>([]);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  const pathname = usePathname(); // текущий маршрут
 
   useEffect(() => {
     fetchDTPByYear();
+    const token = localStorage.getItem("token");
+    setIsAuthorized(!!token);
   }, []);
 
   const fetchDTPByYear = async () => {
@@ -172,7 +178,6 @@ export default function DTPAnalitics() {
         status: 200,
         createdAt: new Date().toISOString(),
       });
-      // перезагружаем данные
       if (yearFilter) fetchDTP(yearFilter);
       else fetchDTPByYear();
     } catch (err: any) {
@@ -208,10 +213,15 @@ export default function DTPAnalitics() {
   return (
     <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-        <h1 className="text-3xl font-bold text-center text-gray-900">
-          Аналитика ДТП
-        </h1>
-
+        {pathname === "/statistics" ? (
+          <h1 className="text-3xl font-bold text-center text-gray-900 mt-20">
+            Аналитика ДТП
+          </h1>
+        ) : (
+          <h1 className="text-3xl font-bold text-center text-gray-900">
+            Аналитика ДТП
+          </h1>
+        )}
         {/* Диаграммы */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="shadow-md rounded-2xl lg:col-span-2">
@@ -226,34 +236,67 @@ export default function DTPAnalitics() {
           </Card>
         </div>
 
-        {/* блок ввода года + загрузка отчётов */}
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-lg">Загрузка отчётов</CardTitle>
-            <CardDescription>
-              Добавьте CSV-файл (.csv) с данными о ДТП
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={handleUpload}
-              className="flex flex-col sm:flex-row items-start sm:items-end gap-3"
-            >
-              <div className="flex-1 w-full">
-                <label className="block text-sm text-gray-700 mb-1">Файл CSV</label>
+        {/* Добавление новых данных - только для авторизованных */}
+        {typeof window !== "undefined" && localStorage.getItem("token") && (
+          <Card className="w-full">
+            <CardHeader> 
+              <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
+                <Upload className="w-5 h-5 text-blue-600" />
+                Добавление новых данных
+              </CardTitle>
+              <CardDescription>
+                Загрузите Excel (.xlsx) файл для добавления в реестр
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <form
+                onSubmit={handleUpload}
+                className="flex flex-col sm:flex-row items-center gap-3"
+              >
                 <input
                   type="file"
                   name="file"
-                  accept=".csv"
-                  className="w-full text-sm border rounded-[10px] px-3 py-2"
+                  accept=".xlsx"
+                  className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
                 />
-              </div>
-              <Button type="submit" className="h-10 px-6">
-                Отправить
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button type="submit" className="h-10">
+                  Загрузить
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+            {/* просмотр данных */}
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Просмотр данных</CardTitle>
+                  <CardDescription>
+                    Загрузите данные о ДТП с возможностью фильтрации по году
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row gap-6 items-end">
+                    <div className="w-full md:w-1/3">
+                      <label className="block text-sm text-gray-700 mb-1">Год</label>
+                      <Input
+                        type="number"
+                        value={yearFilter}
+                        onChange={(e) => setYearFilter(e.target.value)}
+                        placeholder="Например: 2024"
+                        className="w-full h-10 border rounded px-3 text-sm"
+                      />
+                    </div>
+                    <Button
+                      onClick={() => fetchDTP(yearFilter)}
+                      className="h-10 w-full sm:w-auto"
+                    >
+                      Загрузить данные
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+        {/* загрузка отчётов */}
         {/* таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">

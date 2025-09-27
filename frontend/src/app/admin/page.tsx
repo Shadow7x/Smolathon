@@ -17,15 +17,6 @@ export default function Admin() {
     <div className="container mx-auto p-6">
       <AnaliticsSection />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/admin/penalties">
-          <Button className="w-full h-32 text-lg">Штрафы</Button>
-        </Link>
-        <Link href="/admin/evacuationRoutes">
-          <Button className="w-full h-32 text-lg">Маршруты эвакуации</Button>
-        </Link>
-        <Link href="/admin/users">
-          <Button className="w-full h-32 text-lg">Пользователи</Button>
-        </Link>
       </div>
     </div>
   )
