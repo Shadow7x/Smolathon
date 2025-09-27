@@ -5,6 +5,7 @@ import MainNewSection from "@/widgets/mainNewSection/mainNewSection";
 import axi from "@/utils/api";
 import { useUser } from "@/hooks/user-context";
 import WeekNewsSection from "@/widgets/weekNewsSection/weekNewsSection";
+import ArchiveNewsSection from "@/widgets/archiveNewsSection/ArchiveNewsSection";
 
 const NewsPage = () => {
   const [news, setNews] = useState([]);
@@ -30,6 +31,7 @@ const NewsPage = () => {
     <div>
       <MainNewSection news={firstNews} user={user} />
       <WeekNewsSection news={weekNews} />
+      <ArchiveNewsSection news={news} />
     </div>
   );
 };
