@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from "next/navigation"; //
+import { usePathname } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -21,7 +21,7 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 import DTPLineDiagram from "@/components/Diagrams/DTP/Line";
 import DTPPieDiagram from "@/components/Diagrams/DTP/Pie";
-import { Eye, EyeOff, ArrowUpDown, Upload, Lock } from "lucide-react";
+import { Eye, EyeOff, ArrowUpDown, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface DTP {
@@ -79,13 +79,14 @@ const DTPCard = ({ item }: { item: DTP }) => (
       </span>
     </div>
     <div className="text-gray-700">Точка: {item.point_FPSR}</div>
-    <div className="text-gray-500 text-xs">Фактор: {item.statistical_factor}</div>
+    <div className="text-gray-500 text-xs">
+      Фактор: {item.statistical_factor}
+    </div>
     <div className="text-gray-900 font-bold text-right">{item.count}</div>
   </div>
 );
 
 export default function DTPAnalitics() {
-  const router = useRouter();
   const [showTable, setShowTable] = useState(true);
   const [allDTP, setAllDTP] = useState<DTP[]>([]);
   const [DTP2024, setDTP2024] = useState<DTP[]>([]);
@@ -96,37 +97,29 @@ export default function DTPAnalitics() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [monthFilter, setMonthFilter] = useState("");
   const [displayedDTP, setDisplayedDTP] = useState<DTP[]>([]);
-  const [isAuthorized, setIsAuthorized] = useState(false)
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const pathname = usePathname(); // текущий маршрут
+  const pathname = usePathname();
 
-useEffect(() => {
-  if (typeof window === "undefined") return;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  const token = localStorage.getItem("token");
-  const rawUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    const rawUser = localStorage.getItem("user");
 
-  if (!token || !rawUser) {
-    router.replace("/not-found");
-    return;
-  }
-
-  try {
-    const user = JSON.parse(rawUser);
-    console.log("user from LS:", user);
-
-    if (user?.is_superuser) {
-      setIsAuthorized(true);
-    } else {
-      setIsAuthorized(false);
+    if (token && rawUser) {
+      try {
+        const user = JSON.parse(rawUser);
+        if (user?.is_superuser) {
+          setIsAuthorized(true); // только админ
+        }
+      } catch (err) {
+        console.error("Ошибка парсинга user:", rawUser);
+      }
     }
-  } catch (err) {
-    console.error("Ошибка парсинга user:", rawUser);
-    setIsAuthorized(false);
-  }
 
-  fetchDTPByYear();
-}, [router]);
+    fetchDTPByYear();
+  }, []);
 
   const fetchDTPByYear = async () => {
     try {
@@ -173,51 +166,52 @@ useEffect(() => {
   };
 
   // загрузка файла отчёта
-const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  const form = e.currentTarget;
-  const fileInput = form.querySelector<HTMLInputElement>('input[name="file"]');
-  const file = fileInput?.files?.[0];
+    const form = e.currentTarget;
+    const fileInput = form.querySelector<HTMLInputElement>(
+      'input[name="file"]'
+    );
+    const file = fileInput?.files?.[0];
 
-  if (!file) {
-    addNotification({
-      id: Date.now().toString(),
-      title: "Ошибка",
-      description: "Файл не выбран",
-      status: 400,
-      createdAt: new Date().toISOString(),
-    });
-    return;
-  }
+    if (!file) {
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка",
+        description: "Файл не выбран",
+        status: 400,
+        createdAt: new Date().toISOString(),
+      });
+      return;
+    }
 
-  const data = new FormData();
-  data.append("file", file);
+    const data = new FormData();
+    data.append("file", file);
 
-  try {
-    await axi.post("/analytics/DTP/create", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    addNotification({
-      id: Date.now().toString(),
-      title: "Успешно",
-      description: "Файл загружен",
-      status: 200,
-      createdAt: new Date().toISOString(),
-    });
-    if (yearFilter) fetchDTP(yearFilter);
-    else fetchDTPByYear();
-  } catch (err: any) {
-    addNotification({
-      id: Date.now().toString(),
-      title: "Ошибка данных",
-      description: err.response?.data || "Не удалось загрузить файл",
-      status: err.response?.status || 500,
-      createdAt: new Date().toISOString(),
-    });
-  }
-};
-
+    try {
+      await axi.post("/analytics/DTP/create", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      addNotification({
+        id: Date.now().toString(),
+        title: "Успешно",
+        description: "Файл загружен",
+        status: 200,
+        createdAt: new Date().toISOString(),
+      });
+      if (yearFilter) fetchDTP(yearFilter);
+      else fetchDTPByYear();
+    } catch (err: any) {
+      addNotification({
+        id: Date.now().toString(),
+        title: "Ошибка данных",
+        description: err.response?.data || "Не удалось загрузить файл",
+        status: err.response?.status || 500,
+        createdAt: new Date().toISOString(),
+      });
+    }
+  };
 
   // сортировка и фильтрация
   useEffect(() => {
@@ -237,19 +231,18 @@ const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
 
     setDisplayedDTP(filtered);
   }, [allDTP, sortOrder, monthFilter]);
-  console.log("isAuthorized:", isAuthorized);
+
   return (
     <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-        {pathname === "/statistics" ? (
-          <h1 className="text-3xl font-bold text-center text-gray-900 mt-20">
-            Аналитика ДТП
-          </h1>
-        ) : (
-          <h1 className="text-3xl font-bold text-center text-gray-900">
-            Аналитика ДТП
-          </h1>
-        )}
+        <h1
+          className={`text-3xl font-bold text-center text-gray-900 ${
+            pathname === "/statistics" ? "mt-20" : ""
+          }`}
+        >
+          Аналитика ДТП
+        </h1>
+
         {/* Диаграммы */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="shadow-md rounded-2xl lg:col-span-2">
@@ -264,72 +257,73 @@ const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
           </Card>
         </div>
 
-        {/* Добавление новых данных - только для авторизованных */}
+        {/* Загрузка новых данных — только для админов */}
+        {isAuthorized && (
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
+                <Upload className="w-5 h-5 text-blue-600" />
+                Добавление новых данных
+              </CardTitle>
+              <CardDescription>
+                Загрузите Excel (.xlsx) файл для добавления в реестр
+              </CardDescription>
+            </CardHeader>
 
-{isAuthorized && (
-  <Card className="w-full">
-    <CardHeader>
-      <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
-        <Upload className="w-5 h-5 text-blue-600" />
-        Добавление новых данных
-      </CardTitle>
-      <CardDescription>
-        Загрузите Excel (.xlsx) файл для добавления в реестр
-      </CardDescription>
-    </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={handleUpload}
+                className="flex flex-col sm:flex-row items-center gap-3"
+                encType="multipart/form-data"
+              >
+                <input
+                  type="file"
+                  name="file"
+                  accept=".xlsx, .csv"
+                  className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
+                />
+                <Button
+                  type="submit"
+                  className="h-10 w-full sm:w-auto flex items-center gap-2"
+                >
+                  Загрузить
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
-    <CardContent>
-      <form
-        onSubmit={handleUpload}
-        className="flex flex-col sm:flex-row items-center gap-3"
-        encType="multipart/form-data"
-      >
-        <input
-          type="file"
-          name="file"
-          accept=".xlsx, .csv"
-          className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
-        />
-        <Button
-          type="submit"
-          className="h-10 w-full sm:w-auto flex items-center gap-2"
-        >
-          Загрузить
-        </Button>
-      </form>
-    </CardContent>
-  </Card>
-)}
-            {/* просмотр данных */}
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle className="text-lg">Просмотр данных</CardTitle>
-                  <CardDescription>
-                    Загрузите данные о ДТП с возможностью фильтрации по году
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col md:flex-row gap-6 items-end">
-                    <div className="w-full md:w-1/3">
-                      <label className="block text-sm text-gray-700 mb-1">Год</label>
-                      <Input
-                        type="number"
-                        value={yearFilter}
-                        onChange={(e) => setYearFilter(e.target.value)}
-                        placeholder="Например: 2024"
-                        className="w-full h-10 border rounded px-3 text-sm"
-                      />
-                    </div>
-                    <Button
-                      onClick={() => fetchDTP(yearFilter)}
-                      className="h-10 w-full sm:w-auto"
-                    >
-                      Загрузить данные
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-        {/* таблица / карточки */}
+        {/* Просмотр данных */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-lg">Просмотр данных</CardTitle>
+            <CardDescription>
+              Загрузите данные о ДТП с возможностью фильтрации по году
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-6 items-end">
+              <div className="w-full md:w-1/3">
+                <label className="block text-sm text-gray-700 mb-1">Год</label>
+                <Input
+                  type="number"
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  placeholder="Например: 2024"
+                  className="w-full h-10 border rounded px-3 text-sm"
+                />
+              </div>
+              <Button
+                onClick={() => fetchDTP(yearFilter)}
+                className="h-10 w-full sm:w-auto"
+              >
+                Загрузить данные
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">
             <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -369,7 +363,6 @@ const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
               <>
                 {/* сортировка + фильтр по месяцу */}
                 <div className="min-w-[267px] flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                  {/* сортировка */}
                   <div className="flex items-center gap-2">
                     <ArrowUpDown className="h-4 w-4 text-gray-600" />
                     <span className="text-sm text-gray-600">Сортировка:</span>
@@ -386,7 +379,6 @@ const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
                     </Button>
                   </div>
 
-                  {/* фильтр по месяцу */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">Месяц:</span>
                     <select
@@ -404,7 +396,6 @@ const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
                   </div>
                 </div>
 
-                {/* данные или сообщение */}
                 {displayedDTP.length > 0 ? (
                   <>
                     {/* таблица (desktop) */}
