@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import MainNewSection from "@/widgets/mainNewSection/mainNewSection";
 import axi from "@/utils/api";
 import { useUser } from "@/hooks/user-context";
+import WeekNewsSection from "@/widgets/weekNewsSection/weekNewsSection";
 
 const NewsPage = () => {
   const [news, setNews] = useState([]);
@@ -23,9 +24,12 @@ const NewsPage = () => {
   }, []);
 
   const firstNews = news[0];
+  const weekNews = news.slice(0, 6);
+
   return (
     <div>
       <MainNewSection news={firstNews} user={user} />
+      <WeekNewsSection news={weekNews} />
     </div>
   );
 };

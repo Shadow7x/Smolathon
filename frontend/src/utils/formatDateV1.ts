@@ -1,4 +1,4 @@
-export const formatDate = (dateStr: string | undefined): string => {
+export const formatDateV1 = (dateStr: string | undefined): string => {
   if (!dateStr) return "";
 
   const months: string[] = [
@@ -20,5 +20,5 @@ export const formatDate = (dateStr: string | undefined): string => {
 
   if (!year || !month || !day) return "";
 
-  return `${Number(day)} ${months[Number(month) - 1]} ${year}`;
+  return `${Number(day)} ${months[Number(month) - 1]} - ${year}`;
 };
