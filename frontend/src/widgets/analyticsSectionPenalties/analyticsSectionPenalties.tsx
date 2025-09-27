@@ -93,8 +93,8 @@ function PenaltyUploadForm() {
       <CardHeader>
         
         <CardTitle className="text-lg flex items-center max-w-[190px] justify-between">
-          <Upload className="w-5 h-5 text-blue-600" /> 
-        Загрузка штрафов</CardTitle>
+        <Upload className="w-5 h-5 text-blue-600" /> 
+            Загрузка штрафов</CardTitle>
         <CardDescription>Добавьте Excel-файл (.xlsx) с данными о штрафах</CardDescription>
       </CardHeader>
       <CardContent>

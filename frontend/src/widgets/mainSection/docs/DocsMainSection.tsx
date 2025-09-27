@@ -76,49 +76,85 @@ DocsRow.displayName = "DocsRow"
 
 
 export default function DocsMainSection() {
-    const [docs, setDocs] = useState<Docs[]>([])
+  const [docs, setDocs] = useState<Docs[]>([])
 
-    useEffect(() => {
-        axi.get("content/docs/get").then((res) => {setDocs(res.data)
-            console.log(res.data)
-        })
+  useEffect(() => {
+    axi.get("content/docs/get").then((res) => {
+      setDocs(res.data)
+    })
+  }, [])
 
-    }, [])
+  const parseFileName = (file: string) => {
+    const arr = file.split("/")
+    return arr[arr.length - 1]
+  }
 
-    const parseFileName = (file: string) => {
-        const arr = file.split("/")
-        return arr[arr.length-1]
-    }
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("ru-RU")
 
-    const formatDate = (dateString: string) =>
-        new Date(dateString).toLocaleDateString("ru-RU")
+  const parseFileType = (file: string) => {
+    const arr = file.split(".")
+    return arr[arr.length - 1]
+  }
 
-    const parseFileType = (file: string) => {
-        const arr = file.split(".")
-        return arr[arr.length-1]
-    }
   return (
-    <div className="w-[50%]">
-        <h1>Документы</h1>
-        <p className="">Здесь вы можете найти все необходимые документы</p>
-        <div className="">
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <Table>
-                  <TableHeader className="bg-gray-50">
-                    <TableRow>
-                      <TableHead>Дата</TableHead>
-                      <TableHead className="text-right">Название</TableHead>
-                      <TableHead className="text-right">Тип</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {docs.map((doc) => (
-                        <DocsRow key={doc.id} docs={doc} formatDate={formatDate} parseFileType={parseFileType} parseFileName = {parseFileName} />
-                    ))}
-                    </TableBody>
-                </Table>
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl font-bold text-center mb-2">Документы</h1>
+      <p className="text-gray-600 text-center mb-6">
+        Здесь вы можете найти все необходимые документы
+      </p>
+
+      {/* Таблица (ПК) */}
+      <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
+        <Table>
+          <TableHeader className="bg-gray-50">
+            <TableRow>
+              <TableHead>Дата</TableHead>
+              <TableHead className="text-right">Название</TableHead>
+              <TableHead className="text-right">Тип</TableHead>
+              <TableHead className="text-right">Действие</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {docs.map((doc) => (
+              <DocsRow
+                key={doc.id}
+                docs={doc}
+                formatDate={formatDate}
+                parseFileType={parseFileType}
+                parseFileName={parseFileName}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Карточки (мобильные) */}
+      <div className="grid gap-4 md:hidden">
+        {docs.map((doc) => (
+          <div
+            key={doc.id}
+            className="border rounded-lg p-4 shadow-sm bg-white flex flex-col gap-2 text-sm"
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 font-medium">
+                {parseFileName(doc.name)}
+              </span>
+              <span className="text-xs text-gray-500">
+                {formatDate(doc.updated_at)}
+              </span>
             </div>
-        </div>
+            <div className="text-gray-500">Тип: {parseFileType(doc.name)}</div>
+            <a
+              href={`${API_URL}content/docs/get?id=${doc.id}`}
+              download
+              className="text-blue-600 text-sm font-medium hover:underline mt-2"
+            >
+              Скачать
+            </a>
+          </div>
+        ))}
+      </div>
     </div>
-  );
+  )
 }
