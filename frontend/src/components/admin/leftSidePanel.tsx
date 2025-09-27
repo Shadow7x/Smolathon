@@ -92,7 +92,7 @@ export default function LeftSidePanel() {
 
         {/* Скачать отчет */}
         <CardContent className={`${menuItemClass} group`}>
-          <img src="" alt="" />
+          <img src="/icons/loding.svg" alt="" />
           {!isCollapsed && (
             <button 
               className={`${isActive("/admin/Downloadingreport") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
