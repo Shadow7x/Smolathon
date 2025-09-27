@@ -1,11 +1,11 @@
 // NewsPage.jsx
 "use client";
 import { useEffect, useState } from "react";
-import MainNewSection from "@/widgets/mainNewSection/mainNewSection";
+import MainNewSection from "@/widgets/news/mainNewSection/MainNewSection";
 import axi from "@/utils/api";
 import { useUser } from "@/hooks/user-context";
-import WeekNewsSection from "@/widgets/weekNewsSection/weekNewsSection";
-import ArchiveNewsSection from "@/widgets/archiveNewsSection/ArchiveNewsSection";
+import WeekNewsSection from "@/widgets/news/weekNewsSection/WeekNewsSection";
+import ArchiveNewsSection from "@/widgets/news/archiveNewsSection/ArchiveNewsSection";
 
 const NewsPage = () => {
   const [news, setNews] = useState([]);
