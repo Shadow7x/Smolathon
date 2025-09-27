@@ -31,10 +31,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ scrollToInfo }) => {
         max-w-screen-2xl
       "
       >
-        <h1 className="text-[4rem] leading-[3.5rem] sm:text-[5rem] sm:leading-[4.5rem] md:text-[6rem] md:leading-[5.5rem] lg:text-[6rem] lg:leading-[5.5rem] xl:text-[6rem] xl:leading-[5.5rem] font-bold tracking-[0%] align-middle">
-          <span className="text-[#82CF61]">Безопасные</span> дороги - <br />
-          наша забота
-        </h1>
+      <h1
+        className="
+          text-6xl leading-snug       /* базовый (мобильный) */
+          sm:text-4xl sm:leading-snug /* >640px */
+          md:text-5xl md:leading-snug /* >768px */
+          lg:text-7xl lg:leading-[5.5rem] /* >1024px */
+          xl:text-8xl xl:leading-[6rem]   /* >1280px */
+          font-bold tracking-tight
+        "
+      >
+        <span className="text-[#82CF61]">Безопасные</span> дороги - <br />
+        наша забота
+      </h1>
       </div>
     </section>
   );
