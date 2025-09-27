@@ -1,46 +1,98 @@
 "use client";
-
-import IconButton from "@/components/common/IconButton";
-import TransparentButton from "@/components/common/TransparentButton";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { formatDateV1 } from "@/utils/formatDateV1";
-import { MEDIA_URL } from "@/index";
 import WhiteButton from "@/components/common/whiteButton";
+import { formatDateV1 } from "@/utils/formatDateV1";
 
-const MainNewSection = ({ news, user }) => {
-  if (!news) return null;
+interface News {
+  id: string;
+  title: string;
+  text: string;
+  date: string;
+  image?: string;
+}
 
-  const firstLine = news.text.split("\n")[0];
+interface TitleNewsSectionProps {
+  news: News;
+  user?: any;
+}
 
-  const preview =
-    firstLine.length > 25 ? firstLine.slice(0, 25) + "..." : firstLine;
+export default function TitleNewsSection({
+  news,
+  user,
+}: TitleNewsSectionProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [title, setTitle] = useState(news.title || "");
+  const [bgImage, setBgImage] = useState(news.image || "");
 
-  const imageNews = MEDIA_URL + news.image;
+  useEffect(() => {
+    if (titleRef.current) {
+      titleRef.current.textContent = news.title;
+    }
+  }, [news.title]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setBgImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <section
-      className="w-full flex flex-col md:flex-row justify-between pb-8 md:pb-16 bg-cover bg-center text-white px-[clamp(2rem,5vw,10rem)] lg:h-screen"
+      className="w-full flex flex-col md:flex-row justify-between pb-8 md:pb-16 bg-cover bg-center text-white px-[clamp(2rem,5vw,10rem)] h-1/2"
       style={{
         backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('${
-          imageNews ? imageNews : "/images/newsBackground.webp"
+          bgImage || "/images/newsBackground.webp"
         }')`,
       }}
     >
+      {/* Левая колонка */}
       <div className="flex-1 flex flex-col gap-8 md:gap-12 mt-[7rem] sm:mt-[10rem] md:mt-[14rem] lg:mt-[20rem]">
         <div className="flex flex-col gap-6 sm:gap-8">
           <p className="font-sans font-normal text-[clamp(1rem,2vw,1.5rem)] leading-[1.2] tracking-[0]">
             {formatDateV1(news.date)}
           </p>
-          <h2 className="font-sans font-bold text-[clamp(1.5rem,4vw,3rem)] leading-[1.1] tracking-[0]">
-            {news.title}
-          </h2>
-          <TransparentButton onClick={() => alert("Подробнее")}>
-            Подробнее
-          </TransparentButton>
+
+          <div className="relative">
+            <h2
+              contentEditable
+              suppressContentEditableWarning
+              dir="ltr"
+              className="font-sans font-bold text-left text-[clamp(1.5rem,4vw,3rem)] leading-[1.1] break-words"
+              style={{
+                minHeight: "3rem",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+              ref={titleRef}
+              onInput={(e) => setTitle(e.currentTarget.textContent || "")}
+            />
+            {user && !title && (
+              <span
+                className="absolute top-0 left-0 pointer-events-none text-white/50 font-bold"
+                style={{ fontSize: "clamp(1.5rem,4vw,3rem)" }}
+              >
+                Введите заголовок
+              </span>
+            )}
+          </div>
+
+          {user && (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="mt-4 text-grey-700"
+            />
+          )}
         </div>
       </div>
 
-      <div className="flex flex-col justify-end items-start md:items-end mt-[4rem] sm:mt-[6rem] md:mt-0 opacity-90 w-fit max-w-full md:max-w-[50%] sm:whitespace-nowrap md:whitespace-normal gap-4">
+      {/* Правая колонка */}
+      <div className="flex flex-col justify-end items-start md:items-end mt-[4rem] sm:mt-[6rem] md:mt-0 opacity-90 w-fit max-w-full md:max-w-[50%] gap-4">
         {user && (
           <div className="flex flex-row gap-4 mt-[10rem] mb-auto">
             <div className="flex flex-row gap-2">
@@ -63,7 +115,6 @@ const MainNewSection = ({ news, user }) => {
                 }
                 className="hover:bg-[#82CF61] hover:text-white group"
               />
-
               <WhiteButton
                 icon={
                   <div className="relative w-6 h-6">
@@ -107,34 +158,7 @@ const MainNewSection = ({ news, user }) => {
             </WhiteButton>
           </div>
         )}
-        <h2 className="font-sans font-bold text-[clamp(1.5rem,4vw,3rem)] leading-[1.1] tracking-[0]">
-          {preview}
-        </h2>
-
-        <IconButton
-          size={60}
-          className="flex-shrink-0 group bg-[#62A744] hover:bg-white transition duration-300"
-        >
-          <div className="relative w-[3.25rem] h-[3.25rem]">
-            <Image
-              src="/icons/whiteLeftArrowIcon.svg"
-              alt="Arrow"
-              fill
-              priority
-              className="object-contain opacity-100 group-hover:opacity-0 transition duration-300"
-            />
-            <Image
-              src="/icons/greenLeftArrowIcon.svg"
-              alt="Arrow"
-              fill
-              priority
-              className="object-contain opacity-0 group-hover:opacity-100 transition duration-300"
-            />
-          </div>
-        </IconButton>
       </div>
     </section>
   );
-};
-
-export default MainNewSection;
+}
