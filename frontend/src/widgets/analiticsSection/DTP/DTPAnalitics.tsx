@@ -213,16 +213,15 @@ export default function DTPAnalitics() {
   return (
     <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-{pathname === "/statistics" ? (
-  <h1 className="text-3xl font-bold text-center text-gray-900 mt-20">
-    Аналитика ДТП
-  </h1>
-) : (
-  <h1 className="text-3xl font-bold text-center text-gray-900">
-    Аналитика ДТП
-  </h1>
-)}
-
+        {pathname === "/statistics" ? (
+          <h1 className="text-3xl font-bold text-center text-gray-900 mt-20">
+            Аналитика ДТП
+          </h1>
+        ) : (
+          <h1 className="text-3xl font-bold text-center text-gray-900">
+            Аналитика ДТП
+          </h1>
+        )}
         {/* Диаграммы */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="shadow-md rounded-2xl lg:col-span-2">
@@ -238,38 +237,36 @@ export default function DTPAnalitics() {
         </div>
 
         {/* Добавление новых данных - только для авторизованных */}
-        {/* блок загрузки Excel, показывается только если есть токен */}
-{typeof window !== "undefined" && localStorage.getItem("token") && (
-  <Card className="w-full">
-    <CardHeader> 
-      <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
-        <Upload className="w-5 h-5 text-blue-600" />
-        Добавление новых данных
-      </CardTitle>
-      <CardDescription>
-        Загрузите Excel (.xlsx) файл для добавления в реестр
-      </CardDescription>
-    </CardHeader>
+        {typeof window !== "undefined" && localStorage.getItem("token") && (
+          <Card className="w-full">
+            <CardHeader> 
+              <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
+                <Upload className="w-5 h-5 text-blue-600" />
+                Добавление новых данных
+              </CardTitle>
+              <CardDescription>
+                Загрузите Excel (.xlsx) файл для добавления в реестр
+              </CardDescription>
+            </CardHeader>
 
-    <CardContent>
-      <form
-        onSubmit={handleUpload}
-        className="flex flex-col sm:flex-row items-center gap-3"
-      >
-        <input
-          type="file"
-          name="file"
-          accept=".xlsx"
-          className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
-        />
-        <Button type="submit" className="h-10">
-          Загрузить
-        </Button>
-      </form>
-    </CardContent>
-  </Card>
-)}
-
+            <CardContent>
+              <form
+                onSubmit={handleUpload}
+                className="flex flex-col sm:flex-row items-center gap-3"
+              >
+                <input
+                  type="file"
+                  name="file"
+                  accept=".xlsx"
+                  className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
+                />
+                <Button type="submit" className="h-10">
+                  Загрузить
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
             {/* просмотр данных */}
               <Card className="w-full">
                 <CardHeader>
@@ -299,11 +296,7 @@ export default function DTPAnalitics() {
                   </div>
                 </CardContent>
               </Card>
-
-          
         {/* загрузка отчётов */}
-
-
         {/* таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">
