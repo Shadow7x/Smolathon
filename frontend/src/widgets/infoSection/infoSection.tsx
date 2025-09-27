@@ -2,8 +2,8 @@ import React, { forwardRef } from "react";
 
 const InfoSection = forwardRef<HTMLDivElement>((props, ref) => {
   return (
-    <div ref={ref} className="w-full min-h-screen lg:pt-12 text-white">
-      <div className="flex flex-col justify-center text-center gap-8 sm:gap-12 lg:gap-16 py-8 sm:py-12 lg:py-[100px] px-4 sm:px-6 md:px-8 lg:px-16 xl:px-[400px]">
+    <div ref={ref} className="w-full text-white">
+      <div className="flex flex-col justify-center text-center gap-8 sm:gap-12 lg:gap-16 py-8 sm:py-12 lg:py-[300px] px-4 sm:px-6 md:px-8 lg:px-16 xl:px-[400px]">
         <div className="text-black font-bold text-4xl sm:text-5xl md:text-6xl lg:text-[64px]">
           Кто <span className="text-[#62A744]">мы</span>?
         </div>
