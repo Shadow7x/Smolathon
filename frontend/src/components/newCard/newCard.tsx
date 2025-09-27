@@ -19,14 +19,20 @@ const NewCard = ({ news, size = "small" }) => {
     size === "large"
       ? "clamp(20rem, 50vw, 38.5rem)"
       : "clamp(12rem, 40vw, 18.75rem)";
+
   const cardWidth =
     size === "large"
       ? "clamp(18rem, 60vw, 46.5rem)"
+      : size === "medium"
+      ? "clamp(20rem, 35vw, 28.75rem)"
       : "clamp(12rem, 30vw, 25rem)";
+
   const dateFontSize =
     size === "large" ? "clamp(16px,2vw,24px)" : "clamp(12px,1.5vw,16px)";
+
   const titleFontSize =
     size === "large" ? "clamp(20px,2.5vw,32px)" : "clamp(14px,2vw,20px)";
+
   const iconSize = size === "large" ? 3 : 2;
   const paddingX = size === "large" ? "2rem" : "1rem";
   const paddingY = size === "large" ? "3rem" : "1.5rem";
