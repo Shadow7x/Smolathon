@@ -61,14 +61,7 @@ const InitMerit = (merits: Props) => {
 
     const router = useRouter();
 
-        const handleDelete =(id: number) => {
-        setLoading(true)
-        axi.post("/content/merits/delete", {id: id}).then(() => {
-            setOpen(false)
-            setLoading(false)
-            window.location.reload()
-        })
-    }
+        
 
     return (
         <div className="pt-[10rem] flex flex-col content-center items-center min-w-[80%]">

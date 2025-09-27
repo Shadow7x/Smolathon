@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation"; //
+import { usePathname, useRouter } from "next/navigation"; //
 import {
   Card,
   CardContent,
@@ -85,6 +85,7 @@ const DTPCard = ({ item }: { item: DTP }) => (
 );
 
 export default function DTPAnalitics() {
+  const router = useRouter();
   const [showTable, setShowTable] = useState(true);
   const [allDTP, setAllDTP] = useState<DTP[]>([]);
   const [DTP2024, setDTP2024] = useState<DTP[]>([]);
@@ -95,15 +96,37 @@ export default function DTPAnalitics() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [monthFilter, setMonthFilter] = useState("");
   const [displayedDTP, setDisplayedDTP] = useState<DTP[]>([]);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false)
 
   const pathname = usePathname(); // текущий маршрут
 
-  useEffect(() => {
-    fetchDTPByYear();
-    const token = localStorage.getItem("token");
-    setIsAuthorized(!!token);
-  }, []);
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const token = localStorage.getItem("token");
+  const rawUser = localStorage.getItem("user");
+
+  if (!token || !rawUser) {
+    router.replace("/not-found");
+    return;
+  }
+
+  try {
+    const user = JSON.parse(rawUser);
+    console.log("user from LS:", user);
+
+    if (user?.is_superuser) {
+      setIsAuthorized(true);
+    } else {
+      setIsAuthorized(false);
+    }
+  } catch (err) {
+    console.error("Ошибка парсинга user:", rawUser);
+    setIsAuthorized(false);
+  }
+
+  fetchDTPByYear();
+}, [router]);
 
   const fetchDTPByYear = async () => {
     try {
@@ -150,46 +173,51 @@ export default function DTPAnalitics() {
   };
 
   // загрузка файла отчёта
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
-    const file = data.get("file") as File;
+const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    if (!file) {
-      addNotification({
-        id: Date.now().toString(),
-        title: "Ошибка",
-        description: "Файл не выбран",
-        status: 400,
-        createdAt: new Date().toISOString(),
-      });
-      return;
-    }
+  const form = e.currentTarget;
+  const fileInput = form.querySelector<HTMLInputElement>('input[name="file"]');
+  const file = fileInput?.files?.[0];
 
-    try {
-      await axi.post("/analytics/DTP/create", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      addNotification({
-        id: Date.now().toString(),
-        title: "Успешно",
-        description: "Файл загружен",
-        status: 200,
-        createdAt: new Date().toISOString(),
-      });
-      if (yearFilter) fetchDTP(yearFilter);
-      else fetchDTPByYear();
-    } catch (err: any) {
-      addNotification({
-        id: Date.now().toString(),
-        title: "Ошибка данных",
-        description: err.response?.data || "Не удалось загрузить файл",
-        status: err.response?.status || 500,
-        createdAt: new Date().toISOString(),
-      });
-    }
-  };
+  if (!file) {
+    addNotification({
+      id: Date.now().toString(),
+      title: "Ошибка",
+      description: "Файл не выбран",
+      status: 400,
+      createdAt: new Date().toISOString(),
+    });
+    return;
+  }
+
+  const data = new FormData();
+  data.append("file", file);
+
+  try {
+    await axi.post("/analytics/DTP/create", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    addNotification({
+      id: Date.now().toString(),
+      title: "Успешно",
+      description: "Файл загружен",
+      status: 200,
+      createdAt: new Date().toISOString(),
+    });
+    if (yearFilter) fetchDTP(yearFilter);
+    else fetchDTPByYear();
+  } catch (err: any) {
+    addNotification({
+      id: Date.now().toString(),
+      title: "Ошибка данных",
+      description: err.response?.data || "Не удалось загрузить файл",
+      status: err.response?.status || 500,
+      createdAt: new Date().toISOString(),
+    });
+  }
+};
+
 
   // сортировка и фильтрация
   useEffect(() => {
@@ -209,7 +237,7 @@ export default function DTPAnalitics() {
 
     setDisplayedDTP(filtered);
   }, [allDTP, sortOrder, monthFilter]);
-
+  console.log("isAuthorized:", isAuthorized);
   return (
     <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
@@ -237,36 +265,41 @@ export default function DTPAnalitics() {
         </div>
 
         {/* Добавление новых данных - только для авторизованных */}
-        {typeof window !== "undefined" && localStorage.getItem("token") && (
-          <Card className="w-full">
-            <CardHeader> 
-              <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
-                <Upload className="w-5 h-5 text-blue-600" />
-                Добавление новых данных
-              </CardTitle>
-              <CardDescription>
-                Загрузите Excel (.xlsx) файл для добавления в реестр
-              </CardDescription>
-            </CardHeader>
 
-            <CardContent>
-              <form
-                onSubmit={handleUpload}
-                className="flex flex-col sm:flex-row items-center gap-3"
-              >
-                <input
-                  type="file"
-                  name="file"
-                  accept=".xlsx"
-                  className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
-                />
-                <Button type="submit" className="h-10">
-                  Загрузить
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+{isAuthorized && (
+  <Card className="w-full">
+    <CardHeader>
+      <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
+        <Upload className="w-5 h-5 text-blue-600" />
+        Добавление новых данных
+      </CardTitle>
+      <CardDescription>
+        Загрузите Excel (.xlsx) файл для добавления в реестр
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent>
+      <form
+        onSubmit={handleUpload}
+        className="flex flex-col sm:flex-row items-center gap-3"
+        encType="multipart/form-data"
+      >
+        <input
+          type="file"
+          name="file"
+          accept=".xlsx, .csv"
+          className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
+        />
+        <Button
+          type="submit"
+          className="h-10 w-full sm:w-auto flex items-center gap-2"
+        >
+          Загрузить
+        </Button>
+      </form>
+    </CardContent>
+  </Card>
+)}
             {/* просмотр данных */}
               <Card className="w-full">
                 <CardHeader>
@@ -296,7 +329,6 @@ export default function DTPAnalitics() {
                   </div>
                 </CardContent>
               </Card>
-        {/* загрузка отчётов */}
         {/* таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">
