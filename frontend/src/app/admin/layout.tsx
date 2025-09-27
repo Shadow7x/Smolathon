@@ -19,12 +19,7 @@ export default function RootLayout({
   useEffect(() => {
     if (!isLoading && isClient) {
       const token = localStorage.getItem("token")
-      
-      if (!token && !user) {
-        router.replace('/not-found')
-        return
-      }
-      
+
       if (token && !user) {
         const timeout = setTimeout(() => {
           if (!user) {
@@ -34,6 +29,17 @@ export default function RootLayout({
         
         return () => clearTimeout(timeout)
       }
+      
+      if (!user?.is_superuser) {
+        router.replace('/not-found')
+        return
+      }
+      
+      if (!token && !user) {
+        router.replace('/not-found')
+        return
+      }
+      
     }
   }, [user, isLoading, router, isClient])
 
@@ -51,10 +57,6 @@ export default function RootLayout({
     )
   }
 
-  if (!user?.is_superuser) {
-    router.replace('/not-found')
-    return
-  }
 
   return (
     <div className="flex min-h-screen">

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation"; //
+import { usePathname } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -21,7 +21,7 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 import DTPLineDiagram from "@/components/Diagrams/DTP/Line";
 import DTPPieDiagram from "@/components/Diagrams/DTP/Pie";
-import { Eye, EyeOff, ArrowUpDown, Upload, Lock } from "lucide-react";
+import { Eye, EyeOff, ArrowUpDown, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface DTP {
@@ -79,7 +79,9 @@ const DTPCard = ({ item }: { item: DTP }) => (
       </span>
     </div>
     <div className="text-gray-700">Точка: {item.point_FPSR}</div>
-    <div className="text-gray-500 text-xs">Фактор: {item.statistical_factor}</div>
+    <div className="text-gray-500 text-xs">
+      Фактор: {item.statistical_factor}
+    </div>
     <div className="text-gray-900 font-bold text-right">{item.count}</div>
   </div>
 );
@@ -97,12 +99,26 @@ export default function DTPAnalitics() {
   const [displayedDTP, setDisplayedDTP] = useState<DTP[]>([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const pathname = usePathname(); // текущий маршрут
+  const pathname = usePathname();
 
   useEffect(() => {
-    fetchDTPByYear();
+    if (typeof window === "undefined") return;
+
     const token = localStorage.getItem("token");
-    setIsAuthorized(!!token);
+    const rawUser = localStorage.getItem("user");
+
+    if (token && rawUser) {
+      try {
+        const user = JSON.parse(rawUser);
+        if (user?.is_superuser) {
+          setIsAuthorized(true); // только админ
+        }
+      } catch (err) {
+        console.error("Ошибка парсинга user:", rawUser);
+      }
+    }
+
+    fetchDTPByYear();
   }, []);
 
   const fetchDTPByYear = async () => {
@@ -150,11 +166,14 @@ export default function DTPAnalitics() {
   };
 
   // загрузка файла отчёта
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
-    const file = data.get("file") as File;
+
+    const form = e.currentTarget;
+    const fileInput = form.querySelector<HTMLInputElement>(
+      'input[name="file"]'
+    );
+    const file = fileInput?.files?.[0];
 
     if (!file) {
       addNotification({
@@ -166,6 +185,9 @@ export default function DTPAnalitics() {
       });
       return;
     }
+
+    const data = new FormData();
+    data.append("file", file);
 
     try {
       await axi.post("/analytics/DTP/create", data, {
@@ -213,15 +235,14 @@ export default function DTPAnalitics() {
   return (
     <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-        {pathname === "/statistics" ? (
-          <h1 className="text-3xl font-bold text-center text-gray-900 mt-20">
-            Аналитика ДТП
-          </h1>
-        ) : (
-          <h1 className="text-3xl font-bold text-center text-gray-900">
-            Аналитика ДТП
-          </h1>
-        )}
+        <h1
+          className={`text-3xl font-bold text-center text-gray-900 ${
+            pathname === "/statistics" ? "mt-20" : ""
+          }`}
+        >
+          Аналитика ДТП
+        </h1>
+
         {/* Диаграммы */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="shadow-md rounded-2xl lg:col-span-2">
@@ -236,10 +257,10 @@ export default function DTPAnalitics() {
           </Card>
         </div>
 
-        {/* Добавление новых данных - только для авторизованных */}
-        {typeof window !== "undefined" && localStorage.getItem("token") && (
+        {/* Загрузка новых данных — только для админов */}
+        {isAuthorized && (
           <Card className="w-full">
-            <CardHeader> 
+            <CardHeader>
               <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
                 <Upload className="w-5 h-5 text-blue-600" />
                 Добавление новых данных
@@ -253,6 +274,7 @@ export default function DTPAnalitics() {
               <form
                 onSubmit={handleUpload}
                 className="flex flex-col sm:flex-row items-center gap-3"
+                encType="multipart/form-data"
               >
                 <input
                   type="file"
@@ -260,43 +282,48 @@ export default function DTPAnalitics() {
                   accept=".xlsx, .csv"
                   className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
                 />
-                <Button type="submit" className="h-10 w-full sm:w-auto flex items-center gap-2">
+                <Button
+                  type="submit"
+                  className="h-10 w-full sm:w-auto flex items-center gap-2"
+                >
                   Загрузить
                 </Button>
               </form>
             </CardContent>
           </Card>
         )}
-            {/* просмотр данных */}
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle className="text-lg">Просмотр данных</CardTitle>
-                  <CardDescription>
-                    Загрузите данные о ДТП с возможностью фильтрации по году
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col md:flex-row gap-6 items-end">
-                    <div className="w-full md:w-1/3">
-                      <label className="block text-sm text-gray-700 mb-1">Год</label>
-                      <Input
-                        type="number"
-                        value={yearFilter}
-                        onChange={(e) => setYearFilter(e.target.value)}
-                        placeholder="Например: 2024"
-                        className="w-full h-10 border rounded px-3 text-sm"
-                      />
-                    </div>
-                    <Button
-                      onClick={() => fetchDTP(yearFilter)}
-                      className="h-10 w-full sm:w-auto"
-                    >
-                      Загрузить данные
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-        {/* таблица / карточки */}
+
+        {/* Просмотр данных */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-lg">Просмотр данных</CardTitle>
+            <CardDescription>
+              Загрузите данные о ДТП с возможностью фильтрации по году
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-6 items-end">
+              <div className="w-full md:w-1/3">
+                <label className="block text-sm text-gray-700 mb-1">Год</label>
+                <Input
+                  type="number"
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  placeholder="Например: 2024"
+                  className="w-full h-10 border rounded px-3 text-sm"
+                />
+              </div>
+              <Button
+                onClick={() => fetchDTP(yearFilter)}
+                className="h-10 w-full sm:w-auto"
+              >
+                Загрузить данные
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">
             <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -336,7 +363,6 @@ export default function DTPAnalitics() {
               <>
                 {/* сортировка + фильтр по месяцу */}
                 <div className="min-w-[267px] flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                  {/* сортировка */}
                   <div className="flex items-center gap-2">
                     <ArrowUpDown className="h-4 w-4 text-gray-600" />
                     <span className="text-sm text-gray-600">Сортировка:</span>
@@ -353,7 +379,6 @@ export default function DTPAnalitics() {
                     </Button>
                   </div>
 
-                  {/* фильтр по месяцу */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">Месяц:</span>
                     <select
@@ -371,7 +396,6 @@ export default function DTPAnalitics() {
                   </div>
                 </div>
 
-                {/* данные или сообщение */}
                 {displayedDTP.length > 0 ? (
                   <>
                     {/* таблица (desktop) */}
