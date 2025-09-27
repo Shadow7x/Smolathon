@@ -20,7 +20,7 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 import DTPLineDiagram from "@/components/Diagrams/DTP/Line";
 import DTPPieDiagram from "@/components/Diagrams/DTP/Pie";
-import { Eye, EyeOff, ArrowUpDown } from "lucide-react";
+import { Eye, EyeOff, ArrowUpDown, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface DTP {
@@ -225,35 +225,69 @@ export default function DTPAnalitics() {
             </CardContent>
           </Card>
         </div>
+            <CardTitle className="text-lg">Просмотр данных</CardTitle>
+            {/* просмотр данных */}
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Просмотр данных</CardTitle>
+                  <CardDescription>
+                    Загрузите данные о ДТП с возможностью фильтрации по году
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row gap-6 items-end">
+                    <div className="w-full md:w-1/3">
+                      <label className="block text-sm text-gray-700 mb-1">Год</label>
+                      <Input
+                        type="number"
+                        value={yearFilter}
+                        onChange={(e) => setYearFilter(e.target.value)}
+                        placeholder="Например: 2024"
+                        className="w-full h-10 border rounded px-3 text-sm"
+                      />
+                    </div>
+                    <Button
+                      onClick={() => fetchDTP(yearFilter)}
+                      className="h-10 w-full sm:w-auto"
+                    >
+                      Загрузить данные
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-        {/* блок ввода года + загрузка отчётов */}
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-lg">Загрузка отчётов</CardTitle>
-            <CardDescription>
-              Добавьте CSV-файл (.csv) с данными о ДТП
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={handleUpload}
-              className="flex flex-col sm:flex-row items-start sm:items-end gap-3"
-            >
-              <div className="flex-1 w-full">
-                <label className="block text-sm text-gray-700 mb-1">Файл CSV</label>
-                <input
-                  type="file"
-                  name="file"
-                  accept=".csv"
-                  className="w-full text-sm border rounded-[10px] px-3 py-2"
-                />
-              </div>
-              <Button type="submit" className="h-10 px-6">
-                Отправить
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+          
+        {/* загрузка отчётов */}
+        {/* загрузка отчётов */}
+<Card className="w-full">
+  <CardHeader> 
+    <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
+      <Upload className="w-5 h-5 text-blue-600" />
+      Добавление новых данных</CardTitle>
+    <CardDescription>
+      Загрузите Excel (.xlsx) файл для добавления в реестр
+    </CardDescription>
+  </CardHeader>
+
+  <CardContent>
+    <form
+      onSubmit={handleUpload}
+      className="flex flex-col sm:flex-row items-center gap-3"
+    >
+      <input
+        type="file"
+        name="file"
+        accept=".xlsx"
+        className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
+      />
+      <Button type="submit" className="h-10">
+        Загрузить
+      </Button>
+    </form>
+  </CardContent>
+</Card>
+
+
         {/* таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">
