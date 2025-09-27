@@ -3,16 +3,13 @@ import Image from "next/image";
 import { MEDIA_URL } from "@/index";
 import { formatDateV2 } from "@/utils/formatDateV2";
 import { useUser } from "@/hooks/user-context";
+import axi from "@/utils/api";
+import { useNotificationManager } from "@/hooks/notification-context";
 
 const NewCard = ({ news, size = "small" }) => {
   const imageNews = news?.image ? MEDIA_URL + news.image : null;
   const { user } = useUser();
-
-  const handleButtonClick = (e, action) => {
-    e.stopPropagation();
-    e.preventDefault();
-    console.log(`${action} clicked for news id: ${news.id}`);
-  };
+  const { addNotification } = useNotificationManager();
 
   // размеры через clamp для адаптива
   const cardHeight =
@@ -38,6 +35,39 @@ const NewCard = ({ news, size = "small" }) => {
   const paddingY = size === "large" ? "3rem" : "1.5rem";
   const buttonTop = size === "large" ? "2.25rem" : "1.5rem";
   const buttonRight = size === "large" ? "2.25rem" : "1.5rem";
+
+  const handleButtonClick = async (e, action) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (action === "edit") {
+      window.location.href = `/news/${news.id}`;
+    } else if (action === "trash") {
+      try {
+        await axi.post("content/news/deleteNews", { id: news.id });
+
+        Notification({
+          title: "Успешно",
+          description: `Новость "${news.title}" удалена`,
+          createdAt: new Date(),
+          status: 201,
+          id: Date.now(),
+        });
+
+        window.location.reload();
+      } catch (err) {
+        console.error("Ошибка при удалении:", err);
+
+        addNotification({
+          title: "Ошибка",
+          description: "Не удалось удалить новость",
+          createdAt: new Date(),
+          status: err.response?.status || 500,
+          id: Date.now(),
+        });
+      }
+    }
+  };
 
   return (
     <div

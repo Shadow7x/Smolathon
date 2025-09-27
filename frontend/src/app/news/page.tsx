@@ -15,7 +15,7 @@ const NewsPage = () => {
     const fetchNews = async () => {
       try {
         const response = await axi.get("content/news/get");
-        setNews(response.data);
+        setNews(response.data.reverse());
       } catch (error) {
         console.error("Ошибка при загрузке новостей:", error);
       }

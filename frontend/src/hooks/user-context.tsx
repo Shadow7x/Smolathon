@@ -8,7 +8,7 @@ interface UserType {
   id: number;
   is_active: boolean;
   name: string;
-  avatar?: string; 
+  avatar?: string;
 }
 
 interface UserContextType {
@@ -28,15 +28,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("вызвано обновление юзера");
   }, []);
 
-  
-
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      
-      const response = await axi.get(API_URL + "account/info", { 
-        headers: { Authorization: `Bearer ${token}` }
+
+      const response = await axi.get(API_URL + "account/info", {
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.status !== 200) localStorage.removeItem("token");
       setUser(response.data);
@@ -57,12 +55,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
-  
-    
-  
-
   return (
-    <UserContext.Provider value={{ user, fetchUser, updateUser , cleanupUser }}>
+    <UserContext.Provider value={{ user, fetchUser, updateUser, cleanupUser }}>
       {children}
     </UserContext.Provider>
   );
