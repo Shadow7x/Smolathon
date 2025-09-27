@@ -35,20 +35,20 @@ def createMerit(request: Request):
         address = data['address']
         
         files = request.FILES
-        if files.get('logo_first_block') and files.get('logo_second_block') and files.getlist('images_first_block') and files.getlist('images_second_block'):     
+        if files.get('logo_first_block') and files.get('logo_second_block') and files.getlist('images_first_block[]') and files.getlist('images_second_block[]'):     
             logo_first_block = files.get('logo_first_block')
             logo_second_block = files.get('logo_second_block')
-            images_first_block = files.getlist('images_first_block')
-            images_second_block = files.getlist('images_second_block')
+            images_first_block = files.getlist('images_first_block[]')
+            images_second_block = files.getlist('images_second_block[]')
 
             merits = Merits.objects.create(title=title, decode=decode, purposes=purposes,
                 parents_name=parents_name, parents_phone=parents_phone, parents_email=parents_email, address=address,
                 logo_first_block=logo_first_block, logo_second_block=logo_second_block)
             for image in images_first_block:
-                i = ImageForMerits.objects.create(merits=merits, image=image)
+                i = ImageForMerits.objects.create( image=image)
                 merits.images_first_block.add(i)
             for image in images_second_block:
-                i = ImageForMerits.objects.create(merits=merits, image=image)
+                i = ImageForMerits.objects.create( image=image)
                 merits.images_second_block.add(i)
         else:
             return Response('Не все фотографии указанны', status=status.HTTP_400_BAD_REQUEST) 
@@ -107,26 +107,31 @@ def updateMerit(request: Request):
             merits.logo_second_block.delete()
             merits.logo_second_block = logo_second_block
 
-        if files.getlist('images_first_block'):
-            images_first_block = files.getlist('images_first_block')
-            for image in merits.images_first_block.all():
-                if image:
+        if data.getlist('images_first_block[]'):
+            images_first_block = data.getlist('images_first_block[]')
+            print(images_first_block)
+            for image, new_image in zip(merits.images_first_block.all(), images_first_block):
+                
+                
+                if new_image != 'false':
+                    print(image)
+                    print(new_image)
                     image.image.delete()
-            
-            for image in images_first_block:
-                if image:
-                    i = ImageForMerits.objects.create(merits=merits, image=image)
+                    merits.images_first_block.remove(image)
+                    i = ImageForMerits.objects.create( image=new_image)
                     merits.images_first_block.add(i)
+                    
 
-        if files.getlist('images_second_block'):
-            images_second_block = files.getlist('images_second_block')
-            for image in merits.images_second_block.all():
-                if image:
+        if data.getlist('images_second_block[]'):
+            images_second_block = data.getlist('images_second_block[]')
+            print(images_second_block)
+            for image, new_image in zip(merits.images_second_block.all(), images_second_block):
+                if new_image != 'false':
+                    print(image)
+                    print(new_image)
                     image.image.delete()
-
-            for image in images_second_block:
-                if image:
-                    i = ImageForMerits.objects.create(merits=merits, image=image)
+                    merits.images_second_block.remove(image)
+                    i = ImageForMerits.objects.create( image=new_image)
                     merits.images_second_block.add(i)
 
         merits.save()

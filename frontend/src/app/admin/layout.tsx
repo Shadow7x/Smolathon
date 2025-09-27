@@ -51,8 +51,9 @@ export default function RootLayout({
     )
   }
 
-  if (!user) {
-    return null
+  if (!user?.is_superuser) {
+    router.replace('/not-found')
+    return
   }
 
   return (
