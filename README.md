@@ -37,3 +37,4 @@ login: user
 password: useruser1
 
 
+презентация и скринкаст: https://disk.yandex.ru/d/Yo3NSLvza76Zeg
