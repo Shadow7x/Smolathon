@@ -43,6 +43,7 @@ interface Props {
 }
 
 export default function MeritsMainSection({ merit }: Props) {
+  
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -66,6 +67,15 @@ export default function MeritsMainSection({ merit }: Props) {
       }
     }
   }, [merit]);
+
+  const handleDelete =(id: number) => {
+        setLoading(true)
+        axi.post("/content/merits/delete", {id: id}).then(() => {
+            setOpen(false)
+            setLoading(false)
+            window.location.reload()
+        })
+    }
 
   const bringToFront = (index: number) => {
     const newImages = [...images];
@@ -140,10 +150,10 @@ export default function MeritsMainSection({ merit }: Props) {
     form.append("parents_email", editable?.parents_email || "");
     form.append("address", editable?.address || "");
     images_first_block.forEach((image, index) => {
-      form.append(`images_first_block[]`, image);
+      form.append(`images_first_block[]`, image || false);
     })
     images_second_block.forEach((image, index) => {
-      form.append(`images_second_block[]`, image);
+      form.append(`images_second_block[]`, image|| false);
     })
 
     axi.post("/content/merits/update", form, {headers: {'Content-Type': 'multipart/form-data'}}).then(() => {
@@ -174,7 +184,7 @@ export default function MeritsMainSection({ merit }: Props) {
               <DialogFooter>
                 <Button
                   variant="destructive"
-                  onClick={() => console.log("delete", editable.id)}
+                  onClick={() => handleDelete(merit.id)}
                   disabled={loading}
                 >
                   {loading ? "Удаляем..." : "Удалить"}

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/user-context";
 
 import InitMerit from "@/widgets/mainSection/merits/InitMirits";
+import MeritCreate from "@/widgets/mainSection/merits/MeritCreate";
 
 interface Merit{
     id: number,
@@ -56,6 +57,7 @@ const MeritsPage = () => {
 
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [isCreating, setIsCreating] = useState(false)
 
       const router = useRouter();
 
@@ -83,7 +85,8 @@ const MeritsPage = () => {
             <div className="w-[60%]">
                 <p className="text-3xl text-center">Благодаря профессионализму нашей команды, результаты нашей работы видны не только на бумаге, но и в статистике!</p>
             </div>
-            {merit && <InitMerit merits={merit}/>}
+            {isCreating ? <MeritCreate />:
+            merit && <InitMerit merits={merit}/>}
             <div className="w-full flex flex-col items-center gap-4 py-6">
                 {/* Сетка кнопок */}
                 <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap lg:justify-center gap-2">
@@ -101,7 +104,9 @@ const MeritsPage = () => {
                     
                 </div>
             </div>
-            <button className="mb-10 w-10 h-10 flex items-center justify-center rounded-md bg-green-600 text-white text-xl hover:bg-green-700 transition-colors">
+            <button
+            onClick={() => setIsCreating(!isCreating)}
+             className="mb-10 w-10 h-10 flex items-center justify-center rounded-md bg-green-600 text-white text-xl hover:bg-green-700 transition-colors">
                     +
             </button>
   
