@@ -109,15 +109,15 @@ export default function LeftSidePanel() {
 
         {/* Футер */}
         {/* Футер */}
-      <CardFooter
-        className="flex items-center gap-1 cursor-pointer"
-        onClick={() => setIsCollapsed(!isCollapsed)}
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10.5417 5.66667V14.3333L14.875 10L10.5417 5.66667Z" fill="#636363" />
-        </svg>
-        {!isCollapsed && <span>Скрыть</span>}
-      </CardFooter>
+        <CardFooter
+          className="hidden md:flex items-center gap-1 cursor-pointer"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10.5417 5.66667V14.3333L14.875 10L10.5417 5.66667Z" fill="#636363" />
+          </svg>
+          {!isCollapsed && <span>Скрыть</span>}
+        </CardFooter>
     </>
   )
 
