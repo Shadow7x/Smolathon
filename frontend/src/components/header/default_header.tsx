@@ -15,7 +15,7 @@ export default function Default_Header() {
   const navLinks = [
     { href: "/news", label: "Новости" },
     { href: "/statistics", label: "Статистика" },
-    { href: "/contacts", label: "Контакты" },
+    { href: "/merits", label: "Заслуги" },
     { href: "/docs", label: "Документы" },
     { href: "/about", label: "О нас" },
   ];
