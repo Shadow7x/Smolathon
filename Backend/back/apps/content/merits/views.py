@@ -94,8 +94,9 @@ def updateMerit(request: Request):
         merits.parents_phone = data.get('parents_phone', merits.parents_phone)
         merits.parents_email = data.get('parents_email', merits.parents_email)
         merits.address = data.get('address', merits.address)
-
+        print(data)
         files = request.FILES
+        print(files)
         if files.get('logo_first_block'):
             logo_first_block = files.get('logo_first_block')
             merits.logo_first_block.delete()
@@ -109,20 +110,24 @@ def updateMerit(request: Request):
         if files.getlist('images_first_block'):
             images_first_block = files.getlist('images_first_block')
             for image in merits.images_first_block.all():
-                image.image.delete()
-            merits.images_first_block.clear()
+                if image:
+                    image.image.delete()
+            
             for image in images_first_block:
-                i = ImageForMerits.objects.create(merits=merits, image=image)
-                merits.images_first_block.add(i)
+                if image:
+                    i = ImageForMerits.objects.create(merits=merits, image=image)
+                    merits.images_first_block.add(i)
 
         if files.getlist('images_second_block'):
             images_second_block = files.getlist('images_second_block')
             for image in merits.images_second_block.all():
-                image.image.delete()
-            merits.images_second_block.clear()
+                if image:
+                    image.image.delete()
+
             for image in images_second_block:
-                i = ImageForMerits.objects.create(merits=merits, image=image)
-                merits.images_second_block.add(i)
+                if image:
+                    i = ImageForMerits.objects.create(merits=merits, image=image)
+                    merits.images_second_block.add(i)
 
         merits.save()
 
