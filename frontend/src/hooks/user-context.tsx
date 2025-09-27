@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import axi from "@/utils/api";
 import { API_URL } from "@/index";
 
@@ -8,12 +8,12 @@ interface UserType {
   id: number;
   is_active: boolean;
   name: string;
-  avatar?: string; 
+  avatar?: string;
 }
 
 interface UserContextType {
   user: UserType | null;
-  fetchUser: () => Promise<void>;
+  fetchUser: () => Promise<UserType | null>;
   updateUser: (newData: Partial<UserType>) => void;
   cleanupUser: () => void;
 }
@@ -23,46 +23,56 @@ const UserContext = createContext<UserContextType>({} as UserContextType);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
 
-  React.useEffect(() => {
-    fetchUser();
-    console.log("вызвано обновление юзера");
-  }, []);
-
-  
-
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async (): Promise<UserType | null> => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
-      
-      const response = await axi.get(API_URL + "account/info", { 
-        headers: { Authorization: `Bearer ${token}` }
+      if (!token) return null;
+
+      const response = await axi.get(API_URL + "account/info", {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.status !== 200) localStorage.removeItem("token");
+
+      if (response.status !== 200) {
+        localStorage.removeItem("token");
+        setUser(null);
+        return null;
+      }
+
       setUser(response.data);
+      return response.data; // ✅ теперь возвращаем юзера
     } catch (error) {
       console.error("Authorization error:", error);
       localStorage.removeItem("token");
       setUser(null);
+      return null;
     }
-  };
+  }, []);
 
   const updateUser = (newData: Partial<UserType>) => {
     if (user) {
-      setUser({ ...user, ...newData });
+      const updated = { ...user, ...newData };
+      setUser(updated);
+      localStorage.setItem("user", JSON.stringify(updated)); // ✅ сохраняем обновлённого юзера
     }
   };
 
   const cleanupUser = () => {
     setUser(null);
+    localStorage.removeItem("user"); // ✅ чистим localStorage
+    localStorage.removeItem("token");
   };
 
-  
-    
-  
+  // Автовызов при монтировании
+  useEffect(() => {
+    fetchUser().then((u) => {
+      if (u) {
+        localStorage.setItem("user", JSON.stringify(u)); // ✅ сразу сохраняем в LS
+      }
+    });
+  }, [fetchUser]);
 
   return (
-    <UserContext.Provider value={{ user, fetchUser, updateUser , cleanupUser }}>
+    <UserContext.Provider value={{ user, fetchUser, updateUser, cleanupUser }}>
       {children}
     </UserContext.Provider>
   );
