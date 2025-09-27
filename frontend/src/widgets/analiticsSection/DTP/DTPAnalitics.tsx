@@ -257,10 +257,10 @@ export default function DTPAnalitics() {
                 <input
                   type="file"
                   name="file"
-                  accept=".xlsx"
+                  accept=".xlsx, .csv"
                   className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
                 />
-                <Button type="submit" className="h-10">
+                <Button type="submit" className="h-10 w-full sm:w-auto flex items-center gap-2">
                   Загрузить
                 </Button>
               </form>
@@ -296,7 +296,6 @@ export default function DTPAnalitics() {
                   </div>
                 </CardContent>
               </Card>
-        {/* загрузка отчётов */}
         {/* таблица / карточки */}
         <Card className="w-full">
           <CardHeader className="pb-4">
