@@ -50,13 +50,22 @@ const MeritsPage = () => {
             }
         })
     }, []);
+    
 
     
 
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
+      const router = useRouter();
 
+    const handleClick = (title) => {
+        // Добавляем title в URL (query параметр)
+        const params = new URLSearchParams(window.location.search);
+        params.set("name", title);
+        router.push(`?${params.toString()}`);
+        setMerit(merits.find((merit) => merit.title === title) || null);
+    };
 
 
     return (
@@ -75,6 +84,27 @@ const MeritsPage = () => {
                 <p className="text-3xl text-center">Благодаря профессионализму нашей команды, результаты нашей работы видны не только на бумаге, но и в статистике!</p>
             </div>
             {merit && <InitMerit merits={merit}/>}
+            <div className="w-full flex flex-col items-center gap-4 py-6">
+                {/* Сетка кнопок */}
+                <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap lg:justify-center gap-2">
+                    {merits?.map((merit, index) => (
+                    <button
+                        key={index}
+                        onClick={() => handleClick(merit.title)}
+                        className="px-4 py-2 border rounded-md bg-white text-black text-sm font-medium hover:bg-gray-100 transition-colors text-center"
+                    >
+                        {merit.title}
+                    </button>
+                    ))}
+
+                    {/* Кнопка "+" */}
+                    
+                </div>
+            </div>
+            <button className="mb-10 w-10 h-10 flex items-center justify-center rounded-md bg-green-600 text-white text-xl hover:bg-green-700 transition-colors">
+                    +
+            </button>
+  
         </div>
   );
 };

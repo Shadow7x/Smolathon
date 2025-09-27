@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
 interface Merit{
     id: number,
@@ -55,20 +56,24 @@ const InitMerit = (merits: Props) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const user = useUser();
+    console.log(user)
     const merit = merits.merits
+
+    const router = useRouter();
 
         const handleDelete =(id: number) => {
         setLoading(true)
         axi.post("/content/merits/delete", {id: id}).then(() => {
             setOpen(false)
             setLoading(false)
+            window.location.reload()
         })
     }
 
     return (
         <div className="pt-[10rem] flex flex-col content-center items-center">
             <div className="w-[80%]">
-                {user && <div className="flex flex-row gap-2">
+                {user.user && <div className="flex flex-row gap-2">
                     
                         <Dialog open={open} onOpenChange={setOpen}>
                             <DialogTrigger asChild>
@@ -83,7 +88,7 @@ const InitMerit = (merits: Props) => {
                                 <DialogTitle>Вы уверены, что хотите удалить запись?</DialogTitle>
                                 </DialogHeader>
                                 <DialogFooter>
-                                <Button variant="destructive" onClick={(merit) => {handleDelete(merit.id)}} disabled={loading}>
+                                <Button variant="destructive" onClick={(mert) => {handleDelete(merit.id)}} disabled={loading}>
                                     {loading ? "Удаляем..." : "Удалить"}
                                 </Button>
                                 </DialogFooter>
