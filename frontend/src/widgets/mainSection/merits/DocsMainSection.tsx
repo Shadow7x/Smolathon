@@ -215,108 +215,104 @@ export default function MeritsMainSection({ merit }: Props) {
       )}
 
       {/* Первый блок */}
-      <div className="flex flex-row items-center justify-between gap-[5%] w-full">
-        <div className="w-[20%] flex justify-center">
-          <img
-            src={
-              editable.logo_first_block.startsWith("blob:")
-                ? editable.logo_first_block
-                : `${MEDIA_URL}${editable.logo_first_block}`
-            }
-            alt="Логотип"
-            className="w-[80%] h-auto object-contain cursor-pointer"
-            onClick={() => isEditing && logo1Ref.current?.click()}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            ref={logo1Ref}
-            className="hidden"
-            onChange={(e) => handleLogoChange(e, "logo_first_block")}
-          />
-        </div>
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 w-full">
+        <div className="w-24 h-24 lg:w-[20%] flex justify-center mb-4 lg:mb-0">
+            <img
+              src={
+                editable.logo_first_block.startsWith("blob:")
+                  ? editable.logo_first_block
+                  : `${MEDIA_URL}${editable.logo_first_block}`
+              }
+              alt="Логотип"
+              className="w-full h-full object-contain cursor-pointer"
+              onClick={() => isEditing && logo1Ref.current?.click()}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              ref={logo1Ref}
+              className="hidden"
+              onChange={(e) => handleLogoChange(e, "logo_first_block")}
+            />
+          </div>
 
-        <div className="w-[30%] text-center flex flex-col justify-center">
-          {isEditing ? (
-            <div className="flex flex-col min-h-[200px]">
-              <Input
-                value={editable.title}
-                onChange={(e) => handleChange("title", e.target.value)}
-                className="text-[2vw] text-center font-bold mb-[1%]"
-              />
-              <Input
-                value={editable.decode}
-                onChange={(e) => handleChange("decode", e.target.value)}
-                className="text-[1.2vw] text-gray-600 leading-relaxed"
-              />
-            </div>
-          ) : (
-            <>
-              <p className="text-[2vw] font-bold mb-[2%]">{editable.title}</p>
-              <p className="text-[1.2vw] text-gray-600 leading-relaxed">
-                {editable.decode}
-              </p>
-            </>
-          )}
-        </div>
+          <div className="text-center lg:text-left flex flex-col justify-center w-full lg:w-[30%] mb-4 lg:mb-0">
+            {isEditing ? (
+              <>
+                <Input
+                  value={editable.title}
+                  onChange={(e) => handleChange("title", e.target.value)}
+                  className="text-lg sm:text-xl md:text-2xl lg:text-[2vw] font-bold mb-2"
+                />
+                <Input
+                  value={editable.decode}
+                  onChange={(e) => handleChange("decode", e.target.value)}
+                  className="text-base sm:text-lg md:text-xl lg:text-[1.2vw] text-gray-600"
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-lg sm:text-xl md:text-2xl lg:text-[2vw] font-bold mb-2">
+                  {editable.title}
+                </p>
+                <p className="text-base sm:text-lg md:text-xl lg:text-[1.2vw] text-gray-600">
+                  {editable.decode}
+                </p>
+              </>
+            )}
+          </div>
 
-        <div className="relative w-[40%] h-[22vw]">
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className="absolute top-0 left-0 w-[100%] h-[90%]"
-              style={{
-                zIndex: index,
-                transform: `translate(${index * 15}%, ${index * 5}%)`,
-              }}
-            >
-              <img
-                src={
-                  image.preview
-                    ? image.preview
-                    : `${MEDIA_URL}${image.image}`
-                }
-                alt={`img-${index}`}
-                onClick={() =>
-                  isEditing
-                    ? document
-                        .getElementById(`file-input-first-${index}`)
-                        ?.click()
-                    : bringToFront(index)
-                }
-                className="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer transition-transform duration-500 hover:scale-105"
-              />
-              <input
-                type="file"
-                accept="image/*"
-                id={`file-input-first-${index}`}
-                className="hidden"
-                onChange={(e) => handleImageChange(e, index, "first")}
-              />
-            </div>
-          ))}
+          <div className="relative w-full h-48 sm:h-64 lg:w-[40%] lg:h-[22vw]">
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className="absolute top-0 left-0 w-full h-full"
+                style={{
+                  zIndex: index,
+                  transform: `translate(${index * 15}%, ${index * 5}%)`,
+                }}
+              >
+                <img
+                  src={image.preview ? image.preview : `${MEDIA_URL}${image.image}`}
+                  alt={`img-${index}`}
+                  onClick={() =>
+                    isEditing
+                      ? document.getElementById(`file-input-first-${index}`)?.click()
+                      : bringToFront(index)
+                  }
+                  className="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer transition-transform duration-500 hover:scale-105"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  id={`file-input-first-${index}`}
+                  className="hidden"
+                  onChange={(e) => handleImageChange(e, index, "first")}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
       {/* Второй блок */}
-      <div className="flex flex-row items-center justify-between gap-6 py-12 w-full">
-        <Card className="w-[70%] shadow-md border border-gray-200">
-          <CardContent className="p-[5%] min-h-[180px] flex">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 py-12 w-full mt-12">
+        <Card className="w-full lg:w-[80%] shadow-md border border-gray-200 lg:mb-0">
+          <CardContent className="p-10 sm:p-8 min-h-[150px] flex">
             {isEditing ? (
               <textarea
                 value={editable.purposes}
                 onChange={(e) => handleChange("purposes", e.target.value)}
-                className="w-[100%] h-[100%] resize-none text-[1.2vw] leading-relaxed text-gray-700 rounded-md border border-gray-300 p-2"
+                className="w-full h-full resize-none text-base sm:text-lg md:text-xl lg:text-[1.2vw] leading-relaxed text-gray-700 rounded-md border border-gray-300 p-2"
               />
             ) : (
-              <p className="text-[1.2vw] leading-relaxed text-gray-700 w-full">
+              <p className="text-base sm:text-lg md:text-xl lg:text-[1.2vw] leading-relaxed text-gray-700 w-full">
                 {editable.purposes}
               </p>
             )}
           </CardContent>
         </Card>
 
-        <div className="w-[25%] flex justify-center">
+        <div className="w-24 h-24 lg:w-48 lg:h-48 flex justify-center">
           <img
             src={
               editable.logo_second_block.startsWith("blob:")
@@ -324,7 +320,7 @@ export default function MeritsMainSection({ merit }: Props) {
                 : `${MEDIA_URL}${editable.logo_second_block}`
             }
             alt="Логотип второго блока"
-            className="w-[60%] h-auto object-contain cursor-pointer"
+            className="w-full h-full object-contain cursor-pointer"
             onClick={() => isEditing && logo2Ref.current?.click()}
           />
           <input
@@ -338,29 +334,23 @@ export default function MeritsMainSection({ merit }: Props) {
       </div>
 
       {/* Третий блок */}
-      <div className="flex flex-row items-center justify-between gap-[5%] py-[5%] w-full">
-        <div className="relative w-[45%] h-[20vw]">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 py-12 w-full">
+        <div className="relative w-full h-48 sm:h-64 lg:w-[45%] lg:h-[20vw] mb-6 lg:mb-0">
           {images2.map((image, index) => (
             <div
               key={index}
-              className="absolute top-0 left-0 w-[100%] h-[100%]"
+              className="absolute top-0 left-0 w-full h-full"
               style={{
                 zIndex: index,
                 transform: `translate(${index * 15}%, ${index * 5}%)`,
               }}
             >
               <img
-                src={
-                  image.preview
-                    ? image.preview
-                    : `${MEDIA_URL}${image.image}`
-                }
+                src={image.preview ? image.preview : `${MEDIA_URL}${image.image}`}
                 alt={`contact-img-${index}`}
                 onClick={() =>
                   isEditing
-                    ? document
-                        .getElementById(`file-input-second-${index}`)
-                        ?.click()
+                    ? document.getElementById(`file-input-second-${index}`)?.click()
                     : bringToFront2(index)
                 }
                 className="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer transition-transform duration-500 hover:scale-105"
@@ -376,46 +366,32 @@ export default function MeritsMainSection({ merit }: Props) {
           ))}
         </div>
 
-        <div className="w-[45%] flex flex-row items-center justify-between">
-          <div className="w-[70%] min-h-[200px] flex flex-col justify-center">
-            <p className="text-[2vw] font-bold mb-[1vw]">Контакты</p>
+        <div className="w-full lg:w-[45%] flex flex-row items-center justify-between">
+          <div className="w-full lg:w-[70%] flex flex-col justify-center">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-[2vw] font-bold mb-4">
+              Контакты
+            </p>
             {isEditing ? (
               <div className="flex flex-col gap-2">
-                <Input
-                  value={editable.parents_name}
-                  onChange={(e) => handleChange("parents_name", e.target.value)}
-                  className="w-full"
-                />
-                <Input
-                  value={editable.parents_phone}
-                  onChange={(e) => handleChange("parents_phone", e.target.value)}
-                  className="w-full"
-                />
-                <Input
-                  value={editable.parents_email}
-                  onChange={(e) => handleChange("parents_email", e.target.value)}
-                  className="w-full"
-                />
-                <Input
-                  value={editable.address}
-                  onChange={(e) => handleChange("address", e.target.value)}
-                  className="w-full"
-                />
+                <Input value={editable.parents_name} onChange={(e) => handleChange("parents_name", e.target.value)} />
+                <Input value={editable.parents_phone} onChange={(e) => handleChange("parents_phone", e.target.value)} />
+                <Input value={editable.parents_email} onChange={(e) => handleChange("parents_email", e.target.value)} />
+                <Input value={editable.address} onChange={(e) => handleChange("address", e.target.value)} />
               </div>
             ) : (
               <>
-                <p className="text-[1.2vw]">{editable.parents_name}</p>
-                <p className="text-[1.2vw]">{editable.parents_phone}</p>
-                <p className="text-[1.2vw]">{editable.parents_email}</p>
-                <p className="text-[1.2vw]">{editable.address}</p>
+                <p className="text-base sm:text-lg md:text-xl lg:text-[1.2vw]">{editable.parents_name}</p>
+                <p className="text-base sm:text-lg md:text-xl lg:text-[1.2vw]">{editable.parents_phone}</p>
+                <p className="text-base sm:text-lg md:text-xl lg:text-[1.2vw]">{editable.parents_email}</p>
+                <p className="text-base sm:text-lg md:text-xl lg:text-[1.2vw]">{editable.address}</p>
               </>
             )}
           </div>
-          <div className="w-[20%] flex justify-end">
+          <div className="hidden lg:flex w-[20%] justify-end">
             <img
               src="/images/phone.png"
               alt="Телефон"
-              className="w-[100%] h-auto object-contain"
+              className="w-full h-auto object-contain"
             />
           </div>
         </div>

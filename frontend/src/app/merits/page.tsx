@@ -61,25 +61,27 @@ const MeritsPage = () => {
 
         {isCreating ? <MeritCreate /> : merit && <InitMerit merits={merit} />}
 
-        <div className="w-full grid grid-cols-2 gap-2 py-4">
-          {merits?.map((merit, index) => (
+         <div className="w-full grid grid-cols-2 gap-2 py-4">
+            {merits?.map((merit, index) => (
             <button
-              key={index}
-              onClick={() => handleClick(merit.title)}
-              className="px-2 py-1 text-xs border rounded-md bg-white text-black hover:bg-gray-100"
+                key={index}
+                onClick={() => handleClick(merit.title)}
+                className="px-2 py-1 text-xs border rounded-md bg-white text-black hover:bg-gray-100"
             >
-              {merit.title}
+                {merit.title}
             </button>
-          ))}
+            ))}
         </div>
 
-        <button
-          onClick={() => setIsCreating(!isCreating)}
-          className="mb-6 w-8 h-8 flex items-center justify-center rounded-md bg-green-600 text-white text-lg hover:bg-green-700"
-        >
-          +
-        </button>
-      </div>
+        {user && (
+            <button
+            onClick={() => setIsCreating(!isCreating)}
+            className="mb-6 w-8 h-8 flex items-center justify-center rounded-md bg-green-600 text-white text-lg hover:bg-green-700"
+            >
+            +
+            </button>
+        )}
+        </div>
 
       {/* 💻 Десктопная версия */}
       <div className="hidden lg:block w-full px-8">
@@ -121,13 +123,15 @@ const MeritsPage = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsCreating(!isCreating)}
-          className="mb-10 w-12 h-12 flex items-center justify-center rounded-md bg-green-600 text-white text-2xl hover:bg-green-700"
-        >
-          +
-        </button>
-      </div>
+        {user && (
+            <button
+            onClick={() => setIsCreating(!isCreating)}
+            className="mb-10 w-12 h-12 flex items-center justify-center rounded-md bg-green-600 text-white text-2xl hover:bg-green-700"
+            >
+            +
+            </button>
+        )}
+        </div>
     </div>
   );
 };
