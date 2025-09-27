@@ -214,7 +214,7 @@ export default function DTPAnalitics() {
     <div className="pt-[4rem]">
       <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
 {pathname === "/statistics" ? (
-  <h1 className="text-3xl font-bold text-center text-gray-900 mt-8">
+  <h1 className="text-3xl font-bold text-center text-gray-900 mt-20">
     Аналитика ДТП
   </h1>
 ) : (
