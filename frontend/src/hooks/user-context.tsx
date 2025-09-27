@@ -23,10 +23,22 @@ const UserContext = createContext<UserContextType>({} as UserContextType);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
 
+<<<<<<< HEAD
+  React.useEffect(() => {
+    fetchUser();
+    console.log("вызвано обновление юзера");
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+=======
   const fetchUser = useCallback(async (): Promise<UserType | null> => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return null;
+>>>>>>> ceba48f66bc95ec05ce8bc2a0650dd5c367fc1af
 
       const response = await axi.get(API_URL + "account/info", {
         headers: { Authorization: `Bearer ${token}` },
@@ -62,6 +74,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("token");
   };
 
+<<<<<<< HEAD
+=======
   // Автовызов при монтировании
   useEffect(() => {
     fetchUser().then((u) => {
@@ -71,6 +85,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, [fetchUser]);
 
+>>>>>>> ceba48f66bc95ec05ce8bc2a0650dd5c367fc1af
   return (
     <UserContext.Provider value={{ user, fetchUser, updateUser, cleanupUser }}>
       {children}
