@@ -56,7 +56,7 @@ export default function TableDetector() {
   return (
     <div className="p-4 bg-white rounded-2xl shadow-md">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-lg font-semibold">📡 Таблица детекторов</h1>
+        <h1 className="text-lg font-semibold">Таблица детекторов</h1>
         <div className="flex gap-2">
           {isOpen && (
             <Button
@@ -65,7 +65,11 @@ export default function TableDetector() {
               onClick={() => fetchDetectors(yearFilter)}
               disabled={loading}
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Обновить"}
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Обновить"
+              )}
             </Button>
           )}
           <Button
@@ -115,7 +119,9 @@ export default function TableDetector() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-gray-500">
-                    {loading ? "Загрузка данных..." : "Нет данных для отображения"}
+                    {loading
+                      ? "Загрузка данных..."
+                      : "Нет данных для отображения"}
                   </TableCell>
                 </TableRow>
               )}
