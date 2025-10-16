@@ -1,7 +1,5 @@
-// components/YandexMapRoute.tsx
 "use client";
 
-import { YANDEX_MAPS_API_KEY } from "@/index";
 import { useEffect, useRef, useState } from "react";
 
 declare global {
@@ -38,11 +36,10 @@ function YandexMapRoute({
   const mapInstance = useRef<any>(null);
   const multiRoutes = useRef<any[]>([]);
 
-  // Загрузка Яндекс.Карт
   useEffect(() => {
     if (!window.ymaps) {
       const script = document.createElement("script");
-      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${YANDEX_MAPS_API_KEY}&lang=ru_RU`;
+      script.src = `https://api-maps.yandex.ru/2.1/?apikey=43446600-2296-4713-9c16-4baf8af7f5fd&lang=ru_RU`;
       script.async = true;
       script.onload = () => {
         window.ymaps.ready(() => {
@@ -74,11 +71,9 @@ function YandexMapRoute({
           controls: [],
         });
 
-        // Очищаем предыдущие маршруты
         multiRoutes.current = [];
         mapInstance.current.geoObjects.removeAll();
 
-        // Создаем мультимаршруты для каждого маршрута
         routes.forEach((route, index) => {
           const routeColor = route.color || getColorByIndex(index);
 
@@ -115,14 +110,13 @@ function YandexMapRoute({
           multiRoutes.current.push(multiRoute);
           mapInstance.current.geoObjects.add(multiRoute);
 
-          // Добавляем метки только для начальной и конечной точек без текста/попапов
           if (route.points.length > 0) {
             const startPoint = route.points[0];
             const endPoint = route.points[route.points.length - 1];
 
             const startPlacemark = new window.ymaps.Placemark(
               [startPoint.latitude, startPoint.longitude],
-              {}, // без hintContent и balloonContent
+              {},
               {
                 preset: "islands#circleIcon",
                 iconColor: routeColor,
@@ -131,7 +125,7 @@ function YandexMapRoute({
 
             const endPlacemark = new window.ymaps.Placemark(
               [endPoint.latitude, endPoint.longitude],
-              {}, // без hintContent и balloonContent
+              {},
               {
                 preset: "islands#circleIcon",
                 iconColor: routeColor,
@@ -141,7 +135,6 @@ function YandexMapRoute({
             mapInstance.current.geoObjects.add(startPlacemark);
             mapInstance.current.geoObjects.add(endPlacemark);
 
-            // Промежуточные точки — тоже без текста и попапов
             if (route.points.length > 2) {
               for (let i = 1; i < route.points.length - 1; i++) {
                 const intermediatePoint = route.points[i];
@@ -195,7 +188,6 @@ function YandexMapRoute({
   );
 }
 
-// Компонент страницы с картой
 const MapPage = () => {
   // Маршруты с несколькими точками в пределах Москвы
   const routes = [
