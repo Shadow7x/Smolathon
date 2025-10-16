@@ -224,15 +224,15 @@ export default function AnalyticsSectionEvacuation() {
     new Intl.NumberFormat("ru-RU").format(num)
 
   return (
-    <div className="space-y-6 p-4 max-w-[1400px] mx-auto pt-[6rem]">
-      <h1 className="text-3xl font-bold text-center text-gray-900">
+    <div className="space-y-6 px-6 max-w-[1400px] mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900">
         Аналитика эвакуаторов
       </h1>
 
       {/* Диаграммы */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>Динамика эвакуаций</CardTitle>
               <CardDescription>Сравнение по месяцам (2024 vs 2025)</CardDescription>
@@ -246,7 +246,7 @@ export default function AnalyticsSectionEvacuation() {
           </Card>
         </div>
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-lg">Статус эвакуаций</CardTitle>
               <CardDescription>Завершённые и в процессе</CardDescription>

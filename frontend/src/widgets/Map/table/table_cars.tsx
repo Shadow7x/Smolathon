@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useNotificationManager } from "@/hooks/notification-context";
 
-interface Detectors {
+interface Detector {
   id: number;
   name: string;
 }
@@ -48,6 +48,8 @@ interface MergedData {
 export default function TableCars() {
   const [mergedData, setMergedData] = useState<MergedData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { addNotification } = useNotificationManager();
 
   const fetchData = async () => {
@@ -57,30 +59,27 @@ export default function TableCars() {
         axi.get("/analytics/workload/get"),
         axi.get("/analytics/detectors/get"),
       ]);
-      console.log(carsRes);
       const carsData: Car[] = carsRes.data || [];
-      const detectorsData: Detectors[] = detectorsRes.data || [];
+      const detectorsData: Detector[] = detectorsRes.data || [];
 
-      const flattened: MergedData[] = [];
+      const flattened: MergedData[] = carsData.flatMap((car) =>
+        (car.workloads || []).flatMap((workload) =>
+          (workload.detections || []).map((detection) => {
+            const detectorName =
+              detection.detector && typeof detection.detector === "object"
+                ? detection.detector.name
+                : String(detection.detector);
 
-      for (const car of carsData) {
-        for (const workload of car.workloads || []) {
-          for (const detection of workload.detections || []) {
-            const detectorObj = detectorsData.find(
-              (d) => d.name === detection.detector
-            );
-
-            flattened.push({
+            return {
               id: detection.id,
-              detectorName: detectorObj ? detectorObj.name : "—",
+              detectorName: detectorName || "—",
               timestamp: formatDate(detection.time),
               car: car.name,
               speed: Number(detection.speed) || 0,
-            });
-          }
-        }
-        console.log(mergedData);
-      }
+            };
+          })
+        )
+      );
 
       setMergedData(flattened);
     } catch (err: any) {
@@ -108,6 +107,15 @@ export default function TableCars() {
     )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
+  // ====== ПАГИНАЦИЯ ======
+  const totalPages = Math.ceil(mergedData.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+  const pageData = mergedData.slice(startIdx, endIdx);
+
+  const goPrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const goNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
+
   return (
     <div className="p-4 bg-white rounded-2xl shadow-md">
       <div className="flex justify-between items-center mb-4">
@@ -128,8 +136,8 @@ export default function TableCars() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mergedData.length > 0 ? (
-              mergedData.map((row) => (
+            {pageData.length > 0 ? (
+              pageData.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>{row.detectorName}</TableCell>
                   <TableCell>{row.timestamp}</TableCell>
@@ -147,6 +155,31 @@ export default function TableCars() {
           </TableBody>
         </Table>
       </div>
+
+      {/* ====== КНОПКИ ПАГИНАЦИИ ====== */}
+      {mergedData.length > itemsPerPage && (
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goPrev}
+            disabled={currentPage === 1}
+          >
+            Назад
+          </Button>
+          <span>
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goNext}
+            disabled={currentPage === totalPages}
+          >
+            Вперед
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

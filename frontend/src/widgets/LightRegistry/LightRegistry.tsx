@@ -117,223 +117,221 @@ export default function LightRegistry() {
   }, [allLights, sortOrder]);
 
   return (
-    <div className="pt-[6rem] px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6">
-          Реестр светофоров
-        </h1>
+    <div className="space-y-6 px-6 max-w-[1400px] mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900">
+        Реестр светофоров
+      </h1>
 
-        {/* форма загрузки Excel */}
-        <Card className="w-full mb-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg md:text-xl flex items-center gap-2">
-              <Upload className="w-5 h-5 text-blue-600" />
-              Добавление новых данных
-            </CardTitle>
-            <CardDescription>
-              Загрузите Excel (.xlsx) со светофорами для добавления в реестр
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const data = new FormData(e.target as HTMLFormElement);
-                const file = data.get("file") as File;
+      {/* форма загрузки Excel */}
+      <Card className="w-full mb-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+            <Upload className="w-5 h-5 text-blue-600" />
+            Добавление новых данных
+          </CardTitle>
+          <CardDescription>
+            Загрузите Excel (.xlsx) со светофорами для добавления в реестр
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const data = new FormData(e.target as HTMLFormElement);
+              const file = data.get("file") as File;
 
-                if (!file) {
-                  addNotification({
-                    id: Date.now().toString(),
-                    title: "Ошибка",
-                    description: "Файл не выбран",
-                    status: 400,
-                    createdAt: new Date().toISOString(),
-                  });
-                  return;
-                }
+              if (!file) {
+                addNotification({
+                  id: Date.now().toString(),
+                  title: "Ошибка",
+                  description: "Файл не выбран",
+                  status: 400,
+                  createdAt: new Date().toISOString(),
+                });
+                return;
+              }
 
-                try {
-                  const formData = new FormData();
-                  formData.append("file", file);
+              try {
+                const formData = new FormData();
+                formData.append("file", file);
 
-                  const res = await axi.post(
-                    "/analytics/trafficLight/createFromExcel",
-                    formData,
-                    {
-                      headers: { "Content-Type": "multipart/form-data" },
-                    }
-                  );
+                const res = await axi.post(
+                  "/analytics/trafficLight/createFromExcel",
+                  formData,
+                  {
+                    headers: { "Content-Type": "multipart/form-data" },
+                  }
+                );
 
-                  addNotification({
-                    id: Date.now().toString(),
-                    title: "Успешно",
-                    description: res.data?.message || "Файл загружен",
-                    status: res.status,
-                    createdAt: new Date().toISOString(),
-                  });
+                addNotification({
+                  id: Date.now().toString(),
+                  title: "Успешно",
+                  description: res.data?.message || "Файл загружен",
+                  status: res.status,
+                  createdAt: new Date().toISOString(),
+                });
 
-                  fetchTrafficLights(inputYear);
-                } catch (err: any) {
-                  addNotification({
-                    id: Date.now().toString(),
-                    title: "Ошибка данных",
-                    description: err.response?.data || "Не удалось загрузить файл",
-                    status: err.response?.status || 500,
-                    createdAt: new Date().toISOString(),
-                  });
-                }
-              }}
-              className="flex flex-col sm:flex-row items-end gap-4"
+                fetchTrafficLights(inputYear);
+              } catch (err: any) {
+                addNotification({
+                  id: Date.now().toString(),
+                  title: "Ошибка данных",
+                  description: err.response?.data || "Не удалось загрузить файл",
+                  status: err.response?.status || 500,
+                  createdAt: new Date().toISOString(),
+                });
+              }
+            }}
+            className="flex flex-col sm:flex-row items-end gap-4"
+          >
+            <div className="grid w-full sm:max-w-sm items-end gap-1.5">
+              <Label htmlFor="file">Выберите файл</Label>
+              <Input
+                id="file"
+                type="file"
+                name="file"
+                accept=".xlsx"
+                className="h-10"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="h-10 w-full sm:w-auto"
+              variant="default"
             >
-              <div className="grid w-full sm:max-w-sm items-end gap-1.5">
-                <Label htmlFor="file">Выберите файл</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  name="file"
-                  accept=".xlsx"
-                  className="h-10"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="h-10 w-full sm:w-auto"
-                variant="default"
-              >
-                Загрузить
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              Загрузить
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-        {/* форма фильтрации */}
-        <Card className="w-full mb-6">
+      {/* форма фильтрации */}
+      <Card className="w-full mb-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg md:text-xl">Просмотр данных</CardTitle>
+          <CardDescription>
+            Загрузите данные о светофорах с возможностью фильтрации по году
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="grid w-full sm:max-w-sm items-center gap-1.5">
+              <Label htmlFor="year-filter">Год</Label>
+              <Input
+                id="year-filter"
+                type="number"
+                placeholder="Например: 2024"
+                value={inputYear}
+                onChange={(e) => setInputYear(e.target.value)}
+                min="2000"
+                max="2030"
+                className="h-10"
+              />
+            </div>
+            <Button
+              onClick={() => fetchTrafficLights(inputYear)}
+              disabled={loading || !inputYear.trim()}
+              className="h-10 w-full sm:w-auto"
+            >
+              <Upload className="h-4 w-4" />
+              {loading ? "Загрузка..." : "Загрузить данные"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* таблица / карточки */}
+      {displayedLights.length > 0 && (
+        <Card className="w-full">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg md:text-xl">Просмотр данных</CardTitle>
-            <CardDescription>
-              Загрузите данные о светофорах с возможностью фильтрации по году
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
-              <div className="grid w-full sm:max-w-sm items-center gap-1.5">
-                <Label htmlFor="year-filter">Год</Label>
-                <Input
-                  id="year-filter"
-                  type="number"
-                  placeholder="Например: 2024"
-                  value={inputYear}
-                  onChange={(e) => setInputYear(e.target.value)}
-                  min="2000"
-                  max="2030"
-                  className="h-10"
-                />
+            <div className="flex flex-col md:flex-row justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg md:text-xl">
+                  Данные о светофорах {yearFilter && `за ${yearFilter} год`}
+                </CardTitle>
+                <CardDescription>
+                  Всего записей: {displayedLights.length}
+                </CardDescription>
               </div>
               <Button
-                onClick={() => fetchTrafficLights(inputYear)}
-                disabled={loading || !inputYear.trim()}
-                className="h-10 w-full sm:w-auto"
+                variant="outline"
+                onClick={() => setShowTable(!showTable)}
+                className="flex items-center gap-2 h-9 self-start"
               >
-                <Upload className="h-4 w-4" />
-                {loading ? "Загрузка..." : "Загрузить данные"}
+                {showTable ? (
+                  <>
+                    <EyeOff className="h-4 w-4" /> Скрыть таблицу
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" /> Показать таблицу
+                  </>
+                )}
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </CardHeader>
 
-        {/* таблица / карточки */}
-        {displayedLights.length > 0 && (
-          <Card className="w-full">
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <div>
-                  <CardTitle className="text-lg md:text-xl">
-                    Данные о светофорах {yearFilter && `за ${yearFilter} год`}
-                  </CardTitle>
-                  <CardDescription>
-                    Всего записей: {displayedLights.length}
-                  </CardDescription>
+          {showTable && (
+            <CardContent>
+              {/* фильтры */}
+              <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Фильтры:
+                  </span>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowTable(!showTable)}
-                  className="flex items-center gap-2 h-9 self-start"
-                >
-                  {showTable ? (
-                    <>
-                      <EyeOff className="h-4 w-4" /> Скрыть таблицу
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-4 w-4" /> Показать таблицу
-                    </>
-                  )}
-                </Button>
+
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-600">Сортировка:</span>
+                  <Select
+                    value={sortOrder}
+                    onValueChange={(v) => setSortOrder(v as "asc" | "desc")}
+                  >
+                    <SelectTrigger className="w-[160px] h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desc">Сначала новые</SelectItem>
+                      <SelectItem value="asc">Сначала старые</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </CardHeader>
 
-            {showTable && (
-              <CardContent>
-                {/* фильтры */}
-                <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      Фильтры:
-                    </span>
-                  </div>
+              {/* таблица для десктопа */}
+              <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead>Год</TableHead>
+                      <TableHead>Адрес</TableHead>
+                      <TableHead>Тип</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayedLights.map((item) => (
+                      <TrafficLightRow key={item.id} item={item} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-                  <div className="flex items-center gap-2">
-                    <ArrowUpDown className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">Сортировка:</span>
-                    <Select
-                      value={sortOrder}
-                      onValueChange={(v) => setSortOrder(v as "asc" | "desc")}
-                    >
-                      <SelectTrigger className="w-[160px] h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="desc">Сначала новые</SelectItem>
-                        <SelectItem value="asc">Сначала старые</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              {/* карточки для мобильных */}
+              <div className="grid gap-4 md:hidden">
+                {displayedLights.map((item) => (
+                  <TrafficLightCard key={item.id} item={item} />
+                ))}
+              </div>
 
-                {/* таблица для десктопа */}
-                <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
-                  <Table>
-                    <TableHeader className="bg-gray-50">
-                      <TableRow>
-                        <TableHead>Год</TableHead>
-                        <TableHead>Адрес</TableHead>
-                        <TableHead>Тип</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {displayedLights.map((item) => (
-                        <TrafficLightRow key={item.id} item={item} />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* карточки для мобильных */}
-                <div className="grid gap-4 md:hidden">
-                  {displayedLights.map((item) => (
-                    <TrafficLightCard key={item.id} item={item} />
-                  ))}
-                </div>
-
-                <div className="mt-4 text-sm text-gray-500 text-center">
-                  Показано {displayedLights.length} записей из {allLights.length}
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        )}
-      </div>
+              <div className="mt-4 text-sm text-gray-500 text-center">
+                Показано {displayedLights.length} записей из {allLights.length}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

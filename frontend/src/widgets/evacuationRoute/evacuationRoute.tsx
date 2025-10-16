@@ -156,138 +156,136 @@ export default function EvacuationRoutePage() {
   }, []);
 
   return (
-    <div className="pt-[6rem] px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6">
-          Маршруты эвакуации
-        </h1>
+    <div className="space-y-6 px-6 max-w-[1400px] mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900">
+        Маршруты эвакуации
+      </h1>
 
-        {/* форма загрузки */}
-        <Card className="w-full mb-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg md:text-xl flex items-center gap-2">
-            <Upload className="w-5 h-5 text-blue-600" />
-            Загрузка данных</CardTitle>
-            <CardDescription>
-              Добавьте файл маршрутов эвакуации в формате .xlsx
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={handleUpload}
-              className="flex flex-col sm:flex-row gap-4 items-end"
+      {/* форма загрузки */}
+      <Card className="w-full mb-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+          <Upload className="w-5 h-5 text-blue-600" />
+          Загрузка данных</CardTitle>
+          <CardDescription>
+            Добавьте файл маршрутов эвакуации в формате .xlsx
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={handleUpload}
+            className="flex flex-col sm:flex-row gap-4 items-end"
+          >
+            <Input type="file" name="file" accept=".xlsx" className="h-10" />
+            <Button
+              type="submit"
+              disabled={uploading}
+              className="h-10 w-full sm:w-auto flex items-center gap-2"
             >
-              <Input type="file" name="file" accept=".xlsx" className="h-10" />
-              <Button
-                type="submit"
-                disabled={uploading}
-                className="h-10 w-full sm:w-auto flex items-center gap-2"
-              >
-                {uploading ? "Загрузка..." : "Отправить"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              {uploading ? "Загрузка..." : "Отправить"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-{/* таблица / карточки */}
-<Card className="w-full">
-  <CardHeader className="pb-4">
-    <div className="flex flex-col md:flex-row justify-between gap-4">
-      <div>
-        <CardTitle className="text-lg md:text-xl">Данные о маршрутах</CardTitle>
-        <CardDescription>Всего записей: {displayed.length}</CardDescription>
-      </div>
-      <Button
-        variant="outline"
-        onClick={() => setShowTable(!showTable)}
-        className="flex items-center gap-2 h-9 self-start"
-      >
-        {showTable ? (
-          <>
-            <EyeOff className="h-4 w-4" /> Скрыть таблицу
-          </>
-        ) : (
-          <>
-            <Eye className="h-4 w-4" /> Показать таблицу
-          </>
-        )}
-      </Button>
-    </div>
-  </CardHeader>
-
-  <CardContent>
-    {showTable && (
-      <>
-        {/* фильтры */}
-        <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-gray-600" />
-            <span className="text-sm text-gray-600">Сортировка:</span>
+      {/* таблица / карточки */}
+      <Card className="w-full">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
+            <div>
+              <CardTitle className="text-lg md:text-xl">Данные о маршрутах</CardTitle>
+              <CardDescription>Всего записей: {displayed.length}</CardDescription>
+            </div>
             <Button
               variant="outline"
-              onClick={() =>
-                setSortOrder((s) => (s === "asc" ? "desc" : "asc"))
-              }
-              className="h-8"
+              onClick={() => setShowTable(!showTable)}
+              className="flex items-center gap-2 h-9 self-start"
             >
-              {sortOrder === "asc" ? "Сначала старые" : "Сначала новые"}
+              {showTable ? (
+                <>
+                  <EyeOff className="h-4 w-4" /> Скрыть таблицу
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" /> Показать таблицу
+                </>
+              )}
             </Button>
           </div>
+        </CardHeader>
 
-          <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-            <Search className="h-4 w-4 text-gray-600" />
-            <Input
-              placeholder="Поиск по году, месяцу, улице или отчёту..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-8"
-            />
+        <CardContent>
+          {showTable && (
+            <>
+              {/* фильтры */}
+              <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-600">Сортировка:</span>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setSortOrder((s) => (s === "asc" ? "desc" : "asc"))
+                    }
+                    className="h-8"
+                  >
+                    {sortOrder === "asc" ? "Сначала старые" : "Сначала новые"}
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <Search className="h-4 w-4 text-gray-600" />
+                  <Input
+                    placeholder="Поиск по году, месяцу, улице или отчёту..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+
+              {displayed.length > 0 ? (
+                <>
+                  {/* таблица (desktop) */}
+                  <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-gray-50">
+                        <TableRow>
+                          <TableHead>Год</TableHead>
+                          <TableHead>Месяц</TableHead>
+                          <TableHead>Маршрут</TableHead>
+                          <TableHead>Отчёт</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {displayed.map((r) => (
+                          <RouteRow key={r.id} r={r} />
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* карточки (mobile) */}
+                  <div className="grid gap-4 md:hidden">
+                    {displayed.map((r) => (
+                      <RouteCard key={r.id} r={r} />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="w-full min-h-[200px] flex items-center justify-center text-gray-500">
+                  Нет записей
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="mt-4 text-sm text-gray-500 text-center">
+            Показано {displayed.length} маршрутов из {routes.length}
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {displayed.length > 0 ? (
-          <>
-            {/* таблица (desktop) */}
-            <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
-              <Table>
-                <TableHeader className="bg-gray-50">
-                  <TableRow>
-                    <TableHead>Год</TableHead>
-                    <TableHead>Месяц</TableHead>
-                    <TableHead>Маршрут</TableHead>
-                    <TableHead>Отчёт</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayed.map((r) => (
-                    <RouteRow key={r.id} r={r} />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* карточки (mobile) */}
-            <div className="grid gap-4 md:hidden">
-              {displayed.map((r) => (
-                <RouteCard key={r.id} r={r} />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="w-full min-h-[200px] flex items-center justify-center text-gray-500">
-            Нет записей
-          </div>
-        )}
-      </>
-    )}
-
-    <div className="mt-4 text-sm text-gray-500 text-center">
-      Показано {displayed.length} маршрутов из {routes.length}
-    </div>
-  </CardContent>
-</Card>
-
-      </div>
     </div>
   );
 }
