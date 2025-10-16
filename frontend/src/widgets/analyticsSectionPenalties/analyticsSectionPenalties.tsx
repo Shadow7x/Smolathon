@@ -299,8 +299,8 @@ export default function AnaliticsSection() {
   }, [allPenalties, monthFilter, sortOrder]);
 
   return (
-    <div className="space-y-8 p-4 md:p-8 max-w-[1600px] mx-auto">
-      <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6 flex items-center justify-center gap-3">
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900">
         Аналитика штрафов
       </h1>
 
