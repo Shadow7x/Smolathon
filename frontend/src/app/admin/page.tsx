@@ -1,15 +1,7 @@
 // app/admin/page.tsx
 'use client'
 
-import { useUser } from "@/hooks/user-context"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import AnaliticsSection from "@/widgets/analyticsSectionPenalties/analyticsSectionPenalties"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import AnalyticsSectionEvacuation from "@/widgets/analyticsSectionEvacuation/analyticsSectionEvacuation"
-import Link from "next/link"
-
 export default function Admin() {
   
 

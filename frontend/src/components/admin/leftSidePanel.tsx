@@ -113,7 +113,7 @@ export default function LeftSidePanel() {
               onClick={() => handleClick("/admin/Map")}
               
             >
-              Карта
+              Загруженность
             </button>
           )}
         </CardContent>

@@ -1,5 +1,5 @@
 "use client";
-
+import Logout from "../logout/logout";
 import Image from "next/image";
 
 export default function Admin_Header() {
@@ -25,6 +25,7 @@ export default function Admin_Header() {
         СОГБУ <span className="text-[#62A744]">"ЦОДД"</span>
       </h1>
       <h1 className="text-2xl font-bold">Панель администратора</h1>
+      <Logout/>
     </header>
   );
 }
