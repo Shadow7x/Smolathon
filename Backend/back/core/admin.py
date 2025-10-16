@@ -34,6 +34,8 @@ admin.site.register(Docs)
 admin.site.register(Merits)
 admin.site.register(ImageForMerits)
 admin.site.register(Car)
+admin.site.register(Detector) 
+admin.site.register(Detection) 
 admin.site.register(Workload)
 admin.site.register(authorizedToken)
 
