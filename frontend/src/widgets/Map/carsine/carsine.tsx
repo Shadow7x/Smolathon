@@ -30,6 +30,7 @@ export default function Carsine({
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showList, setShowList] = useState(false);
   const [cars, setCars] = useState([])
+  const [selectCar, setSelectCar] = useState([])
   useEffect(() =>{
     axi.get("/analytics/workload/getCars").then((e)=>{
         setCars(e.data);
@@ -55,7 +56,13 @@ export default function Carsine({
   }, [query, routes]);
 
   const handleSelect = (name: string) => {
-    
+    const selectedCar = cars.find((r) => r.name.toLowerCase() === name.toLowerCase());
+    if (selectedCar) {
+      setSelectCar(selectedCar);
+      console.log(selectedCar)
+    } else {
+      setSelectCar(null);
+    }
     setQuery(name);
     setShowList(false);
     onFilterChange({ ...filters, car: name });
