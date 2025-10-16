@@ -1,12 +1,94 @@
-"use client"
-import AnaliticsMap from "@/widgets/Map/analiticsMap/analiticsMap"
-import Carsine from "@/widgets/Map/carsine/carsine"
-export default function Map(){
-    return(
-        <div>
-            <Carsine />
-            <AnaliticsMap />
-            <h1>MAP</h1>
-        </div>
-    )
+"use client";
+import YandexMapRoute from "@/components/map/YandexMapRoute";
+import AnaliticsMap from "@/widgets/Map/analiticsMap/analiticsMap";
+import Carsine from "@/widgets/Map/carsine/carsine";
+export default function Map() {
+  const routes = [
+    {
+      name: "Маршрут по центру Москвы",
+      points: [
+        {
+          latitude: 55.7517,
+          longitude: 37.6178,
+          name: "Московский Кремль",
+        },
+        {
+          latitude: 55.7525,
+          longitude: 37.623,
+          name: "Храм Василия Блаженного",
+        },
+        {
+          latitude: 55.7539,
+          longitude: 37.6208,
+          name: "Красная площадь",
+        },
+        {
+          latitude: 55.7514,
+          longitude: 37.6289,
+          name: "Парк Зарядье",
+        },
+      ],
+      color: "#1e98ff",
+    },
+    {
+      name: "Маршрут через парки",
+      points: [
+        {
+          latitude: 55.7312,
+          longitude: 37.6033,
+          name: "Парк Горького",
+        },
+        {
+          latitude: 55.7356,
+          longitude: 37.5837,
+          name: "Нескучный сад",
+        },
+        {
+          latitude: 55.71,
+          longitude: 37.5445,
+          name: "Воробьевы горы",
+        },
+        {
+          latitude: 55.7225,
+          longitude: 37.5543,
+          name: "МГУ",
+        },
+      ],
+      color: "#ff4444",
+    },
+    {
+      name: "Маршрут по северу Москвы",
+      points: [
+        {
+          latitude: 55.8229,
+          longitude: 37.6366,
+          name: "ВДНХ",
+        },
+        {
+          latitude: 55.8294,
+          longitude: 37.6322,
+          name: "Космонавтов аллея",
+        },
+        {
+          latitude: 55.8198,
+          longitude: 37.6117,
+          name: "Останкинская башня",
+        },
+        {
+          latitude: 55.8079,
+          longitude: 37.6381,
+          name: "Ботанический сад",
+        },
+      ],
+      color: "#00c851",
+    },
+  ];
+  return (
+    <div>
+      <Carsine />
+      <AnaliticsMap />
+
+      <YandexMapRoute routes={routes} routeType="auto" />
+    </div>
+  );
 }
