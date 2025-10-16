@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const Switchmap = () => {
-  const [isAccompaniment, setIsAccompaniment] = useState(true);
+interface SwitchmapProps {
+  isAccompaniment: boolean;
+  setIsAccompaniment: (value: boolean) => void;
+}
 
+const Switchmap = ({ isAccompaniment, setIsAccompaniment }: SwitchmapProps) => {
   return (
     <div
       className={cn(
@@ -19,6 +21,7 @@ const Switchmap = () => {
           isAccompaniment ? "translate-x-0" : "translate-x-full"
         )}
       />
+
       <button
         className={cn(
           "relative z-10 w-1/2 h-full text-sm font-medium transition-colors duration-200",
@@ -26,7 +29,7 @@ const Switchmap = () => {
         )}
         onClick={() => setIsAccompaniment(true)}
       >
-        Сопровождение
+        Загруженность
       </button>
 
       <button
@@ -36,7 +39,7 @@ const Switchmap = () => {
         )}
         onClick={() => setIsAccompaniment(false)}
       >
-        Загруженность
+        Смежность
       </button>
     </div>
   );

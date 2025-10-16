@@ -125,20 +125,35 @@ def getAdjacencies(request: Request):
         
         count_other ={} 
         
-        for detection in other_detections:
-            time_diff = detection.time - target_detection.last().time
-            if time_diff < max_time_diff and detection.detector in target_nodes:
-                count_other[detection] = count_other.get(detection, 0) + 1
+        other_cars = Car.objects.exclude(id=target.id)
         
+        for car in other_cars:
+            if get.get("time_interval"):
+                other_workload= car.workloads.filter(time_interval=get.get("time_interval"))
+            else:
+                other_workload= car.workloads.all()
+            for workload in other_workload:
+                for detection in workload.detections.all():
+
+                    time_diff = detection.time - target_detection.last().time
+                    if time_diff < max_time_diff and detection.detector in target_nodes:
+                        count_other[car] = count_other.get(car, 0) + 1
+            
+        
+        # for detection in other_detections:
+        #     time_diff = detection.time - target_detection.last().time
+        #     if time_diff < max_time_diff and detection.detector in target_nodes:
+        #         count_other[detection] = count_other.get(detection, 0) + 1
+        print(count_other)
         count_other = list(filter(lambda x: x[1] >= nodes_count, count_other.items()))
+        print(count_other)
         count_other = list(sorted(count_other, key=lambda x: x[1], reverse=True))
+        print(count_other)
         Adjacency = list(map(lambda x: x[0], count_other))
         
-        Cars ={}
-        for i in Adjacency:
-            Cars[i.car.name] = Cars.get(i.car.name, []) + [DetectionSerializer(i).data]
+        data = CarSerializer(Adjacency, many=True).data
         
-        return Response(Cars, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
         
             
         
