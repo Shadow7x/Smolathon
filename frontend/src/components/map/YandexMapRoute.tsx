@@ -71,7 +71,7 @@ function YandexMapRoute({
     multiRoutes.current = [];
     mapInstance.current.geoObjects.removeAll();
 
-    cars.forEach((car, carIndex) => {
+    cars.slice(1).forEach((car, carIndex) => {
       // Извлекаем все detections и сортируем по времени
       const detections = car.workloads
         .flatMap((wl) => wl.detections)
