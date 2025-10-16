@@ -168,7 +168,6 @@ function YandexMapRoute({
     initMap();
   }, [mapLoaded, routes, routeType]);
 
-  // Функция для получения цвета по индексу
   const getColorByIndex = (index: number): string => {
     const colors = [
       "#1e98ff", // синий

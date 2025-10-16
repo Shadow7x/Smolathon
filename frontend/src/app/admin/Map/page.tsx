@@ -102,7 +102,7 @@ export default function Map() {
     },
   ];
   return (
-    <div>
+    <div className="px-6">
       <Carsine />
       <YandexMapRoute routes={routes} routeType="auto" />
       <AnaliticsMap />
