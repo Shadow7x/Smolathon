@@ -73,3 +73,39 @@ class MeritsSerializer(serializers.ModelSerializer):
         model = Merits
         fields = '__all__'
 
+
+
+class DetectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Detector
+        fields = '__all__'
+    
+
+class DetectorRouteSerializer(serializers.ModelSerializer):
+    detectorStart = DetectorSerializer()
+    detectorEnd = DetectorSerializer()
+    class Meta:
+        model = DetectorRoute
+        fields = '__all__'
+    
+class DetectionSerializer(serializers.ModelSerializer):
+    detector = DetectorSerializer()
+
+    
+    class  Meta:
+        model = Detection
+        fields = '__all__'    
+    
+    
+class WorkloadSerializer(serializers.ModelSerializer):
+    detections = DetectionSerializer(many=True)
+    class Meta:
+        model = Workload
+        fields = '__all__'
+
+class CarSerializer(serializers.ModelSerializer):
+    workloads = WorkloadSerializer(many=True)
+    class Meta:
+        model = Car
+        fields = '__all__'
+

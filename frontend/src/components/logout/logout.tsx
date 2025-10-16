@@ -2,13 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/hooks/user-context";
 import { useNotificationManager } from "@/hooks/notification-context";
-import { useRouter } from "next/navigation";
 import axi from "@/utils/api";
 
 export default function Logout() {
   const { clearUser } = useUser();
   const { addNotification } = useNotificationManager();
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -22,7 +20,7 @@ export default function Logout() {
           status: 401,
           createdAt: new Date().toISOString(),
         });
-        router.push("/"); // 🔄 если токена нет — на главную
+        window.location.href = "/"; // ✅ Переход + обновление
         return;
       }
 
@@ -31,7 +29,7 @@ export default function Logout() {
         validateStatus: () => true,
       });
 
-      // ✅ Очищаем локальные данные независимо от результата
+      // ✅ Очищаем всё независимо от результата
       localStorage.removeItem("token");
       clearUser?.();
 
@@ -39,13 +37,14 @@ export default function Logout() {
         id: Date.now().toString(),
         title: "Выход выполнен",
         description:
-          res.status === 200 ? "Вы успешно вышли из аккаунта" : "Сессия завершена локально",
+          res.status === 200
+            ? "Вы успешно вышли из аккаунта"
+            : "Сессия завершена локально",
         status: 200,
         createdAt: new Date().toISOString(),
       });
 
-      // 🚀 После выхода всегда переходим на главную
-      router.push("/");
+      window.location.href = "/"; // ✅ Мгновенный редирект с reload
     } catch (err) {
       localStorage.removeItem("token");
       clearUser?.();
@@ -58,7 +57,7 @@ export default function Logout() {
         createdAt: new Date().toISOString(),
       });
 
-      router.push("/"); // 🚀 гарантированный переход на главную
+      window.location.href = "/"; // ✅ fallback переход
     }
   };
 
