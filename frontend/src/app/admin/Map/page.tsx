@@ -8,6 +8,7 @@ import CreateDetector from "@/widgets/Map/createDetector/createDetector";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function Map() {
   const [routes, setRoute] = useState([]);
@@ -28,8 +29,9 @@ export default function Map() {
   }, []);
 
   return (
+    
     <div className="px-6">
-      <Carsine
+      < Carsine
         isAccompaniment={isAccompaniment}
         setIsAccompaniment={setIsAccompaniment}
       />
@@ -37,31 +39,43 @@ export default function Map() {
       {!isAccompaniment ? (
         <>
           <YandexMapRoute cars={routes} routeType="auto" />
-          <AnaliticsMap />
-          <div className="p-4 min-h-[300px] flex flex-col justify-around outline-solid mt-4 rounded-2xl ">
-            <div className="flex mt-4 w-[1014px] justify-center">
-              {activeTab === "map" && <AnaliticsMap />}
-              {activeTab === "create" && <CreateDetector />}
-            </div>
-            <div className="flex items-center max-w-[1400px] justify-center">
-              <div className="flex w-[450px] justify-between">
-                <Button
-                  className="w-[200px]"
-                  variant={activeTab === "map" ? "default" : "outline"}
-                  onClick={() => setActiveTab("map")}
-                >
-                  Загрузить авто
-                </Button>
-                <Button
-                  className="w-[200px]"
-                  variant={activeTab === "create" ? "default" : "outline"}
-                  onClick={() => setActiveTab("create")}
-                >
-                  Загрузить детекторы
-                </Button>
-              </div>
-            </div>
-          </div>
+
+        {/* Контент вкладок */}
+        <div className="flex mt-4 w-[1014px] justify-center mx-auto">
+          {activeTab === "map" && <AnaliticsMap />}
+          {activeTab === "create" && <CreateDetector />}
+        </div>
+        <div
+          className={cn(
+            "relative flex items-center rounded-[1rem] overflow-hidden bg-gray-100 mb-4",
+            "w-[450px] h-[2.5rem] mx-auto"
+          )}
+        >
+          <div
+            className={cn(
+              "absolute top-0 left-0 h-full w-1/2 bg-black rounded-[1rem] transition-transform duration-300",
+              activeTab === "map" ? "translate-x-0" : "translate-x-full"
+            )}
+          />
+          <button
+            className={cn(
+              "relative z-10 w-1/2 h-full text-sm font-medium transition-colors duration-200",
+              activeTab === "map" ? "text-white" : "text-gray-600"
+            )}
+            onClick={() => setActiveTab("map")}
+          >
+            Загрузить авто
+          </button>
+          <button
+            className={cn(
+              "relative z-10 w-1/2 h-full text-sm font-medium transition-colors duration-200",
+              activeTab === "create" ? "text-white" : "text-gray-600"
+            )}
+            onClick={() => setActiveTab("create")}
+          >
+            Загрузить детекторы
+          </button>
+        </div>
           <div>
             <TableDetector />
             <TableCars />
