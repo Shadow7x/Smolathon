@@ -8,26 +8,32 @@ declare global {
   }
 }
 
-interface Point {
-  latitude: number;
-  longitude: number;
-  name?: string;
+interface Detection {
+  detector: {
+    latitude: number;
+    longitude: number;
+    name: string;
+  };
 }
 
-export interface Route {
-  points: Point[];
-  color?: string;
-  name?: string;
+interface Workload {
+  detections: Detection[];
+}
+
+interface CarData {
+  id: number;
+  name: string;
+  workloads: Workload[];
 }
 
 interface YandexMapRouteProps {
-  routes: Route[];
+  cars: CarData[];
   routeType?: "auto" | "masstransit" | "pedestrian" | "bicycle";
   className?: string;
 }
 
 function YandexMapRoute({
-  routes,
+  cars,
   routeType = "auto",
   className = "h-[500px] w-full",
 }: YandexMapRouteProps) {
@@ -41,143 +47,118 @@ function YandexMapRoute({
       const script = document.createElement("script");
       script.src = `https://api-maps.yandex.ru/2.1/?apikey=43446600-2296-4713-9c16-4baf8af7f5fd&lang=ru_RU`;
       script.async = true;
-      script.onload = () => {
-        window.ymaps.ready(() => {
-          setMapLoaded(true);
-        });
-      };
+      script.onload = () => window.ymaps.ready(() => setMapLoaded(true));
       document.head.appendChild(script);
     } else {
-      window.ymaps.ready(() => {
-        setMapLoaded(true);
-      });
+      window.ymaps.ready(() => setMapLoaded(true));
     }
 
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.destroy();
-      }
+      if (mapInstance.current) mapInstance.current.destroy();
     };
   }, []);
 
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || routes.length === 0) return;
-
+    if (!mapLoaded || !mapRef.current || cars.length === 0) return;
     if (mapInstance.current) return;
 
-    const initMap = async () => {
-      try {
-        mapInstance.current = new window.ymaps.Map(mapRef.current, {
-          center: [55.7558, 37.6173],
-          zoom: 10,
-          controls: [],
-        });
+    mapInstance.current = new window.ymaps.Map(mapRef.current, {
+      center: [55.7558, 37.6173],
+      zoom: 10,
+      controls: [],
+    });
 
-        multiRoutes.current = [];
-        mapInstance.current.geoObjects.removeAll();
+    multiRoutes.current = [];
+    mapInstance.current.geoObjects.removeAll();
 
-        routes.forEach((route, index) => {
-          const routeColor = route.color || getColorByIndex(index);
+    cars.forEach((car, carIndex) => {
+      // Извлекаем все detections и сортируем по времени
+      const detections = car.workloads
+        .flatMap((wl) => wl.detections)
+        .sort(
+          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+        );
 
-          const referencePoints = route.points.map((point) => [
-            point.latitude,
-            point.longitude,
-          ]);
+      if (detections.length === 0) return;
 
-          const multiRoute = new window.ymaps.multiRouter.MultiRoute(
-            {
-              referencePoints,
-              params: {
-                routingMode: routeType,
-              },
-            },
-            {
-              boundsAutoApply: false,
-              wayPointVisible: false,
-              wayPointStartIconColor: routeColor,
-              wayPointFinishIconColor: routeColor,
-              routeActiveStrokeWidth: 5,
-              routeActiveStrokeColor: routeColor,
-              routeStrokeStyle: "solid",
-              pinIconFillColor: routeColor,
-              routeActivePedestrianNoise: false,
-              routeOpenBalloonOnClick: false,
-              routePanel: false,
-              viaPointVisible: false,
-              routeEditorDrawOver: false,
-              routeEditorMidPointsType: "none",
-            }
-          );
+      const referencePoints = detections.map((d) => [
+        d.detector.latitude,
+        d.detector.longitude,
+      ]);
+      const routeColor = getColorByIndex(carIndex);
 
-          multiRoutes.current.push(multiRoute);
-          mapInstance.current.geoObjects.add(multiRoute);
-
-          if (route.points.length > 0) {
-            const startPoint = route.points[0];
-            const endPoint = route.points[route.points.length - 1];
-
-            const startPlacemark = new window.ymaps.Placemark(
-              [startPoint.latitude, startPoint.longitude],
-              {},
-              {
-                preset: "islands#circleIcon",
-                iconColor: routeColor,
-              }
-            );
-
-            const endPlacemark = new window.ymaps.Placemark(
-              [endPoint.latitude, endPoint.longitude],
-              {},
-              {
-                preset: "islands#circleIcon",
-                iconColor: routeColor,
-              }
-            );
-
-            mapInstance.current.geoObjects.add(startPlacemark);
-            mapInstance.current.geoObjects.add(endPlacemark);
-
-            if (route.points.length > 2) {
-              for (let i = 1; i < route.points.length - 1; i++) {
-                const intermediatePoint = route.points[i];
-                const intermediatePlacemark = new window.ymaps.Placemark(
-                  [intermediatePoint.latitude, intermediatePoint.longitude],
-                  {},
-                  {
-                    preset: "islands#circleDotIcon",
-                    iconColor: routeColor,
-                  }
-                );
-                mapInstance.current.geoObjects.add(intermediatePlacemark);
-              }
-            }
-          }
-        });
-
-        if (routes.length > 0) {
-          mapInstance.current.setBounds(
-            mapInstance.current.geoObjects.getBounds(),
-            { checkZoomRange: true, duration: 300 }
-          );
+      const multiRoute = new window.ymaps.multiRouter.MultiRoute(
+        {
+          referencePoints,
+          params: { routingMode: routeType },
+        },
+        {
+          boundsAutoApply: false,
+          wayPointVisible: false,
+          routeActiveStrokeWidth: 5,
+          routeActiveStrokeColor: routeColor,
+          routeStrokeStyle: "solid",
+          pinIconFillColor: routeColor,
+          routeOpenBalloonOnClick: false,
         }
-      } catch (error) {
-        console.error("Error initializing Yandex Map:", error);
-      }
-    };
+      );
 
-    initMap();
-  }, [mapLoaded, routes, routeType]);
+      multiRoutes.current.push(multiRoute);
+      mapInstance.current.geoObjects.add(multiRoute);
+
+      // Маркеры начала и конца маршрута
+      const startPlacemark = new window.ymaps.Placemark(
+        referencePoints[0],
+        {},
+        {
+          preset: "islands#circleIcon",
+          iconColor: routeColor,
+        }
+      );
+      const endPlacemark = new window.ymaps.Placemark(
+        referencePoints[referencePoints.length - 1],
+        {},
+        {
+          preset: "islands#circleIcon",
+          iconColor: routeColor,
+        }
+      );
+      mapInstance.current.geoObjects.add(startPlacemark);
+      mapInstance.current.geoObjects.add(endPlacemark);
+
+      // Промежуточные точки
+      for (let i = 1; i < referencePoints.length - 1; i++) {
+        const intermediatePlacemark = new window.ymaps.Placemark(
+          referencePoints[i],
+          {},
+          {
+            preset: "islands#circleDotIcon",
+            iconColor: routeColor,
+          }
+        );
+        mapInstance.current.geoObjects.add(intermediatePlacemark);
+      }
+    });
+
+    // Устанавливаем границы карты
+    if (multiRoutes.current.length > 0) {
+      mapInstance.current.setBounds(
+        mapInstance.current.geoObjects.getBounds(),
+        { checkZoomRange: true, duration: 300 }
+      );
+    }
+  }, [mapLoaded, cars, routeType]);
 
   const getColorByIndex = (index: number): string => {
     const colors = [
-      "#1e98ff", // синий
-      "#ff4444", // красный
-      "#00c851", // зеленый
-      "#ffbb33", // оранжевый
-      "#aa66cc", // фиолетовый
-      "#33b5e5", // голубой
-      "#ff6b6b", // розовый
-      "#4db6ac", // бирюзовый
+      "#1e98ff",
+      "#ff4444",
+      "#00c851",
+      "#ffbb33",
+      "#aa66cc",
+      "#33b5e5",
+      "#ff6b6b",
+      "#4db6ac",
     ];
     return colors[index % colors.length];
   };
