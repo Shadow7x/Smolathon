@@ -10,21 +10,20 @@ import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
 
 export default function Map() {
-  const [routes, setRoute] = useState([]);
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
+  const [segments, setSegments] = useState<Record<string, any>>({});
 
   useEffect(() => {
-    const fetchWorkload = async () => {
+    const fetchSegments = async () => {
       try {
-        const response = await axi.get("analytics/workload/get");
-        setRoute(response.data);
-      } catch (error) {
-        console.error("Ошибка при загрузке:", error);
+        const res = await axi.get("analytics/workload/get");
+        setSegments(res.data);
+      } catch (err) {
+        console.error(err);
       }
     };
-
-    fetchWorkload();
+    fetchSegments();
   }, []);
 
   return (
@@ -36,8 +35,7 @@ export default function Map() {
 
       {!isAccompaniment ? (
         <>
-          <YandexMapRoute cars={routes} routeType="auto" />
-          <AnaliticsMap />
+          <YandexMapRoute segmentsData={segments} />
           <div className="p-4 min-h-[300px] flex flex-col justify-around outline-solid mt-4 rounded-2xl ">
             <div className="flex mt-4 w-[1014px] justify-center">
               {activeTab === "map" && <AnaliticsMap />}
