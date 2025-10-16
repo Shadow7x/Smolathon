@@ -89,7 +89,7 @@ export default function LeftSidePanel() {
             </button>
           )}
         </CardContent>
-
+        
         {/* Скачать отчет */}
         <CardContent className={`${menuItemClass} group`}>
           <img src="/icons/loding.svg" alt="" />
@@ -103,6 +103,21 @@ export default function LeftSidePanel() {
             </button>
           )}
         </CardContent>
+
+        {/*Карта*/}
+        <CardContent className={`${menuItemClass} group`}>
+          <img src="/icons/map.svg" alt=""/>
+          {!isCollapsed && (
+            <button 
+              className={`${isActive("/admin/Map") ? "text-black" :"text-[#636363]"} group-hover:text-black text-left`}
+              onClick={() => handleClick("/admin/Map")}
+              
+            >
+              Карта
+            </button>
+          )}
+        </CardContent>
+
 
         {/* Разделитель */}
         {!isCollapsed && <CardContent className="flex items-center gap-1"><div className="h-[2px] bg-[#636363] w-full"></div></CardContent>}
