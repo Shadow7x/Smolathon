@@ -98,8 +98,8 @@ export default function DocsMainSection() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-2">Документы</h1>
+    <div className="w-full max-w-4xl mx-auto px-6">
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold pb-6 text-center">Документы</h1>
       <p className="text-gray-600 text-center mb-6">
         Здесь вы можете найти все необходимые документы
       </p>

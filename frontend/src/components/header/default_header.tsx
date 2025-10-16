@@ -36,7 +36,7 @@ export default function Default_Header() {
 
   return (
     <header
-      className={`absolute top-0 left-0 right-0 flex items-center justify-between py-5 px-[clamp(2rem,5vw,10rem)] z-50 transition-colors duration-300 ${headerClasses}`}
+      className={`flex items-center justify-between py-5 px-[clamp(2rem,5vw,10rem)] z-50 transition-colors duration-300 ${headerClasses}`}
     >
       <Link href="/" className="flex items-center gap-6">
         <div className="relative w-32 h-15 sm:w-50 sm:h-24 md:max-w-[12.5rem] md:max-h-[6rem] flex-shrink-0">
@@ -93,7 +93,10 @@ export default function Default_Header() {
       <div className="lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" className="bg-transparent p-2">
+            <Button 
+              variant="ghost" 
+              className={`bg-transparent p-2 ${pathname === "/" || pathname === "/news" ? "hover:bg-black rounded transition-colors" : ""}`}
+            >
               <Menu
                 className={isTransparent ? "text-white" : "text-black"}
                 style={{ width: "30px", height: "30px" }}
