@@ -6,9 +6,10 @@ from core.utils.parsers.excelParser import ExcelParser
 from core.models.models import Detection, Detector, Car, Workload
 from django.db import transaction
 from core.utils.auth_decor import token_required,admin_required
-from core.utils.serializers import CarSerializer
+from core.utils.serializers import CarSerializer, DetectionSerializer
 import  pandas as pd
 from django.utils import timezone
+from datetime import timedelta
 
 
 
@@ -107,11 +108,54 @@ def getAdjacencies(request: Request):
         target = Car.objects.get(id=get.get("target"))
         potencialAdjacencies = Detection.objects.all().exclude(car=target)
         if get.get("time_interval"):
-            target_detection = target.workloads.filter(time_interval=get)
-        nodes_count = get.get("nodes_count", 1)
-        target_detection = target_detection.detections.all()
+            target_workloads = target.workloads.filter(time_interval=get.get("time_interval"))
+        else:
+            target_workloads = target.workloads.all()
+        nodes_count = int(get.get("nodes_count", 1))
+        print(target)
+        target_detection = Detection.objects.filter(
+        id__in=target_workloads.values_list("detections__id", flat=True)
+    ).order_by("time")
+        
         target_nodes=[i.detector for i in target_detection]
         
+        max_time_diff = timedelta(minutes=int(get.get("max_time_diff", 5)))
+        
+        other_detections = Detection.objects.exclude(car=target).select_related("car", "detector")
+        
+        count_other ={} 
+        
+        other_cars = Car.objects.exclude(id=target.id)
+        
+        for car in other_cars:
+            if get.get("time_interval"):
+                other_workload= car.workloads.filter(time_interval=get.get("time_interval"))
+            else:
+                other_workload= car.workloads.all()
+            for workload in other_workload:
+                for detection in workload.detections.all():
+
+                    time_diff = detection.time - target_detection.last().time
+                    if time_diff < max_time_diff and detection.detector in target_nodes:
+                        count_other[car] = count_other.get(car, 0) + 1
+            
+        
+        # for detection in other_detections:
+        #     time_diff = detection.time - target_detection.last().time
+        #     if time_diff < max_time_diff and detection.detector in target_nodes:
+        #         count_other[detection] = count_other.get(detection, 0) + 1
+        print(count_other)
+        count_other = list(filter(lambda x: x[1] >= nodes_count, count_other.items()))
+        print(count_other)
+        count_other = list(sorted(count_other, key=lambda x: x[1], reverse=True))
+        print(count_other)
+        Adjacency = list(map(lambda x: x[0], count_other))
+        
+        data = CarSerializer(Adjacency, many=True).data
+        
+        return Response(data, status=status.HTTP_200_OK)
+        
+            
         
     else:
         return Response("Некоректный запрос", status=status.HTTP_400_BAD_REQUEST)
