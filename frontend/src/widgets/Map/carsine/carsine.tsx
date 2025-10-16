@@ -128,8 +128,7 @@ export default function Carsine({
                     { label: "20 минут", value: "20" },
                     { label: "30 минут", value: "30" },
                     { label: "40 минут", value: "40" },
-                    { label: "50 минут", value: "50" },
-                    { label: "1 час", value: "60" },
+
                   ]}
                   onChange={(v) => handleChange("duration", v)}
                 />
