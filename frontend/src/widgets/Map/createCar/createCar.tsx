@@ -75,7 +75,8 @@ export default function WorkloadUpload({ yearFilter, fetchWorkloads, fetchAllWor
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-t-2xl">
+    <div className="flex flex-col w-[500px] h-[100px] justify-between">
+      <h1>Загрузка файлов</h1>
       <input
         type="file"
         accept=".xlsx"

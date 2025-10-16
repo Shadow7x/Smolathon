@@ -127,3 +127,7 @@ body {
   min-height: 100%;
   overflow-x: hidden;
 }
+
+button, select, input[type="file"] {
+  cursor: pointer;
+}
