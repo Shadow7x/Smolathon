@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface CustomSelectProps {
   options: { label: string; value: string }[];
@@ -8,6 +8,7 @@ interface CustomSelectProps {
   placeholder?: string;
   className?: string;
   onChange?: (value: string) => void;
+  defaultt?:string;
 }
 
 const CustomSelect = ({
@@ -16,15 +17,24 @@ const CustomSelect = ({
   placeholder = "Выберите вариант",
   className,
   onChange,
+  defaultt,
 }: CustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<string>("");
-
+  console.log(defaultt)
   const handleSelect = (value: string) => {
     setSelected(value);
     setIsOpen(false);
     onChange?.(value);
   };
+
+   useEffect(() => {
+    console.log(defaultt)
+    if (defaultt) {
+      setSelected(defaultt);
+    }
+    onChange?.(defaultt);
+  }, [defaultt]);
 
   return (
     <div className={cn("relative w-full", className)}>

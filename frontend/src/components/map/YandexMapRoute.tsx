@@ -8,33 +8,24 @@ declare global {
   }
 }
 
-interface Detection {
-  detector: {
-    latitude: number;
-    longitude: number;
-    name: string;
+interface SegmentData {
+  [key: string]: {
+    count: number;
+    start: [number, number]; // [long, lat]
+    end: [number, number]; // [long, lat]
+    speed: number;
+    time: number;
   };
-  time?: string; // добавлено, так как вы сортируете по времени
-}
-
-interface Workload {
-  detections: Detection[];
-}
-
-interface CarData {
-  id: number;
-  name: string;
-  workloads: Workload[];
 }
 
 interface YandexMapRouteProps {
-  cars: CarData[];
+  segmentsData: SegmentData;
   routeType?: "auto" | "masstransit" | "pedestrian" | "bicycle";
   className?: string;
 }
 
-function YandexMapRoute({
-  cars,
+export default function YandexMapRoute({
+  segmentsData,
   routeType = "auto",
   className = "h-[500px] w-full",
 }: YandexMapRouteProps) {
@@ -43,12 +34,13 @@ function YandexMapRoute({
   const mapInstance = useRef<any>(null);
   const multiRoutes = useRef<any[]>([]);
 
-  // Загрузка скрипта Yandex Maps API
+  // Загрузка Yandex Maps API
   useEffect(() => {
     if (!window.ymaps && !document.querySelector("#ymaps-script")) {
       const script = document.createElement("script");
       script.id = "ymaps-script";
-      script.src = `https://api-maps.yandex.ru/2.1/?apikey=43446600-2296-4713-9c16-4baf8af7f5fd&lang=ru_RU`;
+      script.src =
+        "https://api-maps.yandex.ru/2.1/?apikey=43446600-2296-4713-9c16-4baf8af7f5fd&lang=ru_RU";
       script.async = true;
       script.onload = () => window.ymaps.ready(() => setMapLoaded(true));
       document.head.appendChild(script);
@@ -63,42 +55,30 @@ function YandexMapRoute({
     };
   }, []);
 
-  // Инициализация карты и маршрутов
   useEffect(() => {
-    if (
-      !mapLoaded ||
-      !mapRef.current ||
-      !Array.isArray(cars) ||
-      cars.length === 0
-    )
-      return;
-    if (mapInstance.current) return;
+    if (!mapLoaded || !mapRef.current || !segmentsData) return;
 
-    mapInstance.current = new window.ymaps.Map(mapRef.current, {
-      center: [55.7558, 37.6173],
-      zoom: 10,
-      controls: [],
-    });
+    if (!mapInstance.current) {
+      mapInstance.current = new window.ymaps.Map(mapRef.current, {
+        center: [54.7846, 32.0515], // центр можно взять первый сегмент
+        zoom: 12,
+        controls: [],
+      });
+    }
 
-    multiRoutes.current = [];
     mapInstance.current.geoObjects.removeAll();
+    multiRoutes.current = [];
 
-    cars.slice(0, 1).forEach((car, carIndex) => {
-      const detections = car.workloads
-        .flatMap((wl) => wl.detections)
-        .sort(
-          (a, b) =>
-            new Date(a.time || 0).getTime() - new Date(b.time || 0).getTime()
-        );
+    const keys = Object.keys(segmentsData);
+    keys.forEach((key, index) => {
+      const segment = segmentsData[key];
 
-      if (detections.length === 0) return;
+      // Важно: новые данные [long, lat] → [lat, long]
+      const start = [segment.start[1], segment.start[0]];
+      const end = [segment.end[1], segment.end[0]];
+      const referencePoints = [start, end];
 
-      const referencePoints = detections.map((d) => [
-        d.detector.latitude,
-        d.detector.longitude,
-      ]);
-
-      const routeColor = getColorByIndex(carIndex);
+      const routeColor = getColorByIndex(index);
 
       const multiRoute = new window.ymaps.multiRouter.MultiRoute(
         {
@@ -111,17 +91,18 @@ function YandexMapRoute({
           routeActiveStrokeWidth: 5,
           routeActiveStrokeColor: routeColor,
           routeStrokeStyle: "solid",
-          pinIconFillColor: routeColor,
           routeOpenBalloonOnClick: false,
         }
       );
+      multiRoute.model.setParams({ results: 1 });
 
       multiRoutes.current.push(multiRoute);
+
       mapInstance.current.geoObjects.add(multiRoute);
 
-      // Начало и конец маршрута
+      // Начальная и конечная точки
       const startPlacemark = new window.ymaps.Placemark(
-        referencePoints[0],
+        start,
         {},
         {
           preset: "islands#circleIcon",
@@ -129,51 +110,44 @@ function YandexMapRoute({
         }
       );
       const endPlacemark = new window.ymaps.Placemark(
-        referencePoints[referencePoints.length - 1],
+        end,
         {},
         {
           preset: "islands#circleIcon",
           iconColor: routeColor,
         }
       );
+
       mapInstance.current.geoObjects.add(startPlacemark);
       mapInstance.current.geoObjects.add(endPlacemark);
-
-      // Промежуточные точки
-      for (let i = 1; i < referencePoints.length - 1; i++) {
-        const intermediatePlacemark = new window.ymaps.Placemark(
-          referencePoints[i],
-          {},
-          {
-            preset: "islands#circleDotIcon",
-            iconColor: routeColor,
-          }
-        );
-        mapInstance.current.geoObjects.add(intermediatePlacemark);
-      }
     });
 
-    // Устанавливаем границы карты
     if (multiRoutes.current.length > 0) {
       mapInstance.current.setBounds(
         mapInstance.current.geoObjects.getBounds(),
         { checkZoomRange: true, duration: 300 }
       );
     }
-  }, [mapLoaded, cars, routeType]);
+  }, [mapLoaded, segmentsData, routeType]);
 
   const getColorByIndex = (index: number): string => {
-    const colors = [
-      "#1e98ff",
-      "#ff4444",
-      "#00c851",
-      "#ffbb33",
-      "#aa66cc",
-      "#33b5e5",
-      "#ff6b6b",
-      "#4db6ac",
-    ];
-    return colors[index % colors.length];
+    const hue = (index * 137.5) % 360;
+    const c = 255;
+    const x = Math.round(c * (1 - Math.abs(((hue / 60) % 2) - 1)));
+    const m = 0;
+    let r = 0,
+      g = 0,
+      b = 0;
+
+    if (hue < 60) [r, g, b] = [c, x, 0];
+    else if (hue < 120) [r, g, b] = [x, c, 0];
+    else if (hue < 180) [r, g, b] = [0, c, x];
+    else if (hue < 240) [r, g, b] = [0, x, c];
+    else if (hue < 300) [r, g, b] = [x, 0, c];
+    else [r, g, b] = [c, 0, x];
+
+    const toHex = (v: number) => v.toString(16).padStart(2, "0");
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
   return (
@@ -182,5 +156,3 @@ function YandexMapRoute({
     </div>
   );
 }
-
-export default YandexMapRoute;
