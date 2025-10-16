@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +10,7 @@ import { useNotificationManager } from "@/hooks/notification-context";
 import axi from "@/utils/api";
 
 export default function AuthenticationPage() {
-  const { user, fetchUser } = useUser();
+  const { user, isLoading, fetchUser } = useUser(); // ✅ добавляем isLoading
   const { addNotification } = useNotificationManager();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -31,12 +30,10 @@ export default function AuthenticationPage() {
       });
 
       if (res.status === 200 && res.data.token) {
-        // сохраняем токен
         localStorage.setItem("token", res.data.token);
 
         let userData = res.data.user;
 
-        // если user не пришёл — пытаемся получить с бэкенда
         if (!userData && fetchUser) {
           try {
             userData = await fetchUser();
@@ -45,13 +42,10 @@ export default function AuthenticationPage() {
           }
         }
 
-        // если и тут пусто — пробуем достать из localStorage
         if (!userData) {
           const cached = localStorage.getItem("user");
           if (cached) userData = JSON.parse(cached);
         }
-
-        console.log("User after login:", userData);
 
         if (userData) {
           localStorage.setItem("user", JSON.stringify(userData));
@@ -67,11 +61,11 @@ export default function AuthenticationPage() {
 
         formRef.current?.reset();
 
-        // 🚀 Надёжный редирект
+        // 🚀 Переход с перезагрузкой
         if (userData?.username === "admin" || userData?.is_superuser) {
-          router.push("/admin");
+          window.location.href = "/admin";
         } else {
-          router.push("/");
+          window.location.href = "/";
         }
       } else {
         addNotification({
@@ -87,6 +81,16 @@ export default function AuthenticationPage() {
     }
   };
 
+  // 🕓 Пока идёт загрузка пользователя — показываем спиннер
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // ✅ Если пользователь уже авторизован — показываем Logout
   if (user) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -95,6 +99,7 @@ export default function AuthenticationPage() {
     );
   }
 
+  // 🧾 Если пользователь не авторизован — форма логина
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <form
@@ -118,14 +123,14 @@ export default function AuthenticationPage() {
 
         <div className="mb-6">
           <Label htmlFor="password">Password</Label>
-            <Input
-              name="password"
-              type="password"
-              placeholder="Введите пароль"
-              className="mt-1"
-              autoComplete="off" // ✅ безопасный вариант
-              required
-            />
+          <Input
+            name="password"
+            type="password"
+            placeholder="Введите пароль"
+            className="mt-1"
+            autoComplete="off"
+            required
+          />
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
