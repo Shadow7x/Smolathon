@@ -1,9 +1,12 @@
 "use client";
 import Logout from "../logout/logout";
 import Image from "next/image";
+import { useUser } from "@/hooks/user-context";
 
 export default function Admin_Header() {
-  return (
+  const { user } = useUser();
+
+  return user && (
     <header
       className={`
     flex flex-wrap items-center gap-3.5 
