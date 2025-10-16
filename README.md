@@ -4,7 +4,7 @@
 3. py -m venv .venv
 4. .venv\Scripts\activate
 5. pip install poetry
-6. poetry install
+6. poetry update
 7. cd back
 8. py manage.py runserver
 

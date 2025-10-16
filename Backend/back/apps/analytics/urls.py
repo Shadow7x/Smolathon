@@ -8,4 +8,6 @@ urlpatterns = [
     path("trafficLight/", include("apps.analytics.trafficLight.urls")),
     path("DTP/", include("apps.analytics.DTP.urls")),
     path("reports/", include("apps.analytics.report.urls")), 
+    path("workload/", include("apps.analytics.workload.urls")), 
+    path("detectors/", include("apps.analytics.Detectors.urls")), 
 ]

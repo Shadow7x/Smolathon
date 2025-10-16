@@ -119,6 +119,33 @@ class Merits(models.Model):
     parents_phone = models.TextField()
     parents_email = models.EmailField()
     address = models.TextField()
+    
+class Detector(models.Model):
+    name = models.TextField()
+    latitude = models.FloatField()
+    longitude = models.FloatField() 
+    
+class DetectorRoute(models.Model):
+    detectorStart = models.ForeignKey(Detector, on_delete=models.CASCADE, related_name="detectorStart")
+    detectorEnd = models.ForeignKey(Detector, on_delete=models.CASCADE, related_name="detectorEnd") 
+    count = models.PositiveIntegerField()
+    
+class Detection(models.Model):
+    detector = models.ForeignKey(Detector, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    car = models.ForeignKey("Car",  on_delete=models.CASCADE)
+    speed = models.FloatField()
+
+class Workload(models.Model):
+    TIMES_INTERVAL = [(f"{hour:02d}:00-{hour+2:02d}:00", f"{hour:02d}:00-{hour+2:02d}:00") for hour in range(0, 24, 2)]
+    time_interval = models.CharField(max_length=20, choices=TIMES_INTERVAL)
+    detections = models.ManyToManyField(Detection)
+
+
+class Car(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+    workloads=  models.ManyToManyField(Workload)
+    
 
 class authorizedToken(Token):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
