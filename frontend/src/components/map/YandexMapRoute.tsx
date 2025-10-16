@@ -8,6 +8,33 @@ declare global {
   }
 }
 
+interface Detector {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
+interface Detection {
+  id: number;
+  detector: Detector;
+  time: string;
+  speed: number;
+  car: number;
+}
+
+interface Workload {
+  id: number;
+  detections: Detection[];
+  time_interval: string;
+}
+
+interface CarRouteData {
+  id: number;
+  workloads: Workload[];
+  name: string;
+}
+
 interface Point {
   latitude: number;
   longitude: number;
@@ -21,13 +48,13 @@ export interface Route {
 }
 
 interface YandexMapRouteProps {
-  routes: Route[];
+  cars: CarRouteData[];
   routeType?: "auto" | "masstransit" | "pedestrian" | "bicycle";
   className?: string;
 }
 
 function YandexMapRoute({
-  routes,
+  cars,
   routeType = "auto",
   className = "h-[500px] w-full",
 }: YandexMapRouteProps) {
@@ -61,8 +88,7 @@ function YandexMapRoute({
   }, []);
 
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || routes.length === 0) return;
-
+    if (!mapLoaded || !mapRef.current || cars.length === 0) return;
     if (mapInstance.current) return;
 
     const initMap = async () => {
@@ -76,20 +102,27 @@ function YandexMapRoute({
         multiRoutes.current = [];
         mapInstance.current.geoObjects.removeAll();
 
-        routes.forEach((route, index) => {
-          const routeColor = route.color || getColorByIndex(index);
+        cars.slice(4, 5).forEach((car, index) => {
+          const routeColor = getColorByIndex(index);
 
-          const referencePoints = route.points.map((point) => [
-            point.latitude,
-            point.longitude,
+          // Собираем точки из всех детекций по времени
+          const allDetections = car.workloads
+            .flatMap((w) => w.detections)
+            .sort(
+              (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+            );
+
+          const referencePoints = allDetections.map((d) => [
+            d.detector.latitude,
+            d.detector.longitude,
           ]);
+
+          if (referencePoints.length === 0) return;
 
           const multiRoute = new window.ymaps.multiRouter.MultiRoute(
             {
               referencePoints,
-              params: {
-                routingMode: routeType,
-              },
+              params: { routingMode: routeType },
             },
             {
               boundsAutoApply: false,
@@ -100,61 +133,35 @@ function YandexMapRoute({
               routeActiveStrokeColor: routeColor,
               routeStrokeStyle: "solid",
               pinIconFillColor: routeColor,
-              routeActivePedestrianNoise: false,
               routeOpenBalloonOnClick: false,
               routePanel: false,
               viaPointVisible: false,
-              routeEditorDrawOver: false,
-              routeEditorMidPointsType: "none",
             }
           );
 
           multiRoutes.current.push(multiRoute);
           mapInstance.current.geoObjects.add(multiRoute);
+          const totalPoints = allDetections.length;
 
-          if (route.points.length > 0) {
-            const startPoint = route.points[0];
-            const endPoint = route.points[route.points.length - 1];
+          allDetections.forEach((d, idx) => {
+            const factor = totalPoints > 1 ? idx / (totalPoints - 1) : 0; // 0 → начало, 1 → конец
+            const color = interpolateColor("#ff0000", "#00ff00", factor); // красный → зелёный
 
-            const startPlacemark = new window.ymaps.Placemark(
-              [startPoint.latitude, startPoint.longitude],
+            const placemark = new window.ymaps.Placemark(
+              [d.detector.latitude, d.detector.longitude],
               {},
               {
                 preset: "islands#circleIcon",
-                iconColor: routeColor,
+                iconColor: color,
               }
             );
 
-            const endPlacemark = new window.ymaps.Placemark(
-              [endPoint.latitude, endPoint.longitude],
-              {},
-              {
-                preset: "islands#circleIcon",
-                iconColor: routeColor,
-              }
-            );
-
-            mapInstance.current.geoObjects.add(startPlacemark);
-            mapInstance.current.geoObjects.add(endPlacemark);
-
-            if (route.points.length > 2) {
-              for (let i = 1; i < route.points.length - 1; i++) {
-                const intermediatePoint = route.points[i];
-                const intermediatePlacemark = new window.ymaps.Placemark(
-                  [intermediatePoint.latitude, intermediatePoint.longitude],
-                  {},
-                  {
-                    preset: "islands#circleDotIcon",
-                    iconColor: routeColor,
-                  }
-                );
-                mapInstance.current.geoObjects.add(intermediatePlacemark);
-              }
-            }
-          }
+            mapInstance.current.geoObjects.add(placemark);
+          });
         });
 
-        if (routes.length > 0) {
+        // Подгоняем карту под все объекты
+        if (cars.length > 0) {
           mapInstance.current.setBounds(
             mapInstance.current.geoObjects.getBounds(),
             { checkZoomRange: true, duration: 300 }
@@ -166,18 +173,45 @@ function YandexMapRoute({
     };
 
     initMap();
-  }, [mapLoaded, routes, routeType]);
+  }, [mapLoaded, cars, routeType]);
+
+  // Функция для интерполяции цвета между красным и зелёным
+  const interpolateColor = (
+    startColor: string,
+    endColor: string,
+    factor: number
+  ) => {
+    const hexToRgb = (hex: string) => {
+      const sanitized = hex.replace(/^#/, "");
+      const bigint = parseInt(sanitized, 16);
+      return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+    };
+
+    const rgbToHex = (r: number, g: number, b: number) => {
+      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    };
+
+    const startRGB = hexToRgb(startColor);
+    const endRGB = hexToRgb(endColor);
+
+    const result = startRGB.map((startVal, i) => {
+      const endVal = endRGB[i];
+      return Math.round(startVal + (endVal - startVal) * factor);
+    });
+
+    return rgbToHex(result[0], result[1], result[2]);
+  };
 
   const getColorByIndex = (index: number): string => {
     const colors = [
-      "#1e98ff", // синий
-      "#ff4444", // красный
-      "#00c851", // зеленый
-      "#ffbb33", // оранжевый
-      "#aa66cc", // фиолетовый
-      "#33b5e5", // голубой
-      "#ff6b6b", // розовый
-      "#4db6ac", // бирюзовый
+      "#1e98ff",
+      "#ff4444",
+      "#00c851",
+      "#ffbb33",
+      "#aa66cc",
+      "#33b5e5",
+      "#ff6b6b",
+      "#4db6ac",
     ];
     return colors[index % colors.length];
   };
