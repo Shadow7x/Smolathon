@@ -3,6 +3,7 @@ import YandexMapRoute, { Route } from "@/components/map/YandexMapRoute";
 import axi from "@/utils/api";
 import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
+import CreateDetector from "@/widgets/Map/createDetector/createDetector";
 import { useEffect, useState } from "react";
 export default function Map() {
   useEffect(() => {
@@ -106,6 +107,8 @@ export default function Map() {
       <Carsine />
       <YandexMapRoute routes={routes} routeType="auto" />
       <AnaliticsMap />
+      <CreateDetector/>
+
     </div>
   );
 }
