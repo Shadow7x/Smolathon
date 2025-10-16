@@ -13,26 +13,49 @@ export default function Map() {
   const [routes, setRoute] = useState([]);
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
+  const [filters, setFilters] = useState({
+    car: "",
+    duration: "",
+    nodes: "3",
+    period: "",
+  });
 
-  useEffect(() => {
-    const fetchWorkload = async () => {
+
+    const fetchRoutes  = async () => {
       try {
-        const response = await axi.get("analytics/workload/get");
-        setRoute(response.data);
+        const response = await axi.get("analytics/workload/getAdjacencies", {
+        params: {
+          target: filters.car,
+          nodes_count: filters.nodes,
+          max_time_diff: filters.duration,
+          time_interval: filters.period,
+        },
+      });
+      setRoute(response.data.joint_movements);
       } catch (error) {
         console.error("Ошибка при загрузке:", error);
       }
     };
 
-    fetchWorkload();
-  }, []);
+
+
+
+   useEffect(() => {
+    if (!isAccompaniment) {
+      fetchRoutes();
+    }
+  }, [filters, isAccompaniment]);
 
   return (
     <div className="px-6">
       <Carsine
         isAccompaniment={isAccompaniment}
         setIsAccompaniment={setIsAccompaniment}
+        routes={routes}
+        filters={filters}
+        onFilterChange={setFilters}
       />
+
 
       {!isAccompaniment ? (
         <>
