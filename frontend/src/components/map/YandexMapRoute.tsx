@@ -14,7 +14,7 @@ interface Point {
   name?: string;
 }
 
-interface Route {
+export interface Route {
   points: Point[];
   color?: string;
   name?: string;
@@ -62,6 +62,8 @@ function YandexMapRoute({
 
   useEffect(() => {
     if (!mapLoaded || !mapRef.current || routes.length === 0) return;
+
+    if (mapInstance.current) return;
 
     const initMap = async () => {
       try {
@@ -166,7 +168,6 @@ function YandexMapRoute({
     initMap();
   }, [mapLoaded, routes, routeType]);
 
-  // Функция для получения цвета по индексу
   const getColorByIndex = (index: number): string => {
     const colors = [
       "#1e98ff", // синий

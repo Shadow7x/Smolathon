@@ -1,8 +1,9 @@
 "use client";
-import YandexMapRoute from "@/components/map/YandexMapRoute";
+import YandexMapRoute, { Route } from "@/components/map/YandexMapRoute";
 import axi from "@/utils/api";
-import AnaliticsMap from "@/widgets/Map/analiticsMap/analiticsMap";
+import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
+import CreateDetector from "@/widgets/Map/createDetector/createDetector";
 import { useEffect, useState } from "react";
 export default function Map() {
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function Map() {
     fetchWorkload();
   }, []);
 
-  const [Routes, setRoute] = useState(null);
+  const [Routes, setRoute] = useState<Route[]>([]);
 
   const routes = [
     {
@@ -102,10 +103,12 @@ export default function Map() {
     },
   ];
   return (
-    <div>
+    <div className="px-6">
       <Carsine />
       <YandexMapRoute routes={routes} routeType="auto" />
-        <AnaliticsMap />
+      <AnaliticsMap />
+      <CreateDetector/>
+
     </div>
   );
 }
