@@ -23,7 +23,7 @@ export default function LeftSidePanel() {
       {/* Штрафы */}
       <CardContent className={`${menuItemClass} group`}>
         <button
-          className={`${isActive("/admin") ? "text-black" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+          className={`${isActive("/admin") ? "text-black font-semibold" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
           onClick={() => handleClick("/admin")}
         >
           <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
@@ -40,7 +40,7 @@ export default function LeftSidePanel() {
       {/* Пути эвакуаторов */}
       <CardContent className={`${menuItemClass} group`}>
         <button
-          className={`${isActive("/admin/EvacuationRoutes") ? "text-black" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+          className={`${isActive("/admin/EvacuationRoutes") ? "text-black font-semibold" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
           onClick={() => handleClick("/admin/EvacuationRoutes")}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -57,24 +57,24 @@ export default function LeftSidePanel() {
         {/* Статистика эвакуаций */}
         <CardContent className={`${menuItemClass} group`}>
           <button
-            className={`${isActive("/admin/TowTrucks") ? "text-black" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+            className={`${isActive("/admin/TowTrucks") ? "text-black font-semibold" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer whitespace-normal text-left`}
             onClick={() => handleClick("/admin/TowTrucks")}
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
               <path 
                 d="M5.01667 14.3333L8.32083 11.0292L10.4875 13.1958L14.3333 9.37708V11.0833H16.5V5.66667H11.0833V7.83333H12.7896L10.4875 10.1354L8.32083 7.96875L3.5 12.8167L5.01667 14.3333ZM2.41667 19.75C1.82083 19.75 1.31076 19.5378 0.886458 19.1135C0.462153 18.6892 0.25 18.1792 0.25 17.5833V2.41667C0.25 1.82083 0.462153 1.31076 0.886458 0.886458C1.31076 0.462153 1.82083 0.25 2.41667 0.25H17.5833C18.1792 0.25 18.6892 0.462153 19.1135 0.886458C19.5378 1.31076 19.75 1.82083 19.75 2.41667V17.5833C19.75 18.1792 19.5378 18.6892 19.1135 19.1135C18.6892 19.5378 18.1792 19.75 17.5833 19.75H2.41667ZM2.41667 17.5833H17.5833V2.41667H2.41667V17.5833Z" 
                 fill={isActive("/admin/TowTrucks") ? "black" :"#636363"} 
                 className="group-hover:fill-black" 
               />
             </svg>
-            {!isCollapsed && 'Статистика эвакуаций'}
+            {!isCollapsed && <span className="whitespace-normal break-words">Статистика эвакуаций</span>}
           </button>
         </CardContent>
 
         {/* Реестр светофоров */}
         <CardContent className={`${menuItemClass} group`}>
           <button
-            className={`${isActive("/admin/TrafficLightRegistry") ? "text-black" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+            className={`${isActive("/admin/TrafficLightRegistry") ? "text-black font-semibold" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
             onClick={() => handleClick("/admin/TrafficLightRegistry")}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -91,7 +91,7 @@ export default function LeftSidePanel() {
         {/* ДТП МВД */}
         <CardContent className={`${menuItemClass} group`}>
           <button
-            className={`${isActive("/admin/DTP") ? "text-black" :"text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+            className={`${isActive("/admin/DTP") ? "text-black font-semibold" :"text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
             onClick={() => handleClick("/admin/DTP")}
           >
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -107,7 +107,7 @@ export default function LeftSidePanel() {
         {/* Скачать отчет */}
         <CardContent className={`${menuItemClass} group`}>
           <button 
-            className={`${isActive("/admin/Downloadingreport") ? "text-black" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+            className={`${isActive("/admin/Downloadingreport") ? "text-black font-semibold" : "text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
             onClick={() => handleClick("/admin/Downloadingreport")}
           >
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -124,10 +124,10 @@ export default function LeftSidePanel() {
         {/*Карта*/}
         <CardContent className={`${menuItemClass} group`}>
           <button 
-            className={`${isActive("/admin/Map") ? "text-black" :"text-[#636363]"} group-hover:text-black flex items-center gap-2 cursor-pointer`}
+            className={`${isActive("/admin/Map") ? "text-black font-semibold" : "text-[#636363]"} group-hover:text-black group-hover:font-semibold flex items-center gap-2 cursor-pointer`}
             onClick={() => handleClick("/admin/Map")}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
               <path 
                 d="M320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Zm240 240q-17 0-28.5-11.5T520-600q0-17 11.5-28.5T560-640q17 0 28.5 11.5T600-600q0 17-11.5 28.5T560-560Zm0 200q81-69 120.5-127.5T720-596q0-75-48.5-119.5T560-760q-63 0-111.5 44.5T400-596q0 50 39.5 108.5T560-360Z"
                 fill={isActive("/admin/Map") ? "black" : "#636363"}
@@ -144,7 +144,7 @@ export default function LeftSidePanel() {
 
         {/* Футер */}
         <CardFooter
-          className="hidden md:flex items-center gap-1 cursor-pointer group"
+          className="hidden md:flex items-center gap-1 cursor-pointer group font-semibold"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="flex-shrink-0">
@@ -164,7 +164,7 @@ export default function LeftSidePanel() {
       {/* Бургер только на мобилке */}
       <div className="fixed top-4 left-4 z-50 md:hidden">
         <button
-          className="p-2 rounded-md bg-gray-100"
+          className="p-2 rounded-md bg-gray-100 cursor-pointer"
           onClick={() => setMobileOpen(true)}
         >
           <Menu className="h-6 w-6" />
@@ -186,7 +186,7 @@ export default function LeftSidePanel() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-end p-2">
-              <button onClick={() => setMobileOpen(false)}>
+              <button onClick={() => setMobileOpen(false)} className="cursor-pointer">
                 <X className="h-6 w-6" />
               </button>
             </div>
