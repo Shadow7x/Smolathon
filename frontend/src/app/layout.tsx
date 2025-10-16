@@ -5,6 +5,7 @@ import { NotificationManagerProvider } from "@/hooks/notification-context";
 import { GEOProvider } from "@/hooks/geo-context";
 import "./globals.css";
 import Header from "../components/header/page";
+import Footer from "../components/footer/page";
 import Notifications from "../components/notification/page";
 import Script from "next/script";
 
@@ -56,6 +57,7 @@ export default function RootLayout({
                 <Header />
                 <Notifications />
                 <main>{children}</main>
+                <Footer />
               </div>
             </NotificationManagerProvider>
           </UserProvider>

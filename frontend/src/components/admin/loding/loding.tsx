@@ -72,14 +72,17 @@ export default function OPTION() {
   }
 
 return (
-  <div className="flex justify-center items-start min-h-screen px-2 py-8 pt-12 sm:pt-24">
-    <Card className="w-full max-w-[800px]">
-      <CardHeader>
-        <CardTitle className="text-lg">Скачивание отчётов</CardTitle>
-        <CardDescription>
-          Выберите файл и формат для скачивания отчёта
-        </CardDescription>
-      </CardHeader>
+  <div className="space-y-6 px-6 max-w-[1400px] mx-auto">
+    <h1 className="text-3xl font-bold text-gray-900">
+      Скачивание отчётов
+    </h1>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardDescription>
+            Выберите файл и формат для скачивания отчёта
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <form
           onSubmit={handleSubmit}
@@ -123,9 +126,7 @@ return (
           </Button>
         </form>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   </div>
-);
-
-
-}
+)};

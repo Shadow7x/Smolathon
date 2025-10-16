@@ -172,8 +172,8 @@ export default function LeftSidePanel() {
       </div>
 
       {/* Десктопная панель */}
-      <div className={`mt-[6.2rem] ml-[2rem] transition-all hidden md:block ${isCollapsed ? "w-16" : "w-64"}`}>
-        <Card>
+      <div className={`ml-[2rem] transition-all hidden md:block ${isCollapsed ? "w-16" : "w-64"}`}>
+        <Card className="sticky top-8">
           {MenuItems()}
         </Card>
       </div>

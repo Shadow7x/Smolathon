@@ -233,214 +233,212 @@ export default function DTPAnalitics() {
   }, [allDTP, sortOrder, monthFilter]);
 
   return (
-    <div className="pt-[4rem]">
-      <div className="space-y-6 p-4 max-w-[1400px] mx-auto">
-        <h1
-          className={`text-3xl font-bold text-center text-gray-900 ${
-            pathname === "/statistics" ? "mt-20" : ""
-          }`}
-        >
-          Аналитика ДТП
-        </h1>
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <h1
+        className={`text-3xl font-bold text-gray-900 ${
+          pathname === "/statistics" ? "mt-20" : ""
+        }`}
+      >
+        Аналитика ДТП
+      </h1>
 
-        {/* Диаграммы */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="shadow-md rounded-2xl lg:col-span-2">
-            <CardContent>
-              <DTPLineDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
-            </CardContent>
-          </Card>
-          <Card className="shadow-md rounded-2xl">
-            <CardContent className="flex justify-center">
-              <DTPPieDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Загрузка новых данных — только для админов */}
-        {isAuthorized && (
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
-                <Upload className="w-5 h-5 text-blue-600" />
-                Добавление новых данных
-              </CardTitle>
-              <CardDescription>
-                Загрузите Excel (.xlsx) файл для добавления в реестр
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <form
-                onSubmit={handleUpload}
-                className="flex flex-col sm:flex-row items-center gap-3"
-                encType="multipart/form-data"
-              >
-                <input
-                  type="file"
-                  name="file"
-                  accept=".xlsx, .csv"
-                  className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
-                />
-                <Button
-                  type="submit"
-                  className="h-10 w-full sm:w-auto flex items-center gap-2"
-                >
-                  Загрузить
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Просмотр данных */}
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-lg">Просмотр данных</CardTitle>
-            <CardDescription>
-              Загрузите данные о ДТП с возможностью фильтрации по году
-            </CardDescription>
-          </CardHeader>
+      {/* Диаграммы */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="shadow-md rounded-2xl lg:col-span-2">
           <CardContent>
-            <div className="flex flex-col md:flex-row gap-6 items-end">
-              <div className="w-full md:w-1/3">
-                <label className="block text-sm text-gray-700 mb-1">Год</label>
-                <Input
-                  type="number"
-                  value={yearFilter}
-                  onChange={(e) => setYearFilter(e.target.value)}
-                  placeholder="Например: 2024"
-                  className="w-full h-10 border rounded px-3 text-sm"
-                />
-              </div>
-              <Button
-                onClick={() => fetchDTP(yearFilter)}
-                className="h-10 w-full sm:w-auto"
-              >
-                Загрузить данные
-              </Button>
-            </div>
+            <DTPLineDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
           </CardContent>
         </Card>
-
-        {/* Таблица / карточки */}
-        <Card className="w-full">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              <div>
-                <CardTitle className="text-lg md:text-xl">
-                  Данные о ДТП{" "}
-                  {monthFilter && yearFilter
-                    ? `за ${monthFilter} ${yearFilter}`
-                    : yearFilter
-                    ? `за ${yearFilter} год`
-                    : ""}
-                </CardTitle>
-                <CardDescription>
-                  Всего записей: {displayedDTP.length}
-                </CardDescription>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowTable((s) => !s)}
-                className="flex items-center gap-2 h-9 self-start"
-              >
-                {showTable ? (
-                  <>
-                    <EyeOff className="h-4 w-4" /> Скрыть таблицу
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" /> Показать таблицу
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardHeader>
-
-          <CardContent>
-            {showTable && (
-              <>
-                {/* сортировка + фильтр по месяцу */}
-                <div className="min-w-[267px] flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <ArrowUpDown className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">Сортировка:</span>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setSortOrder((s) => (s === "asc" ? "desc" : "asc"))
-                      }
-                      className="h-8"
-                    >
-                      {sortOrder === "asc"
-                        ? "Сначала старые"
-                        : "Сначала новые"}
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Месяц:</span>
-                    <select
-                      value={monthFilter}
-                      onChange={(e) => setMonthFilter(e.target.value)}
-                      className="h-8 border rounded px-2 text-sm"
-                    >
-                      <option value="">Все</option>
-                      {monthNames.map((m, i) => (
-                        <option key={i} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {displayedDTP.length > 0 ? (
-                  <>
-                    {/* таблица (desktop) */}
-                    <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-50">
-                          <TableRow>
-                            <TableHead>Год</TableHead>
-                            <TableHead>Месяц</TableHead>
-                            <TableHead>Точка ФПСР</TableHead>
-                            <TableHead>Фактор</TableHead>
-                            <TableHead className="text-right">
-                              Значение
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {displayedDTP.map((item) => (
-                            <DTPRow key={item.id} item={item} />
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    {/* карточки (mobile) */}
-                    <div className="grid gap-4 md:hidden">
-                      {displayedDTP.map((item) => (
-                        <DTPCard key={item.id} item={item} />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="w-full min-h-[200px] flex items-center justify-center text-gray-500">
-                    Нет записей
-                  </div>
-                )}
-              </>
-            )}
-
-            <div className="mt-4 text-sm text-gray-500 text-center">
-              Показано {displayedDTP.length} записей из {allDTP.length}
-            </div>
+        <Card className="shadow-md rounded-2xl">
+          <CardContent className="flex justify-center">
+            <DTPPieDiagram DTP2024={DTP2024} DTP2025={DTP2025} />
           </CardContent>
         </Card>
       </div>
+
+      {/* Загрузка новых данных — только для админов */}
+      {isAuthorized && (
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center max-w-[260px] justify-between">
+              <Upload className="w-5 h-5 text-blue-600" />
+              Добавление новых данных
+            </CardTitle>
+            <CardDescription>
+              Загрузите Excel (.xlsx) файл для добавления в реестр
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form
+              onSubmit={handleUpload}
+              className="flex flex-col sm:flex-row items-center gap-3"
+              encType="multipart/form-data"
+            >
+              <input
+                type="file"
+                name="file"
+                accept=".xlsx, .csv"
+                className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
+              />
+              <Button
+                type="submit"
+                className="h-10 w-full sm:w-auto flex items-center gap-2"
+              >
+                Загрузить
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Просмотр данных */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-lg">Просмотр данных</CardTitle>
+          <CardDescription>
+            Загрузите данные о ДТП с возможностью фильтрации по году
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-6 items-end">
+            <div className="w-full md:w-1/3">
+              <label className="block text-sm text-gray-700 mb-1">Год</label>
+              <Input
+                type="number"
+                value={yearFilter}
+                onChange={(e) => setYearFilter(e.target.value)}
+                placeholder="Например: 2024"
+                className="w-full h-10 border rounded px-3 text-sm"
+              />
+            </div>
+            <Button
+              onClick={() => fetchDTP(yearFilter)}
+              className="h-10 w-full sm:w-auto"
+            >
+              Загрузить данные
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Таблица / карточки */}
+      <Card className="w-full">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
+            <div>
+              <CardTitle className="text-lg md:text-xl">
+                Данные о ДТП{" "}
+                {monthFilter && yearFilter
+                  ? `за ${monthFilter} ${yearFilter}`
+                  : yearFilter
+                  ? `за ${yearFilter} год`
+                  : ""}
+              </CardTitle>
+              <CardDescription>
+                Всего записей: {displayedDTP.length}
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowTable((s) => !s)}
+              className="flex items-center gap-2 h-9 self-start"
+            >
+              {showTable ? (
+                <>
+                  <EyeOff className="h-4 w-4" /> Скрыть таблицу
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" /> Показать таблицу
+                </>
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {showTable && (
+            <>
+              {/* сортировка + фильтр по месяцу */}
+              <div className="min-w-[267px] flex flex-wrap gap-4 items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-600">Сортировка:</span>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setSortOrder((s) => (s === "asc" ? "desc" : "asc"))
+                    }
+                    className="h-8"
+                  >
+                    {sortOrder === "asc"
+                      ? "Сначала старые"
+                      : "Сначала новые"}
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Месяц:</span>
+                  <select
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                    className="h-8 border rounded px-2 text-sm"
+                  >
+                    <option value="">Все</option>
+                    {monthNames.map((m, i) => (
+                      <option key={i} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {displayedDTP.length > 0 ? (
+                <>
+                  {/* таблица (desktop) */}
+                  <div className="hidden md:block rounded-lg border border-gray-200 overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-gray-50">
+                        <TableRow>
+                          <TableHead>Год</TableHead>
+                          <TableHead>Месяц</TableHead>
+                          <TableHead>Точка ФПСР</TableHead>
+                          <TableHead>Фактор</TableHead>
+                          <TableHead className="text-right">
+                            Значение
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {displayedDTP.map((item) => (
+                          <DTPRow key={item.id} item={item} />
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* карточки (mobile) */}
+                  <div className="grid gap-4 md:hidden">
+                    {displayedDTP.map((item) => (
+                      <DTPCard key={item.id} item={item} />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="w-full min-h-[200px] flex items-center justify-center text-gray-500">
+                  Нет записей
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="mt-4 text-sm text-gray-500 text-center">
+            Показано {displayedDTP.length} записей из {allDTP.length}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
