@@ -8,6 +8,7 @@ from django.db import transaction
 from core.utils.auth_decor import token_required,admin_required
 from core.utils.serializers import CarSerializer
 import  pandas as pd
+from django.utils import timezone
 
 
 
@@ -55,7 +56,8 @@ def createWorkloadFromExcel(request: Request) -> Response:
                                 found_interval = TIMES_INTERVAL[-1]
 
                             time_interval = found_interval[0]
-                            workload = Workload.objects.create(time_interval=time_interval[0])
+                            print(time_interval)
+                            workload = Workload.objects.create(time_interval=time_interval)
                             for detect in detects:
                                 workload.detections.add(detect)
                             workload.save()
@@ -63,10 +65,9 @@ def createWorkloadFromExcel(request: Request) -> Response:
                             tek_car.save()
                             
                         tek_car = Car.objects.get_or_create(name=row[2])[0]
-                    print(row[1])
                     objs.append(Detection(
                         detector=detectors.filter(name=row[0]).first(),
-                        time=str(row[1]),
+                        time=timezone.make_aware(row[1]) if timezone.is_naive(row[1]) else row[1],
                         car=tek_car,
                         speed=row[3],
                     ))
@@ -97,6 +98,12 @@ def getWorkloads(request: Request):
     serializer = CarSerializer(trafficLight, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+@api_view(['GET'])
+@admin_required
+def getAdjacencies(request: Request):
+    pass
+    
 
 # @api_view(['POST'])
 # @admin_required

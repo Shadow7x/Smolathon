@@ -1,70 +1,95 @@
 "use client";
-import { useState } from "react";
-import { IconCloud } from "@tabler/icons-react";
-
+import React, { useState } from "react";
+import axi from "@/utils/api";
+import { useNotificationManager } from "@/hooks/notification-context"; // путь к твоему NotificationContext
 import { Button } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 
-export default function EmptyOutline() {
+export default function WorkloadUpload({ yearFilter, fetchWorkloads, fetchAllWorkloads }: any) {
   const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { addNotification } = useNotificationManager();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
 
-    // Проверяем расширение
     if (!selected.name.endsWith(".xlsx")) {
-      alert("Можно загружать только файлы .xlsx");
-      e.target.value = ""; // очищаем input
+      addNotification({
+        id: Date.now(),
+        title: "Ошибка",
+        description: "Можно загружать только файлы .xlsx",
+        status: 400,
+        createdAt: new Date(),
+      });
+      e.target.value = "";
       return;
     }
 
     setFile(selected);
   };
 
-  const handleUpload = () => {
-    if (!file) return;
+  const handleUploadWorkload = async () => {
+    if (!file) {
+      addNotification({
+        id: Date.now(),
+        title: "Ошибка",
+        description: "Файл не выбран",
+        status: 400,
+        createdAt: new Date(),
+      });
+      return;
+    }
 
-    // TODO: здесь делаем загрузку на сервер, например через axios/fetch
-    console.log("Загружаем файл:", file.name);
-    alert(`Файл ${file.name} готов к загрузке!`);
-    setFile(null);
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await axi.post("/analytics/workload/createFromExcel", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      addNotification({
+        id: Date.now(),
+        title: "Успешно",
+        description: "Файл загружен",
+        status: 200,
+        createdAt: new Date(),
+      });
+
+      if (yearFilter) fetchWorkloads(yearFilter);
+      else fetchAllWorkloads();
+    } catch (err: any) {
+      addNotification({
+        id: Date.now(),
+        title: "Ошибка данных",
+        description: err.response?.data || "Не удалось загрузить файл",
+        status: err.response?.status || 500,
+        createdAt: new Date(),
+      });
+    } finally {
+      setFile(null);
+      setLoading(false);
+    }
   };
 
   return (
-    <Empty className="border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <IconCloud size={48} stroke={2} />
-        </EmptyMedia>
-        <EmptyTitle>Cloud Storage Empty</EmptyTitle>
-        <EmptyDescription>
-          Upload files to your cloud storage to access them anywhere.
-        </EmptyDescription>
-      </EmptyHeader>
-      <EmptyContent className="flex flex-col gap-2">
-        <input
-          type="file"
-          accept=".xlsx"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border file:border-gray-300 file:text-sm file:font-semibold file:bg-gray-50 hover:file:bg-gray-100"
-        />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleUpload}
-          disabled={!file}
-        >
-          Upload File
-        </Button>
-      </EmptyContent>
-    </Empty>
+    <div className="flex flex-col gap-2">
+      <input
+        type="file"
+        accept=".xlsx"
+        onChange={handleFileChange}
+        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border file:border-gray-300 file:text-sm file:font-semibold file:bg-gray-50 hover:file:bg-gray-100"
+      />
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleUploadWorkload}
+        disabled={!file || loading}
+      >
+        {loading ? "Загрузка..." : "Upload File"}
+      </Button>
+    </div>
   );
 }

@@ -104,9 +104,8 @@ export default function Map() {
   return (
     <div>
       <Carsine />
-      <AnaliticsMap />
-
       <YandexMapRoute routes={routes} routeType="auto" />
+        <AnaliticsMap />
     </div>
   );
 }
