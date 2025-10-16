@@ -42,7 +42,7 @@ export default function EvacuationPopup({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6"
           onClick={() => setIsOpen(false)}
         >
           {/* Dialog */}
@@ -173,7 +173,6 @@ export default function EvacuationPopup({
                 </div>
               </form>
             </div>
-            \
             <div className="hidden md:block w-1/2 relative min-h-[200px] md:min-h-0">
               <Image
                 src="/images/towTruck.webp"

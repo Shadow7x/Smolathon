@@ -51,7 +51,7 @@ const MeritsPage = () => {
   };
 
   return (
-    <div className="pt-[6rem] sm:pt-[8rem] lg:pt-[10rem] flex flex-col items-center px-4 sm:px-6 lg:px-8">
+    <div className="pt-[2rem] sm:pt-[8rem] lg:pt-[1rem] flex flex-col items-center px-4 sm:px-6 lg:px-8">
       {/* Заголовок */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-6 text-center">
         <svg className="w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16" viewBox="0 0 68 68" fill="none">

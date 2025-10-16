@@ -233,11 +233,9 @@ export default function DTPAnalitics() {
   }, [allDTP, sortOrder, monthFilter]);
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto">
+    <div className="pt-[2rem] pt-[1rem] space-y-6 px-6 max-w-[1400px] mx-auto">
       <h1
-        className={`text-3xl font-bold text-gray-900 ${
-          pathname === "/statistics" ? "mt-20" : ""
-        }`}
+        className="text-3xl sm:text-4xl lg:text-5xl font-bold pb-6 text-center"
       >
         Аналитика ДТП
       </h1>

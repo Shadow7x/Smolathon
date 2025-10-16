@@ -9,11 +9,11 @@ export default function Admin_Header() {
   return user && (
     <header
       className={`
-      flex flex-wrap items-center gap-3.5 
-      px-[2rem] md:px-[4rem] lg:px-[7.5rem] z-50
-      relative bg-white text-black py-[1rem] md:py-[3.125rem]
-      content-center
-    `}
+        flex flex-wrap items-center gap-3.5 
+        px-[2rem] md:px-[4rem] lg:px-[7.5rem] z-50
+        relative bg-white text-black py-[1rem] md:py-[3.125rem]
+        content-center
+      `}
     >
       <div className="relative w-[6.625rem] h-[3.125rem] flex-shrink-0">
         <Image
