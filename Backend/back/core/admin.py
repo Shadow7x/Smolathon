@@ -33,6 +33,8 @@ admin.site.register(News)
 admin.site.register(Docs) 
 admin.site.register(Merits)
 admin.site.register(ImageForMerits)
+admin.site.register(Car)
+admin.site.register(Workload)
 admin.site.register(authorizedToken)
 
 
