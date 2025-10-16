@@ -1,7 +1,8 @@
 "use client";
 import YandexMapRoute from "@/components/map/YandexMapRoute";
-import AnaliticsMap from "@/widgets/Map/analiticsMap/analiticsMap";
+import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
+import CreateDetector from "@/widgets/Map/createDetector/createDetector";
 export default function Map() {
   const routes = [
     {
@@ -88,6 +89,7 @@ export default function Map() {
       <Carsine />
       <YandexMapRoute routes={routes} routeType="auto" />
         <AnaliticsMap />
+        <CreateDetector/>
     </div>
   );
 }
