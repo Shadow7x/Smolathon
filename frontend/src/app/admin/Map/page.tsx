@@ -17,8 +17,8 @@ export default function Map() {
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
   const [filters, setFilters] = useState({
     car: "",
-    duration: "",
-    nodes: "3",
+    duration: "10",
+    nodes: "1",
     period: "",
   });
 
@@ -46,6 +46,7 @@ export default function Map() {
     if (!isAccompaniment) {
       fetchRoutes();
     }
+    console.log(filters)
   }, [filters, isAccompaniment]);
 
   return (
