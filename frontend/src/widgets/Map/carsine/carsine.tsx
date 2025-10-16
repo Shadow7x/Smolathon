@@ -29,14 +29,13 @@ export default function Carsine({
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showList, setShowList] = useState(false);
-  const [cars, setCars] = useState([])
-  const [selectCar, setSelectCar] = useState([])
-  useEffect(() =>{
-    axi.get("/analytics/workload/getCars").then((e)=>{
-        setCars(e.data);
-    })
-
-  },[])
+  const [cars, setCars] = useState([]);
+  const [selectCar, setSelectCar] = useState([]);
+  useEffect(() => {
+    axi.get("/analytics/workload/getCars").then((e) => {
+      setCars(e.data);
+    });
+  }, []);
 
   // фильтрация подсказок из routes
   useEffect(() => {
@@ -45,7 +44,7 @@ export default function Carsine({
       setShowList(false);
       return;
     }
-    console.log(cars)
+    console.log(cars);
     const filtered = cars.filter((r) => {
       const name = (r.name || r.car || "").toLowerCase();
       return name.includes(query.toLowerCase());
@@ -56,10 +55,12 @@ export default function Carsine({
   }, [query, routes]);
 
   const handleSelect = (name: string) => {
-    const selectedCar = cars.find((r) => r.name.toLowerCase() === name.toLowerCase());
+    const selectedCar = cars.find(
+      (r) => r.name.toLowerCase() === name.toLowerCase()
+    );
     if (selectedCar) {
       setSelectCar(selectedCar);
-      console.log(selectedCar)
+      console.log(selectedCar);
     } else {
       setSelectCar(null);
     }
@@ -69,7 +70,7 @@ export default function Carsine({
   };
 
   const handleInputChange = (value: string) => {
-    console.log(value)
+    console.log(value);
     setQuery(value);
     onFilterChange({ ...filters, car: value });
   };
@@ -90,10 +91,15 @@ export default function Carsine({
           setIsAccompaniment={setIsAccompaniment}
         />
       </div>
-
-      {!isAccompaniment && (
+      {isAccompaniment ? (
+        <div className="flex flex-row mt-4">
+          <div className="flex flex-col gap-3">
+            <p>Выберите временной интервал</p>
+            <div className="flex flex-row w-[506px] h-[32px] bg-red-700"></div>
+          </div>
+        </div>
+      ) : (
         <>
-          {/* Поле поиска с подсказками */}
           <div className="relative w-60 mt-4">
             <CustomInput
               type="text"
