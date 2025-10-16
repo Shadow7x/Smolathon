@@ -17,16 +17,16 @@ export default function Carsine({
 }: CarsineProps) {
   return (
     <div className="mb-6">
-      <h1 className="text-3xl mb-2 font-semibold">
-        {isAccompaniment ? "Загруженность" : "Смежность"}
-      </h1>
+      <div className="flex flex-col gap-3">
+        <h1 className="text-3xl mb-2 font-semibold">
+          {isAccompaniment ? "Загруженность" : "Смежность"}
+        </h1>
 
-      <Switchmap
-        isAccompaniment={isAccompaniment}
-        setIsAccompaniment={setIsAccompaniment}
-      />
-
-      {/* Блок поиска и фильтрации только для "Сопровождения" */}
+        <Switchmap
+          isAccompaniment={isAccompaniment}
+          setIsAccompaniment={setIsAccompaniment}
+        />
+      </div>
       {!isAccompaniment && (
         <>
           <div className="relative w-60 mt-4">
@@ -43,7 +43,6 @@ export default function Carsine({
           <div className="flex flex-col gap-2 mt-4">
             <p className="mb-2 font-semibold">Фильтрация</p>
             <div className="flex flex-row gap-4">
-              {/* Длительность */}
               <div className="relative w-40">
                 <CustomSelect
                   placeholder="Длительность"

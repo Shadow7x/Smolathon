@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import YandexMapRoute, { Route } from "@/components/map/YandexMapRoute";
+import YandexMapRoute from "@/components/map/YandexMapRoute";
 import axi from "@/utils/api";
 import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
@@ -10,7 +10,7 @@ import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
 
 export default function Map() {
-  const [routes, setRoute] = useState<Route[]>([]);
+  const [routes, setRoute] = useState([]);
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
   useEffect(() => {
