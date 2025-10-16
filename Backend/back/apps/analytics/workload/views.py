@@ -186,6 +186,14 @@ def getAdjacencies(request: Request):
         return Response("Некоректный запрос", status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['GET'])
+@admin_required
+def getCars(request: Request):
+    cars = Car.objects.all()
+    
+    data = CarSerializer(Adjacency, many=True).data
+            
+    return Response(data, status=status.HTTP_200_OK)
     
 
 # @api_view(['POST'])
