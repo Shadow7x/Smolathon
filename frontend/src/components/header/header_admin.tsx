@@ -8,7 +8,7 @@ export default function Admin_Header() {
 
   return user && (
     <header
-      className={`
+    className={`
     flex flex-wrap items-center gap-3.5 
     px-[2rem] md:px-[4rem] lg:px-[7.5rem] z-50
     relative bg-white text-black py-[1rem] md:py-[3.125rem]

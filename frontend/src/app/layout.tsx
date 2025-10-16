@@ -47,7 +47,10 @@ export default function RootLayout({
               src="https://yastatic.net/s3/mapsapi-jslibs/heatmap/0.0.1/heatmap.min.js"
               strategy="beforeInteractive"
             />
-
+            <Script
+              src="https://api-maps.yandex.ru/2.1/?apikey=43446600-2296-4713-9c16-4baf8af7f5fd&lang=ru_RU"
+              type="text/javascript"
+            />
             <NotificationManagerProvider>
               <div className="relative min-h-screen">
                 <Header />
