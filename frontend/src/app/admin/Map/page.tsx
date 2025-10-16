@@ -1,5 +1,5 @@
 "use client";
-import YandexMapRoute from "@/components/map/YandexMapRoute";
+import YandexMapRoute, { Route } from "@/components/map/YandexMapRoute";
 import axi from "@/utils/api";
 import AnaliticsMap from "@/widgets/Map/analiticsMap/analiticsMap";
 import Carsine from "@/widgets/Map/carsine/carsine";
@@ -19,7 +19,7 @@ export default function Map() {
     fetchWorkload();
   }, []);
 
-  const [Routes, setRoute] = useState(null);
+  const [Routes, setRoute] = useState<Route[]>([]);
 
   const routes = [
     {
@@ -105,7 +105,7 @@ export default function Map() {
     <div>
       <Carsine />
       <YandexMapRoute routes={routes} routeType="auto" />
-        <AnaliticsMap />
+      <AnaliticsMap />
     </div>
   );
 }
