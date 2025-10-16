@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import  getWorkloads, createWorkloadFromExcel, getAdjacencies
+from .views import  getWorkloads, createWorkloadFromExcel, getAdjacencies, getCars
 
 urlpatterns = [
 
@@ -8,4 +8,5 @@ urlpatterns = [
 
     path("createFromExcel", createWorkloadFromExcel),
     path("getAdjacencies", getAdjacencies),
+    path("getCars", getCars),
 ]

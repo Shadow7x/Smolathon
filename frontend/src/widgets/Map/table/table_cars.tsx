@@ -56,10 +56,9 @@ export default function TableCars() {
     setLoading(true);
     try {
       const [carsRes, detectorsRes] = await Promise.all([
-        axi.get("/analytics/workload/get"),
+        axi.get("/analytics/workload/getCars"),
         axi.get("/analytics/detectors/get"),
       ]);
-
       const carsData: Car[] = carsRes.data || [];
       const detectorsData: Detector[] = detectorsRes.data || [];
 
@@ -103,9 +102,9 @@ export default function TableCars() {
   const formatDate = (isoDate: string) => {
     const d = new Date(isoDate);
     const pad = (n: number) => n.toString().padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-      d.getHours()
-    )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+      d.getDate()
+    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
   // ====== ПАГИНАЦИЯ ======
@@ -120,7 +119,7 @@ export default function TableCars() {
   return (
     <div className="p-4 bg-white rounded-2xl shadow-md">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">🚘 Таблица детекций</h2>
+        <h2 className="text-lg font-semibold">Таблица детекций</h2>
         <Button variant="outline" size="sm" onClick={fetchData}>
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Обновить"}
         </Button>
@@ -160,7 +159,12 @@ export default function TableCars() {
       {/* ====== КНОПКИ ПАГИНАЦИИ ====== */}
       {mergedData.length > itemsPerPage && (
         <div className="flex justify-center items-center gap-4 mt-4">
-          <Button variant="outline" size="sm" onClick={goPrev} disabled={currentPage === 1}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goPrev}
+            disabled={currentPage === 1}
+          >
             Назад
           </Button>
           <span>
