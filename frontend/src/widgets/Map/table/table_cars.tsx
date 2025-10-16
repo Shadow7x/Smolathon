@@ -57,7 +57,7 @@ export default function TableCars() {
         axi.get("/analytics/workload/get"),
         axi.get("/analytics/detectors/get"),
       ]);
-
+      console.log(carsRes)
       const carsData: Car[] = carsRes.data || [];
       const detectorsData: Detectors[] = detectorsRes.data || [];
 
@@ -79,6 +79,7 @@ export default function TableCars() {
             });
           }
         }
+        console.log(mergedData)
       }
 
       setMergedData(flattened);
