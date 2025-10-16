@@ -14,6 +14,7 @@ interface Detection {
     longitude: number;
     name: string;
   };
+  time?: string; // добавлено, так как вы сортируете по времени
 }
 
 interface Workload {
@@ -42,24 +43,35 @@ function YandexMapRoute({
   const mapInstance = useRef<any>(null);
   const multiRoutes = useRef<any[]>([]);
 
+  // Загрузка скрипта Yandex Maps API
   useEffect(() => {
-    if (!window.ymaps) {
+    if (!window.ymaps && !document.querySelector("#ymaps-script")) {
       const script = document.createElement("script");
+      script.id = "ymaps-script";
       script.src = `https://api-maps.yandex.ru/2.1/?apikey=43446600-2296-4713-9c16-4baf8af7f5fd&lang=ru_RU`;
       script.async = true;
       script.onload = () => window.ymaps.ready(() => setMapLoaded(true));
       document.head.appendChild(script);
-    } else {
+    } else if (window.ymaps) {
       window.ymaps.ready(() => setMapLoaded(true));
     }
 
     return () => {
-      if (mapInstance.current) mapInstance.current.destroy();
+      if (mapInstance.current) {
+        mapInstance.current.destroy();
+      }
     };
   }, []);
 
+  // Инициализация карты и маршрутов
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || cars.length === 0) return;
+    if (
+      !mapLoaded ||
+      !mapRef.current ||
+      !Array.isArray(cars) ||
+      cars.length === 0
+    )
+      return;
     if (mapInstance.current) return;
 
     mapInstance.current = new window.ymaps.Map(mapRef.current, {
@@ -72,11 +84,11 @@ function YandexMapRoute({
     mapInstance.current.geoObjects.removeAll();
 
     cars.slice(0, 1).forEach((car, carIndex) => {
-      // Извлекаем все detections и сортируем по времени
       const detections = car.workloads
         .flatMap((wl) => wl.detections)
         .sort(
-          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+          (a, b) =>
+            new Date(a.time || 0).getTime() - new Date(b.time || 0).getTime()
         );
 
       if (detections.length === 0) return;
@@ -85,6 +97,7 @@ function YandexMapRoute({
         d.detector.latitude,
         d.detector.longitude,
       ]);
+
       const routeColor = getColorByIndex(carIndex);
 
       const multiRoute = new window.ymaps.multiRouter.MultiRoute(
@@ -106,7 +119,7 @@ function YandexMapRoute({
       multiRoutes.current.push(multiRoute);
       mapInstance.current.geoObjects.add(multiRoute);
 
-      // Маркеры начала и конца маршрута
+      // Начало и конец маршрута
       const startPlacemark = new window.ymaps.Placemark(
         referencePoints[0],
         {},

@@ -56,7 +56,7 @@ export default function TableCars() {
     setLoading(true);
     try {
       const [carsRes, detectorsRes] = await Promise.all([
-        axi.get("/analytics/workload/get"),
+        axi.get("/analytics/workload/getCars"),
         axi.get("/analytics/detectors/get"),
       ]);
       const carsData: Car[] = carsRes.data || [];

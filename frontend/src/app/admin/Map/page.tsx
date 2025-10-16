@@ -37,7 +37,6 @@ export default function Map() {
         <>
           <YandexMapRoute cars={routes} routeType="auto" />
           <AnaliticsMap />
-
           <div className="p-4 min-h-[300px] flex flex-col justify-around outline-solid mt-4 rounded-2xl ">
             <div className="flex mt-4 w-[1014px] justify-center">
               {activeTab === "map" && <AnaliticsMap />}
@@ -62,7 +61,6 @@ export default function Map() {
               </div>
             </div>
           </div>
-
           <div>
             <TableDetector />
             <TableCars />
