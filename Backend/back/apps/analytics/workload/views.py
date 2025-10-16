@@ -236,6 +236,9 @@ def getAdjacencies(request: Request):
 def getCars(request: Request):
     cars = Car.objects.all()
 
+    if request.GET.get('id'):
+        cars.get(id=request.GET.get('id'))
+    
     data = CarSerializer(cars, many=True).data
 
     return Response(data, status=status.HTTP_200_OK)

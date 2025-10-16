@@ -9,24 +9,38 @@ import CustomInput from "@/components/common/CustomInput";
 interface CarsineProps {
   isAccompaniment: boolean;
   setIsAccompaniment: (value: boolean) => void;
+  routes: any[]; // список машин или маршрутов
+  filters: {
+    car?: string;
+    duration?: string;
+    nodes?: string;
+    period?: string;
+  };
+  onFilterChange: (filters: any) => void;
 }
 
 export default function Carsine({
   isAccompaniment,
   setIsAccompaniment,
+  routes,
+  filters,
+  onFilterChange,
 }: CarsineProps) {
+  const handleChange = (field: string, value: string) => {
+    onFilterChange({ ...filters, [field]: value });
+  };
   return (
     <div className="mb-6">
-      <h1 className="text-3xl mb-2 font-semibold">
-        {isAccompaniment ? "Загруженность" : "Смежность"}
-      </h1>
+      <div className="flex flex-col gap-3">
+        <h1 className="text-3xl mb-2 font-semibold">
+          {isAccompaniment ? "Загруженность" : "Смежность"}
+        </h1>
 
-      <Switchmap
-        isAccompaniment={isAccompaniment}
-        setIsAccompaniment={setIsAccompaniment}
-      />
-
-      {/* Блок поиска и фильтрации только для "Сопровождения" */}
+        <Switchmap
+          isAccompaniment={isAccompaniment}
+          setIsAccompaniment={setIsAccompaniment}
+        />
+      </div>
       {!isAccompaniment && (
         <>
           <div className="relative w-60 mt-4">
@@ -43,7 +57,6 @@ export default function Carsine({
           <div className="flex flex-col gap-2 mt-4">
             <p className="mb-2 font-semibold">Фильтрация</p>
             <div className="flex flex-row gap-4">
-              {/* Длительность */}
               <div className="relative w-40">
                 <CustomSelect
                   placeholder="Длительность"
@@ -55,6 +68,7 @@ export default function Carsine({
                     { label: "50 минут", value: "50" },
                     { label: "1 час", value: "60" },
                   ]}
+                  onChange={(v) => handleChange("duration", v)}
                 />
               </div>
 
@@ -67,6 +81,7 @@ export default function Carsine({
                     { label: "3", value: "3" },
                     { label: "5", value: "5" },
                   ]}
+                  onChange={(v) => handleChange("nodes", v)}
                 />
               </div>
 
@@ -88,6 +103,7 @@ export default function Carsine({
                     { label: "с 20 до 22", value: "20-22" },
                     { label: "с 22 до 24", value: "22-24" },
                   ]}
+                  onChange={(v) => handleChange("period", v)}
                 />
               </div>
             </div>
