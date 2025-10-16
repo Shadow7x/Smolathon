@@ -10,6 +10,7 @@ from core.utils.serializers import CarSerializer, DetectionSerializer
 import  pandas as pd
 from django.utils import timezone
 from datetime import timedelta
+import datetime
 
 
 
@@ -88,16 +89,47 @@ def createWorkloadFromExcel(request: Request) -> Response:
 @api_view(['GET'])
 @admin_required
 def getWorkloads(request: Request):
-    trafficLight = Car.objects.all()
+    detections = Detection.objects.all().order_by("car__name")
     try:
-        pass
-        # if request.GET.get("year"):
-        #     trafficLight = trafficLight.filter(date__year=request.GET.get("year"))
+        if request.GET.get("time_start") and request.GET.get("time_end"):
+            time_start = datetime.time.fromisoformat(request.GET.get("time_start") + ':00')
+            time_end = datetime.time.fromisoformat(request.GET.get("time_end") + ':59')
+            detections = detections.filter(time__time__range=[time_start, time_end])
     except Exception as e:
         print(e)
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
-    serializer = CarSerializer(trafficLight, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    workloads ={}
+    j=0
+    target_car=detections.first().car.name
+    workload= {}
+    for i in range(len(detections)):
+        if target_car == detections[i].car.name:
+            if i+1 < len(detections):
+                try:
+                    workload["speed"] = workload.get("speed", 0) + detections[i].speed    
+                    workload["time"] = workload.get("time",0) + (detections[i+1].time - detections[i].time).total_seconds() // 60
+                    j+=1
+                except Exception as e:
+                    print(e)
+        else:
+            workload["speed"] /= j
+            workload["time"] /= j
+            if i+1 < len(detections):
+                workload["count"] = j
+                workloads[detections[i].detector.name+":"+detections[i+1].detector.name] = workload
+                workload ={}
+                j=1
+                target_car = detections[i].car.name
+                workload["speed"] = workload.get("speed", 0) + detections[i].speed
+                workload["time"] = workload.get("time",0) + (detections[i+1].time - detections[i].time).total_seconds() // 60
+                
+    
+    most_workloads= dict((sorted(workloads.items(), key =lambda x: x[1]["count"], reverse=True))[:10])
+        
+    
+    # serializer = CarSerializer(trafficLight, many=True)
+    return Response(most_workloads, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
