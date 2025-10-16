@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import axi from "@/utils/api";
-import { useNotificationManager } from "@/hooks/notification-context"; // путь к твоему NotificationContext
+import { useNotificationManager } from "@/hooks/notification-context"; 
 import { Button } from "@/components/ui/button";
 
-export default function WorkloadUpload({ yearFilter, fetchWorkloads, fetchAllWorkloads }: any) {
+export default function CreateDetector({ yearFilter, fetchWorkloads, fetchAllWorkloads }: any) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { addNotification } = useNotificationManager();
@@ -46,7 +46,7 @@ export default function WorkloadUpload({ yearFilter, fetchWorkloads, fetchAllWor
     formData.append("file", file);
 
     try {
-      await axi.post("/analytics/workload/createFromExcel", formData, {
+      await axi.post("/analytics/detectors/createFromExcel", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

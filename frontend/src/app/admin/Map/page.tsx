@@ -1,7 +1,7 @@
 "use client";
 import YandexMapRoute, { Route } from "@/components/map/YandexMapRoute";
 import axi from "@/utils/api";
-import AnaliticsMap from "@/widgets/Map/analiticsMap/analiticsMap";
+import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import { useEffect, useState } from "react";
 export default function Map() {
