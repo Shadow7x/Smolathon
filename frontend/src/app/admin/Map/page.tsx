@@ -31,7 +31,6 @@ export default function Map() {
       <CreateDetector/>
       <TableDetector/>
       <TableCars/>
-      <CreateDetector />
     </div>
   );
 }
