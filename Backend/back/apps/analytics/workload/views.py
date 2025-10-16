@@ -102,7 +102,19 @@ def getWorkloads(request: Request):
 @api_view(['GET'])
 @admin_required
 def getAdjacencies(request: Request):
-    pass
+    get = request.GET
+    if get.get("target"):
+        target = Car.objects.get(id=get.get("target"))
+        potencialAdjacencies = Detection.objects.all().exclude(car=target)
+        if get.get("time_interval"):
+            target_detection = target.workloads.filter(time_interval=get)
+        nodes_count = get.get("nodes_count", 1)
+        target_detection = target_detection.detections.all()
+        target_nodes=[i.detector for i in target_detection]
+        
+        
+    else:
+        return Response("Некоректный запрос", status=status.HTTP_400_BAD_REQUEST)
     
 
 # @api_view(['POST'])
