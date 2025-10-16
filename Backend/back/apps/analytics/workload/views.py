@@ -100,34 +100,25 @@ def getWorkloads(request: Request):
         return Response("Некоректные данные", status=status.HTTP_400_BAD_REQUEST)
     
     workloads ={}
-    j=0
-    target_car=detections.first().car.name
-    workload= {}
     for i in range(len(detections)):
-        if target_car == detections[i].car.name:
-            if i+1 < len(detections):
-                try:
-                    workload["speed"] = workload.get("speed", 0) + detections[i].speed    
-                    workload["time"] = workload.get("time",0) + (detections[i+1].time - detections[i].time).total_seconds() // 60
-                    j+=1
-                except Exception as e:
-                    print(e)
-        else:
-            workload["speed"] /= j
-            workload["time"] /= j
-            if i+1 < len(detections):
-                workload["count"] = j
-                workloads[detections[i].detector.name+":"+detections[i+1].detector.name] = workload
-                workload ={}
-                j=1
-                target_car = detections[i].car.name
-                workload["speed"] = workload.get("speed", 0) + detections[i].speed
-                workload["time"] = workload.get("time",0) + (detections[i+1].time - detections[i].time).total_seconds() // 60
+        if i+1 < len(detections):
+            workload= workloads.get(detections[i].detector.name+":"+detections[i+1].detector.name, {})
+        
+        if i+1 < len(detections):
+            workload["count"] = workload.get("count", 0) + 1
+            workload["start"] = [detections[i].detector.longitude,detections[i].detector.latitude]
+            workload["end"] = [detections[i+1].detector.longitude,detections[i+1].detector.latitude]
+            workloads[detections[i].detector.name+":"+detections[i+1].detector.name] = workload
+            workload["speed"] = workload.get("speed", 0) + detections[i].speed
+            workload["time"] = workload.get("time",0) + (detections[i+1].time - detections[i].time).total_seconds() // 60
                 
     
     most_workloads= dict((sorted(workloads.items(), key =lambda x: x[1]["count"], reverse=True))[:10])
         
-    
+    for race , workload in most_workloads.items():
+        
+        workload['speed'] /= workload["count"]
+        workload['time'] /= workload["count"]
     # serializer = CarSerializer(trafficLight, many=True)
     return Response(most_workloads, status=status.HTTP_200_OK)
 
