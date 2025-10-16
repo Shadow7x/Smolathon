@@ -64,6 +64,9 @@ export default function Map() {
       <Carsine
         isAccompaniment={isAccompaniment}
         setIsAccompaniment={setIsAccompaniment}
+        routes={routes}
+        filters={filters}
+        onFilterChange={setFilters}
       />
 
       {isAccompaniment ? (
