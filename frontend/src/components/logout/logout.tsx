@@ -65,7 +65,7 @@ export default function Logout() {
     <Button
       variant="outline"
       onClick={handleLogout}
-      className="text-black hover:bg-red-50 hover:text-red-600"
+      className="text-black hover:bg-red-50 hover:text-red-600 cursor-pointer"
     >
       Выйти
     </Button>
