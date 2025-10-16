@@ -5,6 +5,7 @@ import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import CreateDetector from "@/widgets/Map/createDetector/createDetector";
 import { useEffect, useState } from "react";
+
 export default function Map() {
   useEffect(() => {
     const fetchWorkload = async () => {

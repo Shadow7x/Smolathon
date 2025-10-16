@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-export default function StatusSwitch() {
+const Switchmap = () => {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
 
   return (
@@ -40,4 +40,6 @@ export default function StatusSwitch() {
       </button>
     </div>
   );
-}
+};
+
+export default Switchmap;
