@@ -1,17 +1,17 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { useUser } from "@/hooks/user-context"
-import { useNotificationManager } from "@/hooks/notification-context"
-import axi from "@/utils/api"
+"use client";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@/hooks/user-context";
+import { useNotificationManager } from "@/hooks/notification-context";
+import axi from "@/utils/api";
 
 export default function Logout() {
-  const { user, clearUser } = useUser()
-  const { addNotification } = useNotificationManager()
+  const { clearUser } = useUser();
+  const { addNotification } = useNotificationManager();
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token")
-      
+      const token = localStorage.getItem("token");
+
       if (!token) {
         addNotification({
           id: Date.now().toString(),
@@ -19,39 +19,35 @@ export default function Logout() {
           description: "Токен не найден",
           status: 401,
           createdAt: new Date().toISOString(),
-        })
-        return
+        });
+        window.location.href = "/"; // ✅ Переход + обновление
+        return;
       }
 
-      // Отправляем запрос на логаут
       const res = await axi.get("/account/logout", {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+        validateStatus: () => true,
+      });
 
-      if (res.status === 200) {
-        // Удаляем токен из localStorage
-        localStorage.removeItem("token")
-        
-        // Очищаем данные пользователя в контексте
-        clearUser?.()
+      // ✅ Очищаем всё независимо от результата
+      localStorage.removeItem("token");
+      clearUser?.();
 
-        addNotification({
-          id: Date.now().toString(),
-          title: "Успешный выход",
-          description: "Вы вышли из аккаунта",
-          status: 200,
-          createdAt: new Date().toISOString(),
-        })
+      addNotification({
+        id: Date.now().toString(),
+        title: "Выход выполнен",
+        description:
+          res.status === 200
+            ? "Вы успешно вышли из аккаунта"
+            : "Сессия завершена локально",
+        status: 200,
+        createdAt: new Date().toISOString(),
+      });
 
-        // Обновляем страницу
-        window.location.reload()
-      }
+      window.location.href = "/"; // ✅ Мгновенный редирект с reload
     } catch (err) {
-      // Даже если запрос не удался, очищаем локальные данные
-      localStorage.removeItem("token")
-      clearUser?.()
+      localStorage.removeItem("token");
+      clearUser?.();
 
       addNotification({
         id: Date.now().toString(),
@@ -59,20 +55,19 @@ export default function Logout() {
         description: "Сессия завершена локально",
         status: 200,
         createdAt: new Date().toISOString(),
-      })
+      });
 
-      // Обновляем страницу
-      window.location.reload()
+      window.location.href = "/"; // ✅ fallback переход
     }
-  }
+  };
 
   return (
-    <Button 
-      variant="outline" 
+    <Button
+      variant="outline"
       onClick={handleLogout}
       className="text-black hover:bg-red-50 hover:text-red-600"
     >
       Выйти
     </Button>
-  )
+  );
 }

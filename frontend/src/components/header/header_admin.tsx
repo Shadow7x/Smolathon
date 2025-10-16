@@ -1,9 +1,12 @@
 "use client";
-
+import Logout from "../logout/logout";
 import Image from "next/image";
+import { useUser } from "@/hooks/user-context";
 
 export default function Admin_Header() {
-  return (
+  const { user } = useUser();
+
+  return user && (
     <header
       className={`
     flex flex-wrap items-center gap-3.5 
@@ -25,6 +28,7 @@ export default function Admin_Header() {
         СОГБУ <span className="text-[#62A744]">"ЦОДД"</span>
       </h1>
       <h1 className="text-2xl font-bold">Панель администратора</h1>
+      <Logout/>
     </header>
   );
 }
