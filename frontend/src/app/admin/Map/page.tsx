@@ -3,7 +3,25 @@ import YandexMapRoute from "@/components/map/YandexMapRoute";
 import AnaliticsMap from "@/widgets/Map/createCar/createCar";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import CreateDetector from "@/widgets/Map/createDetector/createDetector";
+import axi from "@/utils/api";
+import { useEffect, useState } from "react";
 export default function Map() {
+  useEffect(() => {
+    const fetchWorkload = async () => {
+      try {
+        const response = await axi.get("analytics/workload/get");
+        setRoute(response.data);
+        console.log(response.data[0].id);
+      } catch (error) {
+        console.error("Ошибка при загрузке:", error);
+      }
+    };
+
+    fetchWorkload();
+  }, []);
+
+  const [Routes, setRoute] = useState(null);
+
   const routes = [
     {
       name: "Маршрут по центру Москвы",
