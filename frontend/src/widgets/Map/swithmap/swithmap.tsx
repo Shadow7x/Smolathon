@@ -5,9 +5,14 @@ import { cn } from "@/lib/utils";
 interface SwitchmapProps {
   isAccompaniment: boolean;
   setIsAccompaniment: (value: boolean) => void;
+  labels?: [string, string]; // добавляем пропс для названий кнопок
 }
 
-const Switchmap = ({ isAccompaniment, setIsAccompaniment }: SwitchmapProps) => {
+const Switchmap = ({
+  isAccompaniment,
+  setIsAccompaniment,
+  labels = ["Загруженность", "Смежность"], // дефолтные значения
+}: SwitchmapProps) => {
   return (
     <div
       className={cn(
@@ -29,7 +34,7 @@ const Switchmap = ({ isAccompaniment, setIsAccompaniment }: SwitchmapProps) => {
         )}
         onClick={() => setIsAccompaniment(true)}
       >
-        Загруженность
+        {labels[0]}
       </button>
 
       <button
@@ -39,7 +44,7 @@ const Switchmap = ({ isAccompaniment, setIsAccompaniment }: SwitchmapProps) => {
         )}
         onClick={() => setIsAccompaniment(false)}
       >
-        Смежность
+        {labels[1]}
       </button>
     </div>
   );

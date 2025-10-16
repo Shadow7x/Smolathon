@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, Upload } from "lucide-react";
+import Switchmap from "@/widgets/Map/swithmap/swithmap";
 
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
@@ -93,37 +94,16 @@ export default function Map() {
               </div>
             </div>
 
-            <div
-              className={cn(
-                "relative flex rounded-[1rem] overflow-hidden bg-gray-100 mb-2",
-                "w-[250px] h-[2.5rem] mx-auto"
-              )}
-            >
-              <div
-                className={cn(
-                  "absolute top-0 left-0 h-full w-1/2 bg-black rounded-[1rem] transition-transform duration-300",
-                  activeTab === "map" ? "translate-x-0" : "translate-x-full"
-                )}
+            <div className="flex justify-center mt-6">
+              <Switchmap
+                isAccompaniment={activeTab === "map"} // true = Авто, false = Детекторы
+                setIsAccompaniment={(val) =>
+                  setActiveTab(val ? "map" : "create")
+                }
+                labels={["Авто", "Детекторы"]}
               />
-              <button
-                className={cn(
-                  "relative z-10 w-1/2 h-full text-sm font-medium transition-colors duration-200",
-                  activeTab === "map" ? "text-white" : "text-gray-600"
-                )}
-                onClick={() => setActiveTab("map")}
-              >
-                Авто
-              </button>
-              <button
-                className={cn(
-                  "relative z-10 w-1/2 h-full text-sm font-medium transition-colors duration-200",
-                  activeTab === "create" ? "text-white" : "text-gray-600"
-                )}
-                onClick={() => setActiveTab("create")}
-              >
-                Детекторы
-              </button>
             </div>
+
             <div>
               <TableDetector />
               <TableCars />
