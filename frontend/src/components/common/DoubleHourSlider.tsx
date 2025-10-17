@@ -40,28 +40,36 @@ export default function DoubleHourSlider({
           min={MIN}
           max={MAX}
           onChange={handleChange}
-          renderTrack={({ props, children }) => (
-            <div
-              {...props}
-              className="relative w-full h-[3px] rounded cursor-pointer"
-              style={{
-                background: getTrackBackground({
-                  values,
-                  colors: ["#C3C3C3", "#636363", "#C3C3C3"],
-                  min: MIN,
-                  max: MAX,
-                }),
-              }}
-            >
-              {children}
-            </div>
-          )}
-          renderThumb={({ props }) => (
-            <div
-              {...props}
-              className="w-4 h-4 rounded-full bg-[#636363] cursor-pointer flex items-center justify-center"
-            ></div>
-          )}
+          renderTrack={({ props, children }) => {
+            const { key, ...rest } = props;
+            return (
+              <div
+                key={key}
+                {...rest}
+                className="relative w-full h-[3px] rounded cursor-pointer"
+                style={{
+                  background: getTrackBackground({
+                    values,
+                    colors: ["#C3C3C3", "#636363", "#C3C3C3"],
+                    min: MIN,
+                    max: MAX,
+                  }),
+                }}
+              >
+                {children}
+              </div>
+            );
+          }}
+          renderThumb={({ props }) => {
+            const { key, ...rest } = props;
+            return (
+              <div
+                key={key}
+                {...rest}
+                className="w-4 h-4 rounded-full bg-[#636363] cursor-pointer flex items-center justify-center"
+              />
+            );
+          }}
         />
       </div>
 

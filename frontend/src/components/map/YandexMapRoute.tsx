@@ -19,13 +19,15 @@ interface SegmentData {
 }
 
 interface YandexMapRouteProps {
-  segmentsData: SegmentData;
+  segmentsData1: SegmentData;
+  segmentsData2?: SegmentData;
   routeType?: "auto" | "masstransit" | "pedestrian" | "bicycle";
   className?: string;
 }
 
 export default function YandexMapRoute({
-  segmentsData,
+  segmentsData1,
+  segmentsData2,
   routeType = "auto",
   className = "h-[500px] w-full",
 }: YandexMapRouteProps) {
@@ -56,11 +58,11 @@ export default function YandexMapRoute({
   }, []);
 
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || !segmentsData) return;
+    if (!mapLoaded || !mapRef.current) return;
 
     if (!mapInstance.current) {
       mapInstance.current = new window.ymaps.Map(mapRef.current, {
-        center: [54.7846, 32.0515], // центр можно взять первый сегмент
+        center: [54.7846, 32.0515], // Смоленск
         zoom: 12,
         controls: [],
       });
@@ -69,58 +71,56 @@ export default function YandexMapRoute({
     mapInstance.current.geoObjects.removeAll();
     multiRoutes.current = [];
 
-    const keys = Object.keys(segmentsData);
-    keys.forEach((key, index) => {
-      const segment = segmentsData[key];
+    const renderSegments = (segmentsData: SegmentData, color: string) => {
+      Object.keys(segmentsData).forEach((key) => {
+        const segment = segmentsData[key];
+        const start = [segment.start[1], segment.start[0]];
+        const end = [segment.end[1], segment.end[0]];
+        const referencePoints = [start, end];
 
-      // Важно: новые данные [long, lat] → [lat, long]
-      const start = [segment.start[1], segment.start[0]];
-      const end = [segment.end[1], segment.end[0]];
-      const referencePoints = [start, end];
+        const multiRoute = new window.ymaps.multiRouter.MultiRoute(
+          { referencePoints, params: { routingMode: routeType } },
+          {
+            boundsAutoApply: false,
+            wayPointVisible: false,
+            routeActiveStrokeWidth: 5,
+            routeActiveStrokeColor: color,
+            routeStrokeStyle: "solid",
+            routeOpenBalloonOnClick: false,
+          }
+        );
+        multiRoute.model.setParams({ results: 1 });
+        multiRoutes.current.push(multiRoute);
+        mapInstance.current.geoObjects.add(multiRoute);
 
-      const routeColor = getColorByIndex(index);
+        const startPlacemark = new window.ymaps.Placemark(
+          start,
+          {},
+          { preset: "islands#circleIcon", iconColor: color }
+        );
+        const endPlacemark = new window.ymaps.Placemark(
+          end,
+          {},
+          { preset: "islands#circleIcon", iconColor: color }
+        );
 
-      const multiRoute = new window.ymaps.multiRouter.MultiRoute(
-        {
-          referencePoints,
-          params: { routingMode: routeType },
-        },
-        {
-          boundsAutoApply: false,
-          wayPointVisible: false,
-          routeActiveStrokeWidth: 5,
-          routeActiveStrokeColor: routeColor,
-          routeStrokeStyle: "solid",
-          routeOpenBalloonOnClick: false,
-        }
-      );
-      multiRoute.model.setParams({ results: 1 });
+        mapInstance.current.geoObjects.add(startPlacemark);
+        mapInstance.current.geoObjects.add(endPlacemark);
+      });
+    };
 
-      multiRoutes.current.push(multiRoute);
+    // Если данных нет, просто центр на Смоленск
+    const hasData1 = segmentsData1 && Object.keys(segmentsData1).length > 0;
+    const hasData2 = segmentsData2 && Object.keys(segmentsData2).length > 0;
 
-      mapInstance.current.geoObjects.add(multiRoute);
+    if (!hasData1 && !hasData2) {
+      mapInstance.current.setCenter([54.7846, 32.0515]);
+      mapInstance.current.setZoom(12);
+      return;
+    }
 
-      // Начальная и конечная точки
-      const startPlacemark = new window.ymaps.Placemark(
-        start,
-        {},
-        {
-          preset: "islands#circleIcon",
-          iconColor: routeColor,
-        }
-      );
-      const endPlacemark = new window.ymaps.Placemark(
-        end,
-        {},
-        {
-          preset: "islands#circleIcon",
-          iconColor: routeColor,
-        }
-      );
-
-      mapInstance.current.geoObjects.add(startPlacemark);
-      mapInstance.current.geoObjects.add(endPlacemark);
-    });
+    if (hasData1) renderSegments(segmentsData1, "#00FF00");
+    if (hasData2) renderSegments(segmentsData2, "#FF0000");
 
     if (multiRoutes.current.length > 0) {
       mapInstance.current.setBounds(
@@ -128,27 +128,7 @@ export default function YandexMapRoute({
         { checkZoomRange: true, duration: 300 }
       );
     }
-  }, [mapLoaded, segmentsData, routeType]);
-
-  const getColorByIndex = (index: number): string => {
-    const hue = (index * 137.5) % 360;
-    const c = 255;
-    const x = Math.round(c * (1 - Math.abs(((hue / 60) % 2) - 1)));
-    const m = 0;
-    let r = 0,
-      g = 0,
-      b = 0;
-
-    if (hue < 60) [r, g, b] = [c, x, 0];
-    else if (hue < 120) [r, g, b] = [x, c, 0];
-    else if (hue < 180) [r, g, b] = [0, c, x];
-    else if (hue < 240) [r, g, b] = [0, x, c];
-    else if (hue < 300) [r, g, b] = [x, 0, c];
-    else [r, g, b] = [c, 0, x];
-
-    const toHex = (v: number) => v.toString(16).padStart(2, "0");
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  };
+  }, [mapLoaded, segmentsData1, segmentsData2, routeType]);
 
   return (
     <div className={className}>

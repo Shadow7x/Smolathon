@@ -37,10 +37,10 @@ export default function Carsine({
   const [selectCar, setSelectCar] = useState([]);
   const [isComparison, setIsComparison] = useState(false);
 
-  const [firstInterval, setFirstInterval] = useState<[number, number]>([8, 18]);
-  const [secondInterval, setSecondInterval] = useState<[number, number] | null>(
-    null
-  );
+  const [firstInterval, setFirstInterval] = useState<[number, number]>([0, 24]);
+  const [secondInterval, setSecondInterval] = useState<[number, number]>([
+    0, 24,
+  ]);
 
   useEffect(() => {
     axi.get("/analytics/workload/getCars").then((e) => {
@@ -109,7 +109,10 @@ export default function Carsine({
             <div className="flex flex-row w-[38rem] max-w-full h-[2rem]">
               <DoubleHourSlider
                 selectedHours={firstInterval}
-                onChangeHours={(hours) => setFirstInterval(hours)}
+                onChangeHours={(hours) => {
+                  setFirstInterval(hours);
+                  onFilterChange({ ...filters, interval: hours });
+                }}
               />
             </div>
           </div>
@@ -121,9 +124,21 @@ export default function Carsine({
                 <input
                   type="checkbox"
                   checked={isComparison}
-                  onChange={(e) => setIsComparison(e.target.checked)}
+                  onChange={(e) => {
+                    setIsComparison(e.target.checked);
+                    if (e.target.checked) {
+                      // включаем второй сегмент, записываем фильтр
+                      onFilterChange({ ...filters, interval2: secondInterval });
+                    } else {
+                      // отключаем второй сегмент, удаляем фильтр
+                      const newFilters = { ...filters };
+                      delete newFilters.interval2;
+                      onFilterChange(newFilters);
+                    }
+                  }}
                   className="peer appearance-none rounded-[3px] border-2 border-black w-[1.25rem] h-[1.25rem] cursor-pointer"
                 />
+
                 <svg
                   className="absolute w-[1.25rem] h-[1.25rem] opacity-0 peer-checked:opacity-100 pointer-events-none"
                   viewBox="0 0 24 24"
@@ -150,7 +165,13 @@ export default function Carsine({
             >
               <DoubleHourSlider
                 selectedHours={secondInterval}
-                onChangeHours={(hours) => setSecondInterval(hours)}
+                onChangeHours={(hours) => {
+                  setSecondInterval(hours);
+
+                  if (isComparison) {
+                    onFilterChange({ ...filters, interval2: hours });
+                  }
+                }}
               />
             </div>
           </div>
