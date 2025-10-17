@@ -63,7 +63,7 @@ export default function Map() {
       });
       setRoutes(response.data);
     } catch (error) {
-      console.error("Ошибка при загрузке:", error);
+      console.error("Ошибка при загрузке:", error); 
     }
   };
 
