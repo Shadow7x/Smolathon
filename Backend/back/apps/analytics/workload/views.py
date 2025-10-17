@@ -222,7 +222,7 @@ def getAdjacencies(request: Request):
 
             data = CarSerializer(Adjacency, many=True).data
 
-            return Response(data, status=status.HTTP_200_OK)
+            return Response({"data":data, "count":dict(count_other).values()}, status=status.HTTP_200_OK)
 
         else:
             return Response("Некоректный запрос", status=status.HTTP_400_BAD_REQUEST)
