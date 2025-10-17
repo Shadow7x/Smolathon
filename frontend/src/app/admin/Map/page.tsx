@@ -4,17 +4,13 @@ import axi from "@/utils/api";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
+import WorkloadUpload from "@/widgets/Map/createCar/createCar";
 import { useEffect, useState } from "react";
-import { Check, Upload } from "lucide-react";
-import Switchmap from "@/widgets/Map/swithmap/swithmap";
-import InfoCarts from "@/widgets/Map/infocarts/InsoCarts";
+
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
-  const [activeTab, setActiveTab] = useState<"map" | "create">("map");
   const [segments, setSegments] = useState<Record<string, any>>({});
   const [segments2, setSegments2] = useState<Record<string, any>>({});
-  const [selected, setSelected]  = useState(null);
-
   const [routes, setRoutes] = useState<any[]>([]);
   const [filters, setFilters] = useState({
     car: "",
@@ -22,10 +18,6 @@ export default function Map() {
     nodes: "1",
     interval: [0, 24] as [number, number] | null,
   });
-
-  useEffect(() =>{
-    console.log(selected)
-  }, [selected])
 
   useEffect(() => {
     const fetchWorkloads = async (
@@ -67,11 +59,9 @@ export default function Map() {
         },
       });
       setRoutes(response.data);
-      console.log(filters);
     } catch (error) {
       console.error("Ошибка при загрузке:", error);
     }
-    console.log(filters);
   };
 
   useEffect(() => {
@@ -79,66 +69,37 @@ export default function Map() {
   }, [filters, isAccompaniment]);
 
   return (
-    <div className="px-6">
-      <div className="flex items-center justify-between max-w-[1400px]">
+    <div className="px-4 sm:px-6 md:px-10 py-6 flex flex-col max-w-[1400px] mx-auto">
+      {/* Верхний блок — фильтры и настройки */}
+      <div className="bg-white border-gray-200 sm:p-6">
+        <Carsine
+          isAccompaniment={isAccompaniment}
+          setIsAccompaniment={setIsAccompaniment}
+          routes={routes}
+          filters={filters}
+          onFilterChange={setFilters}
+        />
+      </div>
 
-      <div>
-      <Carsine
-        isAccompaniment={isAccompaniment}
-        setIsAccompaniment={setIsAccompaniment}
-        routes={routes}
-        filters={filters}
-        onFilterChange={setFilters}
-      />
-      </div>
-      <div>
-      <InfoCarts
-          route={routes} 
-          filter={selected}
-          onFilterChange={(a) => setSelected(a)} 
-          // ← обязательно функция! 
-        />
-      </div>
-      </div>
+      {/* Блок карты */}
       {isAccompaniment ? (
-        <YandexMapRoute
-          segmentsData1={segments || {}}
-          segmentsData2={filters.interval2 ? segments2 || {} : undefined}
-        />
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <YandexMapRoute
+            segmentsData1={segments || {}}
+            segmentsData2={filters.interval2 ? segments2 || {} : undefined}
+          />
+        </div>
       ) : (
         <>
-          <div className="outline rounded-2xl p-6 w-full max-w-[1100px] mx-auto mt-6">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <Upload className="w-5 h-5 text-gray-600" />
-                <span className="text-lg font-medium">Загрузка файлов</span>
-              </div>
-              <div className="flex gap-2">
-                <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md transition">
-                  <Upload className="w-4 h-4" />
-                  Выбрать файл
-                </button>
-                <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md transition">
-                  <Check className="w-4 h-4" />
-                  Загрузить
-                </button>
-              </div>
-            </div>
+          {/* Блок загрузки */}
+          <div className="bg-white border-gray-200 p-4 sm:p-6">
+            <WorkloadUpload />
+          </div>
 
-            <div className="flex justify-center mt-6">
-              <Switchmap
-                isAccompaniment={activeTab === "map"}
-                setIsAccompaniment={(val) =>
-                  setActiveTab(val ? "map" : "create")
-                }
-                labels={["Авто", "Детекторы"]}
-              />
-            </div>
-
-            <div>
-              <TableDetector />
-              <TableCars />
-            </div>
+          {/* Таблицы */}
+          <div className="bg-white border-gray-200 p-4 sm:p-6 flex flex-col gap-6">
+            <TableDetector />
+            <TableCars />
           </div>
         </>
       )}
@@ -148,10 +109,8 @@ export default function Map() {
 
 function formatTimeInterval(interval: [number, number]) {
   const [start, end] = interval;
-
   const timeStart =
     start === 24 ? "23:59" : start < 10 ? `0${start}:00` : `${start}:00`;
   const timeEnd = end === 24 ? "23:59" : end < 10 ? `0${end}:00` : `${end}:00`;
-
   return { timeStart, timeEnd };
 }
