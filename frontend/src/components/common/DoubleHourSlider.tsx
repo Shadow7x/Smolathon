@@ -33,7 +33,7 @@ export default function DoubleHourSlider({
   return (
     <div className="flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-7">
       {/* Слайдер */}
-      <div className="flex flex-col flex-1 rounded-3xl border border-input items-center justify-center bg-white h-10 px-4 sm:px-6">
+      <div className="hidden sm:flex flex-col flex-1 rounded-3xl border border-input items-center justify-center bg-white h-10 px-4 sm:px-6">
         <Range
           values={values}
           step={STEP}
