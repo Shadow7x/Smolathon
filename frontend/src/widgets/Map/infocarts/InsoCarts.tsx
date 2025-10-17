@@ -46,7 +46,12 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
     }
   },[routes, count])
   useEffect(() => {
+    try{
     onFilterChange(selectCar)
+    }
+    catch{
+        console.error("ну и хуйня виталя 2")
+    }
   }, [selectCar])
 
   console.log(routes)
