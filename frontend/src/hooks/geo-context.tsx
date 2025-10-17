@@ -31,7 +31,6 @@ export const GEOProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Error getting location:", error);
       }
     );
-    console.log(GEO);
   }, []);
 
   return <GEOContext.Provider value={{ GEO }}>{children}</GEOContext.Provider>;

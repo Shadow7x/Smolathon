@@ -23,10 +23,6 @@ export default function Map() {
   });
 
   useEffect(() => {
-    console.log(selected);
-  }, [selected]);
-
-  useEffect(() => {
     const fetchWorkloads = async (
       interval: [number, number],
       key: "segments" | "segments2"

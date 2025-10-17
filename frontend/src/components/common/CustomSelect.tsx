@@ -21,7 +21,6 @@ const CustomSelect = ({
 }: CustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<string>("");
-  console.log(defaultt)
   const handleSelect = (value: string) => {
     setSelected(value);
     setIsOpen(false);
@@ -29,7 +28,6 @@ const CustomSelect = ({
   };
 
    useEffect(() => {
-    console.log(defaultt)
     if (defaultt) {
       setSelected(defaultt);
     }
