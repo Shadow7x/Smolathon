@@ -25,6 +25,7 @@ export default function Default_Header() {
   const headerClasses = isTransparent
     ? "bg-black text-white"
     : "bg-white text-black ";
+  //туаыуыаи
 
   const logoSrc = isTransparent
     ? "/icons/logoIcon.svg"
