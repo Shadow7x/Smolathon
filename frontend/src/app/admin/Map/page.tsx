@@ -76,7 +76,7 @@ export default function Map() {
       {isAccompaniment ? (
         Object.keys(segments).length === 0 ? (
           <div className="flex justify-center mt-6">
-            <Skeleton className="h-[500px] w-full max-w-[1100px] rounded-2xl" />
+            <Skeleton className="h-[500px] w-full  rounded-2xl" />
           </div>
         ) : (
           <YandexMapRoute segmentsData={segments} />

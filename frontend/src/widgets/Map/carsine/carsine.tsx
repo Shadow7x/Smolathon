@@ -5,6 +5,10 @@ import { Search } from "lucide-react";
 import CustomSelect from "@/components/common/CustomSelect";
 import CustomInput from "@/components/common/CustomInput";
 import axi from "@/utils/api";
+import { Range, getTrackBackground } from "react-range";
+import { cn } from "@/lib/utils";
+import DoubleHourSlider from "@/components/common/DoubleHourSlider";
+import { Checkbox } from "@radix-ui/react-checkbox";
 
 interface CarsineProps {
   isAccompaniment: boolean;
@@ -29,16 +33,16 @@ export default function Carsine({
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showList, setShowList] = useState(false);
-  const [cars, setCars] = useState([])
-  const [selectCar, setSelectCar] = useState(null)
-  useEffect(() =>{
-    axi.get("/analytics/workload/getCars").then((e)=>{
-        setCars(e.data);
-    })
+  const [cars, setCars] = useState([]);
+  const [selectCar, setSelectCar] = useState([]);
+  const [isComparison, setIsComparison] = useState(false);
 
-  },[])
+  useEffect(() => {
+    axi.get("/analytics/workload/getCars").then((e) => {
+      setCars(e.data);
+    });
+  }, []);
 
-  // фильтрация подсказок из routes
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -93,10 +97,59 @@ export default function Carsine({
         />
       </div>
       {isAccompaniment ? (
-        <div className="flex flex-row mt-4">
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap mt-4 gap-8 md:gap-14">
+          {/* Первый слайдер */}
+          <div className="flex flex-col gap-3 min-w-[18rem]">
             <p>Выберите временной интервал</p>
-            <div className="flex flex-row w-[506px] h-[32px] bg-red-700"></div>
+            <div className="flex flex-row w-[38rem] max-w-full h-[2rem]">
+              <DoubleHourSlider
+                onChangeHours={function (hours: [number, number]): void {
+                  throw new Error("Function not implemented.");
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Блок сравнения */}
+          <div className="flex flex-col gap-3 min-w-[18rem]">
+            <div className="flex flex-row gap-2 items-center">
+              <label className="relative flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isComparison}
+                  onChange={(e) => setIsComparison(e.target.checked)}
+                  className="peer appearance-none rounded-[3px] border-2 border-black w-[1.25rem] h-[1.25rem] cursor-pointer"
+                />
+                <svg
+                  className="absolute w-[1.25rem] h-[1.25rem] opacity-0 peer-checked:opacity-100 pointer-events-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M5 13l4 4L19 7"
+                    stroke="black"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </label>
+
+              <p>Добавить сравнение</p>
+            </div>
+
+            <div
+              className={cn(
+                "flex flex-row w-[38rem] max-w-full h-[2rem]",
+                !isComparison && "opacity-50 pointer-events-none"
+              )}
+            >
+              <DoubleHourSlider
+                onChangeHours={function (hours: [number, number]): void {
+                  throw new Error("Function not implemented.");
+                }}
+              />
+            </div>
           </div>
         </div>
       ) : (
@@ -113,7 +166,6 @@ export default function Carsine({
               }
             />
 
-            {/* Выпадающие подсказки */}
             {showList && (
               <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-auto">
                 {suggestions.map((item, index) => (
@@ -137,13 +189,12 @@ export default function Carsine({
               <div className="relative w-40">
                 <CustomSelect
                   placeholder="Длительность"
-                  defaultt={selectCar !==null ? "10" : "10"}
+                  defaultt={selectCar !== null ? "10" : "10"}
                   options={[
                     { label: "10 минут", value: "10" },
                     { label: "20 минут", value: "20" },
                     { label: "30 минут", value: "30" },
                     { label: "40 минут", value: "40" },
-
                   ]}
                   onChange={(v) => handleChange("duration", v)}
                 />
@@ -153,7 +204,7 @@ export default function Carsine({
               <div className="relative w-38">
                 <CustomSelect
                   placeholder="Кол-во узлов"
-                  defaultt={selectCar !==null ? "1" : "1"}
+                  defaultt={selectCar !== null ? "1" : "1"}
                   options={[
                     { label: "1", value: "1" },
                     { label: "3", value: "3" },
@@ -167,14 +218,21 @@ export default function Carsine({
               <div className="relative w-30">
                 <CustomSelect
                   placeholder="Период"
-                  
-                  options={selectCar !==null ?[
-                  ...selectCar?.workloads.map((a) => ({
-                    label: a.time_interval, 
-                    value: a.time_interval
-                  })),
-                ] : []}
-                  defaultt={selectCar !==null ? selectCar?.workloads[0]?.time_interval : ""}
+                  options={
+                    selectCar !== null
+                      ? [
+                          ...selectCar?.workloads.map((a) => ({
+                            label: a.time_interval,
+                            value: a.time_interval,
+                          })),
+                        ]
+                      : []
+                  }
+                  defaultt={
+                    selectCar !== null
+                      ? selectCar?.workloads[0]?.time_interval
+                      : ""
+                  }
                   onChange={(v) => handleChange("period", v)}
                 />
               </div>
