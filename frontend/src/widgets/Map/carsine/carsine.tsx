@@ -5,6 +5,10 @@ import { Search } from "lucide-react";
 import CustomSelect from "@/components/common/CustomSelect";
 import CustomInput from "@/components/common/CustomInput";
 import axi from "@/utils/api";
+import { Range, getTrackBackground } from "react-range";
+import { cn } from "@/lib/utils";
+import DoubleHourSlider from "@/components/common/DoubleHourSlider";
+import { Checkbox } from "@radix-ui/react-checkbox";
 
 interface CarsineProps {
   isAccompaniment: boolean;
@@ -31,13 +35,14 @@ export default function Carsine({
   const [showList, setShowList] = useState(false);
   const [cars, setCars] = useState([]);
   const [selectCar, setSelectCar] = useState([]);
+  const [isComparison, setIsComparison] = useState(false);
+
   useEffect(() => {
     axi.get("/analytics/workload/getCars").then((e) => {
       setCars(e.data);
     });
   }, []);
 
-  // фильтрация подсказок из routes
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -92,10 +97,59 @@ export default function Carsine({
         />
       </div>
       {isAccompaniment ? (
-        <div className="flex flex-row mt-4">
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap mt-4 gap-8 md:gap-14">
+          {/* Первый слайдер */}
+          <div className="flex flex-col gap-3 min-w-[18rem]">
             <p>Выберите временной интервал</p>
-            <div className="flex flex-row w-[506px] h-[32px] bg-red-700"></div>
+            <div className="flex flex-row w-[38rem] max-w-full h-[2rem]">
+              <DoubleHourSlider
+                onChangeHours={function (hours: [number, number]): void {
+                  throw new Error("Function not implemented.");
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Блок сравнения */}
+          <div className="flex flex-col gap-3 min-w-[18rem]">
+            <div className="flex flex-row gap-2 items-center">
+              <label className="relative flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isComparison}
+                  onChange={(e) => setIsComparison(e.target.checked)}
+                  className="peer appearance-none rounded-[3px] border-2 border-black w-[1.25rem] h-[1.25rem] cursor-pointer"
+                />
+                <svg
+                  className="absolute w-[1.25rem] h-[1.25rem] opacity-0 peer-checked:opacity-100 pointer-events-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M5 13l4 4L19 7"
+                    stroke="black"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </label>
+
+              <p>Добавить сравнение</p>
+            </div>
+
+            <div
+              className={cn(
+                "flex flex-row w-[38rem] max-w-full h-[2rem]",
+                !isComparison && "opacity-50 pointer-events-none"
+              )}
+            >
+              <DoubleHourSlider
+                onChangeHours={function (hours: [number, number]): void {
+                  throw new Error("Function not implemented.");
+                }}
+              />
+            </div>
           </div>
         </div>
       ) : (
@@ -112,7 +166,6 @@ export default function Carsine({
               }
             />
 
-            {/* Выпадающие подсказки */}
             {showList && (
               <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-auto">
                 {suggestions.map((item, index) => (

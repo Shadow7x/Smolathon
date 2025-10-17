@@ -11,7 +11,7 @@ interface SwitchmapProps {
 const Switchmap = ({
   isAccompaniment,
   setIsAccompaniment,
-  labels = ["Загруженность", "Смежность"], // дефолтные значения
+  labels = ["Загруженность", "Смежность"],
 }: SwitchmapProps) => {
   return (
     <div

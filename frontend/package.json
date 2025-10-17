@@ -25,6 +25,7 @@
     "next": "15.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-range": "^1.10.0",
     "recharts": "^3.2.1",
     "shadcn": "^3.4.2",
     "skeleton": "^4.1.0",

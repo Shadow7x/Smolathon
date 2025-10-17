@@ -33,7 +33,7 @@ const CustomSelect = ({
         className={cn(
           "flex w-full cursor-pointer items-center justify-between border border-input bg-transparent px-4 py-1 text-sm transition-colors select-none",
           "disabled:cursor-not-allowed disabled:opacity-50",
-          isOpen ? "rounded-t-2xl rounded-b-none" : "rounded-2xl"
+          isOpen ? "rounded-t-3xl rounded-b-none" : "rounded-3xl"
         )}
       >
         <span
@@ -60,7 +60,7 @@ const CustomSelect = ({
       {isOpen && (
         <div
           className={cn(
-            "absolute z-10 mt-[-1px] w-full rounded-b-2xl border border-input border-t-0 bg-white shadow-lg"
+            "absolute z-10 mt-[-1px] w-full rounded-b-3xl border border-input border-t-0 bg-white shadow-lg"
           )}
         >
           {options.map((opt) => (
