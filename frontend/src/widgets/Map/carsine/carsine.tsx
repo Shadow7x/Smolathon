@@ -34,7 +34,7 @@ export default function Carsine({
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showList, setShowList] = useState(false);
   const [cars, setCars] = useState([]);
-  const [selectCar, setSelectCar] = useState([]);
+  const [selectCar, setSelectCar] = useState(null)
   const [isComparison, setIsComparison] = useState(false);
 
   const [firstInterval, setFirstInterval] = useState<[number, number]>([8, 18]);
@@ -192,6 +192,7 @@ export default function Carsine({
               <div className="relative w-40">
                 <CustomSelect
                   placeholder="Длительность"
+                  defaultt={selectCar !==null ? "10" : "10"}
                   options={[
                     { label: "10 минут", value: "10" },
                     { label: "20 минут", value: "20" },
@@ -208,6 +209,7 @@ export default function Carsine({
               <div className="relative w-38">
                 <CustomSelect
                   placeholder="Кол-во узлов"
+                  defaultt={selectCar !==null ? "1" : "1"}
                   options={[
                     { label: "1", value: "1" },
                     { label: "3", value: "3" },
@@ -221,20 +223,14 @@ export default function Carsine({
               <div className="relative w-30">
                 <CustomSelect
                   placeholder="Период"
-                  options={[
-                    { label: "с 0 до 2", value: "0-2" },
-                    { label: "с 2 до 4", value: "2-4" },
-                    { label: "с 4 до 6", value: "4-6" },
-                    { label: "с 6 до 8", value: "6-8" },
-                    { label: "с 8 до 10", value: "8-10" },
-                    { label: "с 10 до 12", value: "10-12" },
-                    { label: "с 12 до 14", value: "12-14" },
-                    { label: "с 14 до 16", value: "14-16" },
-                    { label: "с 16 до 18", value: "16-18" },
-                    { label: "с 18 до 20", value: "18-20" },
-                    { label: "с 20 до 22", value: "20-22" },
-                    { label: "с 22 до 24", value: "22-24" },
-                  ]}
+                  
+                  options={selectCar !==null ?[
+                  ...selectCar?.workloads.map((a) => ({
+                    label: a.time_interval, 
+                    value: a.time_interval
+                  })),
+                ] : []}
+                  defaultt={selectCar !==null ? selectCar?.workloads[0]?.time_interval : ""}
                   onChange={(v) => handleChange("period", v)}
                 />
               </div>

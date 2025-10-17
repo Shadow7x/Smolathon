@@ -1,51 +1,95 @@
-"use client"
+"use client";
+import React, { useEffect, useState } from "react";
+import CustomSelect from "@/components/common/CustomSelect"; // ← твой кастомный select
 
 interface CarsProp {
-    isCars: string
-    time: number
-    graf: number
+  route: any[];
+  filter: {
+    isCars: string;
+    time: number;
+    graf: number;
+  };
+  onFilterChange: (filters: any) => void;
 }
 
-export default function InfoCarts({
-    isCars,
-    time,
-    graf
-}: CarsProp) {
-    
-    return(
-        <div className="w-full max-w-[500px] bg-white rounded-[10px] border border-gray-300 shadow-sm p-6">
-            <h1 className="text-2xl font-semibold  mb-6">
-                Информация о совместном движении
-            </h1>
-            
-            <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center w-[150px] justify-between gap-2">
-                    <p className="font-medium whitespace-nowrap">
-                        Гос. номер выбранного авто:
-                    </p>
-                    <span className="px-3 py-1 rounded font-bold">
-                        {isCars}
-                    </span>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row sm:items-center w-[250px] justify-around gap-2">
-                    <p className="font-medium whitespace-nowrap">
-                        Время рейса авто:x
-                    </p>
-                    <span className="text-gray-800 font-bold">
-                        {time} минут
-                    </span>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <p className="text-gray-600 font-medium whitespace-nowrap">
-                        Количество совпавших узлов графа:
-                    </p>
-                    <span className="text-gray-800 font-semibold px-3 py-1 rounded text-7xl">
-                        {graf}
-                    </span>
-                </div>
-            </div>
+export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
+  const [matchedCars, setMatchedCars] = useState<{ label: string; value: string }[]>([]);
+  const [selectedCar, setSelectedCar] = useState<string>("");
+  const [carTime, setCarTime] = useState<string>("");
+  const [matchedCount, setMatchedCount] = useState<number>(0);
+  const [routes, setRoutes] = useState(null)
+  const [count, setCount] = useState(null)
+  const [selectCar, setSelectCar] = useState(null)
+
+  // Приходит массив route (совпавшие маршруты/авто)
+  useEffect(() => {
+    if (route) {
+      setRoutes(route?.data)
+      setCount(route?.count)
+      console.log(route.data)
+      
+    }
+  },[route]);
+
+  useEffect(() =>{
+    if (routes !==null || routes !== undefined){
+        console.log(routes)
+        console.log(count)
+        try{
+            setSelectCar(routes[0])
+            setMatchedCount(count[0])
+        }
+        catch{
+            console.error("ну и хуйня виталя")
+        }
+    }
+  },[routes])
+  console.log(routes)
+  const handleChange = (field: string, value: string) => {
+    // onFilterChange({ ...filters, [field]: value });
+  };
+
+
+
+  return (
+    <div className="w-full max-w-[500px] bg-white rounded-[10px] border border-gray-300 shadow-sm p-6">
+      <h1 className="text-2xl font-semibold mb-6">
+        Информация о совместном движении
+      </h1>
+
+      <div className="space-y-6">
+        {/* Гос. номер выбранного авто */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <p className="font-medium whitespace-nowrap">
+            Гос. номер выбранного авто:
+          </p>
+
+          {/* 🔽 Твой кастомный select */}
+          <CustomSelect
+            placeholder="Подходящие автомобили"
+            options={routes ? [...routes?.map((a) => ({
+                    label: a.name, 
+                    value: a.name
+                  }))
+                ] : []}
+            defaultt={selectCar !==null ? selectCar.name  : ""}
+            onChange={(v) => handleChange("period", v)}
+          />
         </div>
-    )
+
+        {/* Время рейса */}
+       
+
+        {/* Количество совпавших узлов графа */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <p className="text-gray-600 font-medium whitespace-nowrap">
+            Количество совпавших узлов графа:
+          </p>
+          <span className="text-gray-800 font-semibold text-6xl">
+            {matchedCount}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
