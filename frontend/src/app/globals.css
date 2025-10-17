@@ -131,3 +131,6 @@ body {
 button, select, input[type="file"] {
   cursor: pointer;
 }
+nextjs-portal {
+  display: none !important;
+}

@@ -88,7 +88,7 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
 
           {/* 🔽 Твой кастомный select */}
           <CustomSelect
-            placeholder="Подходящие автомобили"
+            placeholder="Гос. Номер"
             options={routes ? [...routes?.map((a) => ({
                     label: a.name, 
                     value: a.name
