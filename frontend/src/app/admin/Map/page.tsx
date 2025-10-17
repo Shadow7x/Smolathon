@@ -7,6 +7,7 @@ import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
 import formatTimeInterval from "@/utils/formatTimeInterval";
 import YandexMapSelected from "@/components/map/YandeMapSelected";
+import UploadPanel from "@/widgets/Map/createCar/createCar";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [segments, setSegments] = useState<Record<string, any>>({});
@@ -98,6 +99,9 @@ export default function Map() {
       ) : (
         <>
           <YandexMapSelected routeMain={filters.car} routeSecond={selected} />
+          <div className="p-6 w-full max-w-[1400px] mx-auto mt-6">
+            <UploadPanel />
+          </div>
 
           <div className="bg-white border-gray-200 p-4 sm:p-6 flex flex-col gap-6">
             <TableDetector />
