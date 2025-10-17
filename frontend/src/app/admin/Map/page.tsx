@@ -4,14 +4,11 @@ import axi from "@/utils/api";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
-import CreateDetector from "@/widgets/Map/createDetector/createDetector";
-import WorkloadUpload from "@/widgets/Map/createCar/createCar";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, Upload } from "lucide-react";
 import Switchmap from "@/widgets/Map/swithmap/swithmap";
-
+import InsoCarts from "@/widgets/Map/infocarts/InsoCarts";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
@@ -61,6 +58,9 @@ export default function Map() {
 
   return (
     <div className="px-6">
+      <div className="flex items-center justify-between max-w-[1400px]">
+
+      <div>
       <Carsine
         isAccompaniment={isAccompaniment}
         setIsAccompaniment={setIsAccompaniment}
@@ -68,7 +68,11 @@ export default function Map() {
         filters={filters}
         onFilterChange={setFilters}
       />
-
+      </div>
+      <div>
+      <InsoCarts isCars={"A414PF"} time={58} graf={23}/>
+      </div>
+      </div>
       {isAccompaniment ? (
         Object.keys(segments).length === 0 ? (
           <div className="flex justify-center mt-6">
