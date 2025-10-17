@@ -104,23 +104,8 @@ export default function Map() {
       ) : (
         <>
           <YandexMapSelected routeMain={filters.car} routeSecond={selected}/>
-          <div className="outline rounded-2xl p-6 w-full max-w-[1100px] mx-auto mt-6">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <Upload className="w-5 h-5 text-gray-600" />
-                <span className="text-lg font-medium">Загрузка файлов</span>
-              </div>
-              <div className="flex gap-2">
-                <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md transition">
-                  <Upload className="w-4 h-4" />
-                  Выбрать файл
-                </button>
-                <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md transition">
-                  <Check className="w-4 h-4" />
-                  Загрузить
-                </button>
-              </div>
-            </div>
+          <div className="p-6 w-full max-w-[1400px] mx-auto mt-6">
+            <UploadPanel />
           </div>
 
           {/* Таблицы */}
