@@ -17,8 +17,10 @@
 6. по ссылке http://localhost:3000 откроется веб сервер  
 
 Для Докера
-1. docker load -i full_stack.tar
-2. docker compose up -d
+1. cd frontend  
+2. npm i --legacy-peer-deps  
+3. npm run build  
+4. docker compose up -d
 
 
 сайт фронт: http://64.188.71.22:3000
