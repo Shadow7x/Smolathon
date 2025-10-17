@@ -18,9 +18,8 @@ interface CarsineProps {
     duration?: string;
     nodes?: string;
     period?: string;
-    
   };
-  select:any[];
+  select: any[];
   onFilterChange: (filters: any) => void;
   onSelected: (filters: any) => void;
 }

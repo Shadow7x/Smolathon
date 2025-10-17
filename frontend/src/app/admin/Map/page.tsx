@@ -4,13 +4,10 @@ import axi from "@/utils/api";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
-import UploadPanel from "@/widgets/Map/createCar/createCar"
 import { useEffect, useState } from "react";
-import { Check, Upload } from "lucide-react";
-
 import formatTimeInterval from "@/utils/formatTimeInterval";
 import YandexMapSelected from "@/components/map/YandeMapSelected";
-// import YandexMapSelected from "@/components/map/YandexMapSelected";
+import UploadPanel from "@/widgets/Map/createCar/createCar";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [segments, setSegments] = useState<Record<string, any>>({});
@@ -80,7 +77,6 @@ export default function Map() {
 
   return (
     <div className="px-4 sm:px-6 md:px-10 py-6 flex flex-col max-w-[1400px] mx-auto">
-      {/* Верхний блок — фильтры и настройки */}
       <div className="bg-white border-gray-200 sm:p-6">
         <Carsine
           isAccompaniment={isAccompaniment}
@@ -93,7 +89,6 @@ export default function Map() {
         />
       </div>
 
-      {/* Блок карты */}
       {isAccompaniment ? (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <YandexMapRoute
@@ -103,27 +98,11 @@ export default function Map() {
         </div>
       ) : (
         <>
-          <YandexMapSelected routeMain={filters.car} routeSecond={selected}/>
-          <div className="outline rounded-2xl p-6 w-full max-w-[1100px] mx-auto mt-6">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <Upload className="w-5 h-5 text-gray-600" />
-                <span className="text-lg font-medium">Загрузка файлов</span>
-              </div>
-              <div className="flex gap-2">
-                <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md transition">
-                  <Upload className="w-4 h-4" />
-                  Выбрать файл
-                </button>
-                <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md transition">
-                  <Check className="w-4 h-4" />
-                  Загрузить
-                </button>
-              </div>
-            </div>
+          <YandexMapSelected routeMain={filters.car} routeSecond={selected} />
+          <div className="p-6 w-full max-w-[1400px] mx-auto mt-6">
+            <UploadPanel />
           </div>
 
-          {/* Таблицы */}
           <div className="bg-white border-gray-200 p-4 sm:p-6 flex flex-col gap-6">
             <TableDetector />
             <TableCars />
