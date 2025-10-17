@@ -27,7 +27,6 @@ export default function YandexMapSelected({
   const [main, setMain] = useState<any | null>(null);
   const [second, setSecond] = useState<any | null>(null);
 
-  // 1) Подключение Яндекс.Карт
   useEffect(() => {
     if (!window.ymaps && !document.querySelector("#ymaps-script")) {
       const script = document.createElement("script");
@@ -46,7 +45,6 @@ export default function YandexMapSelected({
     };
   }, []);
 
-  // 2) Загрузка основного маршрута
   useEffect(() => {
     if (!routeMain) {
       setMain(null);
@@ -62,7 +60,6 @@ export default function YandexMapSelected({
       .catch(console.error);
   }, [routeMain]);
 
-  // 3) Загрузка второго маршрута
   useEffect(() => {
     if (!routeSecond) {
       setSecond(null);
@@ -70,7 +67,14 @@ export default function YandexMapSelected({
     }
 
     axi
-      .get("analytics/workload/getCars", { params: { id: (typeof routeSecond === "object" ? (routeSecond as any).name : routeSecond) } })
+      .get("analytics/workload/getCars", {
+        params: {
+          id:
+            typeof routeSecond === "object"
+              ? (routeSecond as any).name
+              : routeSecond,
+        },
+      })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data[0] : res.data;
         setSecond(data || null);
@@ -78,25 +82,35 @@ export default function YandexMapSelected({
       .catch(console.error);
   }, [routeSecond]);
 
-  // 4) Отрисовка маршрутов
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+
+    if (!mapInstance.current) {
+      mapInstance.current = new window.ymaps.Map(mapRef.current, {
+        center: [54.7846, 32.0515], // Смоленск
+        zoom: 12,
+        controls: [],
+      });
+    }
+  }, [mapLoaded]);
+
   useEffect(() => {
     if (!mapLoaded || !mapRef.current || !main) return;
 
-    // Инициализация карты
     if (!mapInstance.current) {
       mapInstance.current = new window.ymaps.Map(mapRef.current, {
         center: [54.7846, 32.0515],
         zoom: 12,
-        controls: ["zoomControl"],
+        controls: [],
       });
     }
 
-    // Очистка прошлых объектов
     mapInstance.current.geoObjects.removeAll();
 
     const routesToDraw: { car: any; color: string; label: string }[] = [];
-    routesToDraw.push({ car: main, color: "#0E9F6E", label: "Основной" }); // зеленый
-    if (second) routesToDraw.push({ car: second, color: "#EF4444", label: "Сравнение" }); // красный
+    routesToDraw.push({ car: main, color: "#0E9F6E", label: "Основной" });
+    if (second)
+      routesToDraw.push({ car: second, color: "#EF4444", label: "Сравнение" });
 
     const allPoints: [number, number][][] = [];
 
@@ -172,8 +186,11 @@ export default function YandexMapSelected({
   function buildRoutePoints(car: any): [number, number][] {
     const workloads = Array.isArray(car?.workloads) ? car.workloads : [];
     const detections = workloads
-      .flatMap((w: any) => Array.isArray(w?.detections) ? w.detections : [])
-      .sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
+      .flatMap((w: any) => (Array.isArray(w?.detections) ? w.detections : []))
+      .sort(
+        (a: any, b: any) =>
+          new Date(a.time).getTime() - new Date(b.time).getTime()
+      );
 
     const points: [number, number][] = [];
     for (const d of detections) {
