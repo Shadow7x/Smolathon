@@ -6,14 +6,12 @@ import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
 import { Check, Upload } from "lucide-react";
-import Switchmap from "@/widgets/Map/swithmap/swithmap";
-import InfoCarts from "@/widgets/Map/infocarts/InsoCarts";
+
 import formatTimeInterval from "@/utils/formatTimeInterval";
 import YandexMapSelected from "@/components/map/YandeMapSelected";
 // import YandexMapSelected from "@/components/map/YandexMapSelected";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
-  const [activeTab, setActiveTab] = useState<"map" | "create">("map");
   const [segments, setSegments] = useState<Record<string, any>>({});
   const [segments2, setSegments2] = useState<Record<string, any>>({});
   const [selected, setSelected] = useState(null);
@@ -70,11 +68,9 @@ export default function Map() {
         },
       });
       setRoutes(response.data);
-      console.log(filters);
     } catch (error) {
       console.error("Ошибка при загрузке:", error);
     }
-    console.log(filters);
   };
 
   useEffect(() => {
@@ -82,31 +78,26 @@ export default function Map() {
   }, [filters, isAccompaniment]);
 
   return (
-    <div className="px-6">
-      <div className="flex items-center justify-between max-w-[1400px]">
-        <div>
-          <Carsine
-            isAccompaniment={isAccompaniment}
-            setIsAccompaniment={setIsAccompaniment}
-            routes={routes}
-            filters={filters}
-            onFilterChange={setFilters}
-          />
-        </div>
-        <div>
-          <InfoCarts
-            route={routes}
-            filter={selected}
-            onFilterChange={(a) => setSelected(a)}
-            // ← обязательно функция!
-          />
-        </div>
-      </div>
-      {isAccompaniment ? (
-        <YandexMapRoute
-          segmentsData1={segments || {}}
-          segmentsData2={filters.interval2 ? segments2 || {} : undefined}
+    <div className="px-4 sm:px-6 md:px-10 py-6 flex flex-col max-w-[1400px] mx-auto">
+      {/* Верхний блок — фильтры и настройки */}
+      <div className="bg-white border-gray-200 sm:p-6">
+        <Carsine
+          isAccompaniment={isAccompaniment}
+          setIsAccompaniment={setIsAccompaniment}
+          routes={routes}
+          filters={filters}
+          onFilterChange={setFilters}
         />
+      </div>
+
+      {/* Блок карты */}
+      {isAccompaniment ? (
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <YandexMapRoute
+            segmentsData1={segments || {}}
+            segmentsData2={filters.interval2 ? segments2 || {} : undefined}
+          />
+        </div>
       ) : (
         <>
           <YandexMapSelected />
@@ -127,21 +118,12 @@ export default function Map() {
                 </button>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-center mt-6">
-              <Switchmap
-                isAccompaniment={activeTab === "map"}
-                setIsAccompaniment={(val) =>
-                  setActiveTab(val ? "map" : "create")
-                }
-                labels={["Авто", "Детекторы"]}
-              />
-            </div>
-
-            <div>
-              <TableDetector />
-              <TableCars />
-            </div>
+          {/* Таблицы */}
+          <div className="bg-white border-gray-200 p-4 sm:p-6 flex flex-col gap-6">
+            <TableDetector />
+            <TableCars />
           </div>
         </>
       )}
