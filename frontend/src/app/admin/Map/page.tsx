@@ -4,6 +4,7 @@ import axi from "@/utils/api";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
+import UploadPanel from "@/widgets/Map/createCar/createCar"
 import { useEffect, useState } from "react";
 import { Check, Upload } from "lucide-react";
 

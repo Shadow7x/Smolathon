@@ -194,7 +194,7 @@ export default function Carsine({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row justify-between gap-10 mt-6 w-full max-w-[1400px] items-start">
+        <div className="flex flex-col lg:flex-row justify-between gap-10 mt-6 w-full max-w-[1400px] items-end">
           <div className="flex flex-col gap-4 w-full">
             {/* Поле поиска */}
             <div className="relative flex flex-col w-full sm:w-72 md:w-80">
