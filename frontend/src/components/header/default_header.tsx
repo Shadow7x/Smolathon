@@ -23,7 +23,7 @@ export default function Default_Header() {
   const isTransparent = pathname === "/" || pathname.startsWith("/news");
 
   const headerClasses = isTransparent
-    ? "bg-black/30 text-white"
+    ? "bg-black text-white"
     : "bg-white text-black ";
 
   const logoSrc = isTransparent
@@ -93,9 +93,13 @@ export default function Default_Header() {
       <div className="lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className={`bg-transparent p-2 ${pathname === "/" || pathname === "/news" ? "hover:bg-black rounded transition-colors" : ""}`}
+            <Button
+              variant="ghost"
+              className={`bg-transparent p-2 ${
+                pathname === "/" || pathname === "/news"
+                  ? "hover:bg-black rounded transition-colors"
+                  : ""
+              }`}
             >
               <Menu
                 className={isTransparent ? "text-white" : "text-black"}
