@@ -20,25 +20,18 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
   const [routes, setRoutes] = useState(null)
   const [count, setCount] = useState(null)
   const [selectCar, setSelectCar] = useState(null)
-  const [selected, setSelected]  = useState(null);
   
-  useEffect(() =>{
-    console.log(selected)
-  }, [selected])
   // Приходит массив route (совпавшие маршруты/авто)
   useEffect(() => {
     if (route) {
       setRoutes(route?.data)
       setCount(route?.count)
-      console.log(route.data)
         
     }
   },[route]);
 
   useEffect(() =>{
     if (Array.isArray(routes) && Array.isArray(count) && routes.length > 0 && count.length > 0) {
-        console.log(routes)
-        console.log(count)
         try{
             setSelectCar(routes[0])
             setMatchedCount(count[0])
@@ -58,7 +51,6 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
     }
   }, [selectCar])
 
-  console.log(routes)
 
     const handleChange = (value: string) => {
     if (!routes || !Array.isArray(routes)) return;
