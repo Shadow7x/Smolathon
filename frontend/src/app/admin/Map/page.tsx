@@ -13,6 +13,7 @@ export default function Map() {
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
   const [segments, setSegments] = useState<Record<string, any>>({});
   const [segments2, setSegments2] = useState<Record<string, any>>({});
+  const [selected, setSelected]  = useState(null);
 
   const [routes, setRoutes] = useState<any[]>([]);
   const [filters, setFilters] = useState({
@@ -21,6 +22,10 @@ export default function Map() {
     nodes: "1",
     interval: [0, 24] as [number, number] | null,
   });
+
+  useEffect(() =>{
+    console.log(selected)
+  }, [selected])
 
   useEffect(() => {
     const fetchWorkloads = async (
@@ -89,8 +94,10 @@ export default function Map() {
       <div>
       <InfoCarts
           route={routes} 
-          filter={filters}
-          onFilterChange={(newFilters) => setFilters(newFilters)} // ← обязательно функция!
+          filter={selected}
+          onFilterChange={(newFilters) => setSelected(newFilters)
+          
+          } // ← обязательно функция!
         />
       </div>
       </div>

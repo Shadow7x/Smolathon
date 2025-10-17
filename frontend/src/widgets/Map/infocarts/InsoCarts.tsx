@@ -27,12 +27,12 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
       setRoutes(route?.data)
       setCount(route?.count)
       console.log(route.data)
-      
+        
     }
   },[route]);
 
   useEffect(() =>{
-    if (routes !==null || routes !== undefined){
+    if (Array.isArray(routes) && Array.isArray(count) && routes.length > 0 && count.length > 0) {
         console.log(routes)
         console.log(count)
         try{
@@ -42,12 +42,25 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
         catch{
             console.error("ну и хуйня виталя")
         }
+
     }
-  },[routes])
+  },[routes, count])
+  useEffect(() => {
+    onFilterChange(selectCar)
+  }, [selectCar])
+
   console.log(routes)
-  const handleChange = (field: string, value: string) => {
-    // onFilterChange({ ...filters, [field]: value });
-  };
+
+    const handleChange = (value: string) => {
+    if (!routes || !Array.isArray(routes)) return;
+
+    const index = routes.findIndex((car) => car.name === value);
+    if (index !== -1) {
+        setSelectCar(routes[index]);
+        setMatchedCount(count?.[index] ?? 0);
+    }
+    };
+
 
 
 
@@ -73,7 +86,7 @@ export default function InfoCarts({ route, filter, onFilterChange }: CarsProp) {
                   }))
                 ] : []}
             defaultt={selectCar !==null ? selectCar.name  : ""}
-            onChange={(v) => handleChange("period", v)}
+            onChange={(v) => handleChange(v)}
           />
         </div>
 

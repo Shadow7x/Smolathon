@@ -55,10 +55,20 @@ export default function Carsine({
       return;
     }
     console.log(cars);
-    const filtered = cars.filter((r) => {
-      const name = (r.name || r.car || "").toLowerCase();
-      return name.includes(query.toLowerCase());
-    });
+const filtered = cars.filter((r) => {
+  const name = (r.name || r.car || "").toLowerCase();
+  return name.includes(query.toLowerCase());
+});
+
+// если найден ровно один результат и он полностью совпадает с поисковым запросом — ничего не делаем
+if (
+  filtered.length === 1 &&
+  (filtered[0].name?.toLowerCase() === query.toLowerCase() ||
+    filtered[0].car?.toLowerCase() === query.toLowerCase())
+) {
+  return;
+}
+
 
     setSuggestions(filtered.slice(0, 6)); // максимум 6 подсказок
     setShowList(filtered.length > 0);
@@ -188,6 +198,7 @@ export default function Carsine({
               icon={
                 <Search className="absolute right-5 text-gray-600 w-4 h-4" />
               }
+
             />
 
             {showList && (
