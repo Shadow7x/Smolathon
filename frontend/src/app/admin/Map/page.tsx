@@ -49,7 +49,7 @@ export default function Map() {
     } catch (error) {
       console.error("Ошибка при загрузке:", error);
     }
-    console.log(filters)
+    console.log(filters);
   };
 
   useEffect(() => {
