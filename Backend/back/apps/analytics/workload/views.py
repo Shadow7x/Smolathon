@@ -240,7 +240,7 @@ def getCars(request: Request):
     cars = Car.objects.all()
 
     if request.GET.get("id"):
-        cars.get(name=request.GET.get("id"))
+        cars = cars.filter(name=request.GET.get("id"))
 
     data = CarSerializer(cars, many=True).data
 

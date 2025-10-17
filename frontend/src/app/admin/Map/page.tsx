@@ -87,6 +87,8 @@ export default function Map() {
           routes={routes}
           filters={filters}
           onFilterChange={setFilters}
+          select={selected}
+          onSelected={setSelected}
         />
       </div>
 
@@ -100,7 +102,7 @@ export default function Map() {
         </div>
       ) : (
         <>
-          <YandexMapSelected />
+          <YandexMapSelected routeMain={filters.car} routeSecond={selected}/>
           <div className="outline rounded-2xl p-6 w-full max-w-[1100px] mx-auto mt-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">

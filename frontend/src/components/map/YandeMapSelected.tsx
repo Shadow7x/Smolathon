@@ -1,5 +1,6 @@
 "use client";
 
+import axi from "@/utils/api";
 import { useEffect, useRef, useState } from "react";
 
 declare global {
@@ -11,16 +12,22 @@ declare global {
 export default function YandexMapSelected({
   routeType = "auto",
   className = "h-[500px] w-full",
+  routeMain,
+  routeSecond,
 }: {
   routeType?: "auto" | "masstransit" | "pedestrian" | "bicycle";
   className?: string;
+  routeMain: number | string;
+  routeSecond?: number | string | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapInstance = useRef<any>(null);
-  const routesRef = useRef<any[]>([]);
 
-  // Загрузка API Яндекс.Карт
+  const [main, setMain] = useState<any | null>(null);
+  const [second, setSecond] = useState<any | null>(null);
+
+  // 1) Подключение Яндекс.Карт
   useEffect(() => {
     if (!window.ymaps && !document.querySelector("#ymaps-script")) {
       const script = document.createElement("script");
@@ -35,87 +42,159 @@ export default function YandexMapSelected({
     }
 
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.destroy();
-      }
+      if (mapInstance.current) mapInstance.current.destroy();
     };
   }, []);
 
+  // 2) Загрузка основного маршрута
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current) return;
+    if (!routeMain) {
+      setMain(null);
+      return;
+    }
 
+    axi
+      .get("analytics/workload/getCars", { params: { id: routeMain } })
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+        setMain(data || null);
+      })
+      .catch(console.error);
+  }, [routeMain]);
+
+  // 3) Загрузка второго маршрута
+  useEffect(() => {
+    if (!routeSecond) {
+      setSecond(null);
+      return;
+    }
+
+    axi
+      .get("analytics/workload/getCars", { params: { id: (typeof routeSecond === "object" ? (routeSecond as any).name : routeSecond) } })
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+        setSecond(data || null);
+      })
+      .catch(console.error);
+  }, [routeSecond]);
+
+  // 4) Отрисовка маршрутов
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current || !main) return;
+
+    // Инициализация карты
     if (!mapInstance.current) {
       mapInstance.current = new window.ymaps.Map(mapRef.current, {
-        center: [55.751244, 37.618423], // Москва
-        zoom: 10,
+        center: [54.7846, 32.0515],
+        zoom: 12,
         controls: ["zoomControl"],
       });
     }
 
-    // Очищаем старые маршруты
-    routesRef.current.forEach((route) => {
-      mapInstance.current.geoObjects.remove(route);
-    });
-    routesRef.current = [];
+    // Очистка прошлых объектов
+    mapInstance.current.geoObjects.removeAll();
 
-    // Генерация двух случайных маршрутов
-    const randomRoutes = generateRandomRoutes(2);
+    const routesToDraw: { car: any; color: string; label: string }[] = [];
+    routesToDraw.push({ car: main, color: "#0E9F6E", label: "Основной" }); // зеленый
+    if (second) routesToDraw.push({ car: second, color: "#EF4444", label: "Сравнение" }); // красный
 
-    randomRoutes.forEach(async (points, index) => {
-      const color = index === 0 ? "#00FF00" : "#FF0000";
-      try {
-        const multiRoute = await createRouteAsync(points, routeType, color);
-        routesRef.current.push(multiRoute);
-        mapInstance.current.geoObjects.add(multiRoute);
+    const allPoints: [number, number][][] = [];
 
-        // Добавляем маркеры начала и конца
-        const startPlacemark = new window.ymaps.Placemark(
-          points[0],
-          {},
-          { preset: "islands#circleIcon", iconColor: color }
-        );
-        const endPlacemark = new window.ymaps.Placemark(
-          points[1],
-          {},
-          { preset: "islands#circleDotIcon", iconColor: color }
-        );
-        mapInstance.current.geoObjects.add(startPlacemark);
-        mapInstance.current.geoObjects.add(endPlacemark);
-      } catch (err) {
-        console.error("Не удалось построить маршрут:", err);
+    const draw = async () => {
+      for (const r of routesToDraw) {
+        const points = buildRoutePoints(r.car);
+        if (!points.length) continue;
+
+        // Плейсмаркеры для каждой детекции
+        points.forEach((p, idx) => {
+          const mark = new window.ymaps.Placemark(
+            p,
+            { balloonContent: `${r.label}: Точка ${idx + 1}` },
+            { preset: "islands#dotIcon", iconColor: r.color }
+          );
+          mapInstance.current.geoObjects.add(mark);
+        });
+
+        // Выделяем старт/финиш
+        if (points.length >= 1) {
+          const startMark = new window.ymaps.Placemark(
+            points[0],
+            { balloonContent: `${r.label}: Старт` },
+            { preset: "islands#icon", iconColor: r.color }
+          );
+          mapInstance.current.geoObjects.add(startMark);
+        }
+        if (points.length >= 2) {
+          const endMark = new window.ymaps.Placemark(
+            points[points.length - 1],
+            { balloonContent: `${r.label}: Финиш` },
+            { preset: "islands#dotIcon", iconColor: r.color }
+          );
+          mapInstance.current.geoObjects.add(endMark);
+        }
+
+        // Строим маршрут по сегментам между каждой парой точек
+        for (let i = 0; i < points.length - 1; i++) {
+          try {
+            const mr: any = await createRouteAsync(
+              [points[i], points[i + 1]],
+              routeType,
+              r.color
+            );
+            mapInstance.current.geoObjects.add(mr);
+          } catch (e) {
+            console.error("Ошибка построения сегмента маршрута:", i, e);
+          }
+        }
+
+        allPoints.push(points);
       }
-    });
-  }, [mapLoaded, routeType]);
 
-  // Функция генерации случайных маршрутов (по 2 точки)
-  function generateRandomRoutes(count: number): [number, number][][] {
-    const routes: [number, number][][] = [];
-    const baseLat = 55.75;
-    const baseLon = 37.6;
+      // Центровка карты по всем точкам
+      const flat = allPoints.flat();
+      if (flat.length) {
+        const bounds = window.ymaps
+          .geoQuery(flat.map((c) => new window.ymaps.Placemark(c)))
+          .getBounds();
+        if (bounds) {
+          mapInstance.current.setBounds(bounds, {
+            checkZoomRange: true,
+            zoomMargin: 40,
+          });
+        }
+      }
+    };
 
-    for (let i = 0; i < count; i++) {
-      const start: [number, number] = [
-        baseLat + (Math.random() - 0.5) * 0.2,
-        baseLon + (Math.random() - 0.5) * 0.4,
-      ];
-      const end: [number, number] = [
-        baseLat + (Math.random() - 0.5) * 0.2,
-        baseLon + (Math.random() - 0.5) * 0.4,
-      ];
-      routes.push([start, end]);
+    draw();
+  }, [mapLoaded, main, second, routeType]);
+
+  // Собираем точки маршрута из всех детекций, отсортированных по времени
+  function buildRoutePoints(car: any): [number, number][] {
+    const workloads = Array.isArray(car?.workloads) ? car.workloads : [];
+    const detections = workloads
+      .flatMap((w: any) => Array.isArray(w?.detections) ? w.detections : [])
+      .sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+    const points: [number, number][] = [];
+    for (const d of detections) {
+      const lat = d?.detector?.latitude;
+      const lon = d?.detector?.longitude;
+      if (typeof lat === "number" && typeof lon === "number") {
+        points.push([lat, lon]);
+      }
     }
-    return routes;
+    return points;
   }
 
-  // Создание маршрута (асинхронно)
+  // Создание и ожидание построения маршрута в Yandex MultiRoute
   function createRouteAsync(
     referencePoints: [number, number][],
-    routeType: string,
+    routingMode: string,
     color: string
-  ) {
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       const multiRoute = new window.ymaps.multiRouter.MultiRoute(
-        { referencePoints, params: { routingMode: routeType } },
+        { referencePoints, params: { routingMode } },
         {
           routeActiveStrokeColor: color,
           routeActiveStrokeWidth: 5,

@@ -18,8 +18,11 @@ interface CarsineProps {
     duration?: string;
     nodes?: string;
     period?: string;
+    
   };
+  select:any[];
   onFilterChange: (filters: any) => void;
+  onSelected: (filters: any) => void;
 }
 
 export default function Carsine({
@@ -27,6 +30,8 @@ export default function Carsine({
   setIsAccompaniment,
   routes,
   filters,
+  select,
+  onSelected,
   onFilterChange,
 }: CarsineProps) {
   const [query, setQuery] = useState("");
@@ -283,8 +288,8 @@ export default function Carsine({
           <div className="w-full lg:w-1/2">
             <InfoCarts
               route={routes}
-              filter={selected}
-              onFilterChange={(a) => setSelected(a)}
+              filter={select}
+              onFilterChange={(a) => onSelected(a)}
             />
           </div>
         </div>
