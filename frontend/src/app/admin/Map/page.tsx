@@ -105,7 +105,7 @@ export default function Map() {
 
           <div className="bg-white border-gray-200 p-4 sm:p-6 flex flex-col gap-6">
             <TableDetector />
-            <TableCars />
+            <TableCars routes={routes} />
           </div>
         </>
       )}

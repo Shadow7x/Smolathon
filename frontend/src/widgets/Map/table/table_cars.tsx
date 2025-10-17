@@ -17,13 +17,16 @@ import { useNotificationManager } from "@/hooks/notification-context";
 interface Detector {
   id: number;
   name: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface Detection {
   id: number;
-  detector: string;
+  detector: Detector;
   time: string;
   speed: number | null;
+  car: number;
 }
 
 interface Workload {
@@ -45,43 +48,64 @@ interface MergedData {
   speed: number;
 }
 
-export default function TableCars() {
+interface TableCarsProps {
+  routes: { data: Car[] }; // Объект с массивом data
+}
+
+export default function TableCars({ routes }: TableCarsProps) {
   const [mergedData, setMergedData] = useState<MergedData[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { addNotification } = useNotificationManager();
 
+  const formatDate = (isoDate: string) => {
+    const d = new Date(isoDate);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+      d.getDate()
+    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  };
+
+  const flattenRoutes = (routesData: Car[]) => {
+    return routesData.flatMap((car) =>
+      (car.workloads || []).flatMap((workload) =>
+        (workload.detections || []).map((detection) => ({
+          id: detection.id,
+          detectorName: detection.detector?.name || "—",
+          timestamp: formatDate(detection.time),
+          car: car.name,
+          speed: Number(detection.speed) || 0,
+        }))
+      )
+    );
+  };
+
+  // Разворачиваем данные из props
+  useEffect(() => {
+    if (!routes || !routes.data) return;
+    const flattened = flattenRoutes(routes.data);
+    setMergedData(flattened);
+  }, [routes]);
+
+  // ====== ПАГИНАЦИЯ ======
+  const totalPages = Math.ceil(mergedData.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+  const pageData = mergedData.slice(startIdx, endIdx);
+
+  const goPrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const goNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
+
+  // ====== Фетч данных по кнопке ======
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [carsRes, detectorsRes] = await Promise.all([
-        axi.get("/analytics/workload/getCars"),
-        axi.get("/analytics/detectors/get"),
-      ]);
-      const carsData: Car[] = carsRes.data || [];
-      const detectorsData: Detector[] = detectorsRes.data || [];
-
-      const flattened: MergedData[] = carsData.flatMap((car) =>
-        (car.workloads || []).flatMap((workload) =>
-          (workload.detections || []).map((detection) => {
-            const detectorName =
-              detection.detector && typeof detection.detector === "object"
-                ? detection.detector.name
-                : String(detection.detector);
-
-            return {
-              id: detection.id,
-              detectorName: detectorName || "—",
-              timestamp: formatDate(detection.time),
-              car: car.name,
-              speed: Number(detection.speed) || 0,
-            };
-          })
-        )
-      );
-
-      setMergedData(flattened);
+      const carsRes = await axi.get("/analytics/workload/getCars");
+      if (carsRes.data?.data) {
+        const flattened = flattenRoutes(carsRes.data.data);
+        setMergedData(flattened);
+      }
     } catch (err: any) {
       addNotification({
         id: crypto.randomUUID(),
@@ -94,27 +118,6 @@ export default function TableCars() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const formatDate = (isoDate: string) => {
-    const d = new Date(isoDate);
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-      d.getDate()
-    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  };
-
-  // ====== ПАГИНАЦИЯ ======
-  const totalPages = Math.ceil(mergedData.length / itemsPerPage);
-  const startIdx = (currentPage - 1) * itemsPerPage;
-  const endIdx = startIdx + itemsPerPage;
-  const pageData = mergedData.slice(startIdx, endIdx);
-
-  const goPrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
-  const goNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
 
   return (
     <div className="p-4 bg-white rounded-2xl shadow-md">
@@ -156,7 +159,6 @@ export default function TableCars() {
         </Table>
       </div>
 
-      {/* ====== КНОПКИ ПАГИНАЦИИ ====== */}
       {mergedData.length > itemsPerPage && (
         <div className="flex justify-center items-center gap-4 mt-4">
           <Button
