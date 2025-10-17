@@ -35,6 +35,8 @@ export default function YandexMapRoute({
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapInstance = useRef<any>(null);
   const multiRoutes = useRef<any[]>([]);
+  const prevSegmentsData1 = useRef<SegmentData>({});
+  const prevSegmentsData2 = useRef<SegmentData>({});
 
   // Загрузка Yandex Maps API
   useEffect(() => {
@@ -62,73 +64,127 @@ export default function YandexMapRoute({
 
     if (!mapInstance.current) {
       mapInstance.current = new window.ymaps.Map(mapRef.current, {
-        center: [54.7846, 32.0515], // Смоленск
+        center: [54.7846, 32.0515],
         zoom: 12,
         controls: [],
       });
     }
 
-    mapInstance.current.geoObjects.removeAll();
-    multiRoutes.current = [];
+    const loadRoutes = async () => {
+      if (segmentsData1) {
+        await updateSegments(
+          segmentsData1,
+          prevSegmentsData1.current,
+          "#00FF00"
+        );
+        prevSegmentsData1.current = { ...segmentsData1 };
+      }
 
-    const renderSegments = (segmentsData: SegmentData, color: string) => {
-      Object.keys(segmentsData).forEach((key) => {
-        const segment = segmentsData[key];
-        const start = [segment.start[1], segment.start[0]];
-        const end = [segment.end[1], segment.end[0]];
-        const referencePoints = [start, end];
+      if (segmentsData2) {
+        await updateSegments(
+          segmentsData2,
+          prevSegmentsData2.current,
+          "#FF0000"
+        );
+        prevSegmentsData2.current = { ...segmentsData2 };
+      }
 
-        const multiRoute = new window.ymaps.multiRouter.MultiRoute(
-          { referencePoints, params: { routingMode: routeType } },
+      if (multiRoutes.current.length > 0) {
+        mapInstance.current.setBounds(
+          mapInstance.current.geoObjects.getBounds(),
           {
-            boundsAutoApply: false,
-            wayPointVisible: false,
-            routeActiveStrokeWidth: 5,
-            routeActiveStrokeColor: color,
-            routeStrokeStyle: "solid",
-            routeOpenBalloonOnClick: false,
+            checkZoomRange: true,
+            duration: 300,
           }
         );
-        multiRoute.model.setParams({ results: 1 });
-        multiRoutes.current.push(multiRoute);
-        mapInstance.current.geoObjects.add(multiRoute);
-
-        const startPlacemark = new window.ymaps.Placemark(
-          start,
-          {},
-          { preset: "islands#circleIcon", iconColor: color }
-        );
-        const endPlacemark = new window.ymaps.Placemark(
-          end,
-          {},
-          { preset: "islands#circleIcon", iconColor: color }
-        );
-
-        mapInstance.current.geoObjects.add(startPlacemark);
-        mapInstance.current.geoObjects.add(endPlacemark);
-      });
+      }
     };
 
-    // Если данных нет, просто центр на Смоленск
-    const hasData1 = segmentsData1 && Object.keys(segmentsData1).length > 0;
-    const hasData2 = segmentsData2 && Object.keys(segmentsData2).length > 0;
-
-    if (!hasData1 && !hasData2) {
-      mapInstance.current.setCenter([54.7846, 32.0515]);
-      mapInstance.current.setZoom(12);
-      return;
-    }
-
-    if (hasData1) renderSegments(segmentsData1, "#00FF00");
-    if (hasData2) renderSegments(segmentsData2, "#FF0000");
-
-    if (multiRoutes.current.length > 0) {
-      mapInstance.current.setBounds(
-        mapInstance.current.geoObjects.getBounds(),
-        { checkZoomRange: true, duration: 300 }
-      );
-    }
+    loadRoutes();
   }, [mapLoaded, segmentsData1, segmentsData2, routeType]);
+
+  function createRouteAsync(
+    referencePoints: [number, number][],
+    routeType: string,
+    color: string
+  ) {
+    return new Promise((resolve, reject) => {
+      const multiRoute = new window.ymaps.multiRouter.MultiRoute(
+        { referencePoints, params: { routingMode: routeType } },
+        {
+          routeActiveStrokeColor: color,
+          routeActiveStrokeWidth: 5,
+          routeOpenBalloonOnClick: false,
+          wayPointVisible: false,
+        }
+      );
+
+      multiRoute.model.events.add("requestsuccess", () => resolve(multiRoute));
+      multiRoute.model.events.add("requestfail", () =>
+        reject(new Error("Route building failed"))
+      );
+
+      mapInstance.current.geoObjects.add(multiRoute);
+    });
+  }
+
+  const updateSegments = async (
+    newData: SegmentData,
+    prevData: SegmentData,
+    color: string
+  ) => {
+    // Удаляем сегменты, которых больше нет
+    for (const key of Object.keys(prevData)) {
+      if (!newData[key] && multiRoutes.current[key]) {
+        mapInstance.current.geoObjects.remove(multiRoutes.current[key]);
+        delete multiRoutes.current[key];
+      }
+    }
+
+    // Добавляем или обновляем сегменты
+    for (const key of Object.keys(newData)) {
+      if (
+        !prevData[key] ||
+        JSON.stringify(prevData[key]) !== JSON.stringify(newData[key])
+      ) {
+        // Если сегмент новый или изменился
+        if (multiRoutes.current[key]) {
+          mapInstance.current.geoObjects.remove(multiRoutes.current[key]);
+        }
+
+        const segment = newData[key];
+        const start: [number, number] = [segment.start[1], segment.start[0]];
+        const end: [number, number] = [segment.end[1], segment.end[0]];
+
+        try {
+          const multiRoute = await createRouteAsync(
+            [start, end],
+            routeType,
+            color
+          );
+          multiRoute.model.setParams({ results: 1 });
+          multiRoutes.current[key] = multiRoute;
+          mapInstance.current.geoObjects.add(multiRoute);
+
+          const startPlacemark = new window.ymaps.Placemark(
+            start,
+            {},
+            { preset: "islands#icon", iconColor: color }
+          );
+          const endPlacemark = new window.ymaps.Placemark(
+            end,
+            {},
+            { preset: "islands#dotIcon", iconColor: color }
+          );
+
+          mapInstance.current.geoObjects.add(startPlacemark);
+          mapInstance.current.geoObjects.add(endPlacemark);
+        } catch (err) {
+          console.error("Маршрут не построен", err);
+        }
+      }
+    }
+  };
 
   return (
     <div className={className}>

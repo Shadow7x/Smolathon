@@ -222,7 +222,10 @@ def getAdjacencies(request: Request):
 
             data = CarSerializer(Adjacency, many=True).data
 
-            return Response({"data":data, "count":dict(count_other).values()}, status=status.HTTP_200_OK)
+            return Response(
+                {"data": data, "count": dict(count_other).values()},
+                status=status.HTTP_200_OK,
+            )
 
         else:
             return Response("Некоректный запрос", status=status.HTTP_400_BAD_REQUEST)
@@ -236,9 +239,9 @@ def getAdjacencies(request: Request):
 def getCars(request: Request):
     cars = Car.objects.all()
 
-    if request.GET.get('id'):
-        cars.get(id=request.GET.get('id'))
-    
+    if request.GET.get("id"):
+        cars.get(name=request.GET.get("id"))
+
     data = CarSerializer(cars, many=True).data
 
     return Response(data, status=status.HTTP_200_OK)

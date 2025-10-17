@@ -35,13 +35,30 @@ export default function Carsine({
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showList, setShowList] = useState(false);
   const [cars, setCars] = useState([]);
-  const [selectCar, setSelectCar] = useState(null)
+  const [selectCar, setSelectCar] = useState(null);
   const [isComparison, setIsComparison] = useState(false);
 
   const [firstInterval, setFirstInterval] = useState<[number, number]>([0, 24]);
   const [secondInterval, setSecondInterval] = useState<[number, number]>([
     0, 24,
   ]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onFilterChange({ ...filters, interval: firstInterval });
+    }, 1000);
+    return () => clearTimeout(handler);
+  }, [firstInterval]);
+
+  useEffect(() => {
+    if (!isComparison) return;
+
+    const handler = setTimeout(() => {
+      onFilterChange({ ...filters, interval2: secondInterval });
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [secondInterval, isComparison]);
 
   useEffect(() => {
     axi.get("/analytics/workload/getCars").then((e) => {
@@ -56,20 +73,19 @@ export default function Carsine({
       return;
     }
     console.log(cars);
-const filtered = cars.filter((r) => {
-  const name = (r.name || r.car || "").toLowerCase();
-  return name.includes(query.toLowerCase());
-});
+    const filtered = cars.filter((r) => {
+      const name = (r.name || r.car || "").toLowerCase();
+      return name.includes(query.toLowerCase());
+    });
 
-// если найден ровно один результат и он полностью совпадает с поисковым запросом — ничего не делаем
-if (
-  filtered.length === 1 &&
-  (filtered[0].name?.toLowerCase() === query.toLowerCase() ||
-    filtered[0].car?.toLowerCase() === query.toLowerCase())
-) {
-  return;
-}
-
+    // если найден ровно один результат и он полностью совпадает с поисковым запросом — ничего не делаем
+    if (
+      filtered.length === 1 &&
+      (filtered[0].name?.toLowerCase() === query.toLowerCase() ||
+        filtered[0].car?.toLowerCase() === query.toLowerCase())
+    ) {
+      return;
+    }
 
     setSuggestions(filtered.slice(0, 6)); // максимум 6 подсказок
     setShowList(filtered.length > 0);
@@ -120,10 +136,7 @@ if (
             <div className="flex flex-row w-[38rem] max-w-full h-[2rem]">
               <DoubleHourSlider
                 selectedHours={firstInterval}
-                onChangeHours={(hours) => {
-                  setFirstInterval(hours);
-                  onFilterChange({ ...filters, interval: hours });
-                }}
+                onChangeHours={setFirstInterval}
               />
             </div>
           </div>
@@ -176,13 +189,7 @@ if (
             >
               <DoubleHourSlider
                 selectedHours={secondInterval}
-                onChangeHours={(hours) => {
-                  setSecondInterval(hours);
-
-                  if (isComparison) {
-                    onFilterChange({ ...filters, interval2: hours });
-                  }
-                }}
+                onChangeHours={setSecondInterval}
               />
             </div>
           </div>
@@ -199,7 +206,6 @@ if (
               icon={
                 <Search className="absolute right-5 text-gray-600 w-4 h-4" />
               }
-
             />
 
             {showList && (
@@ -225,7 +231,7 @@ if (
               <div className="relative w-40">
                 <CustomSelect
                   placeholder="Длительность"
-                  defaultt={selectCar !==null ? "10" : "10"}
+                  defaultt={selectCar !== null ? "10" : "10"}
                   options={[
                     { label: "10 минут", value: "10" },
                     { label: "20 минут", value: "20" },
@@ -242,7 +248,7 @@ if (
               <div className="relative w-38">
                 <CustomSelect
                   placeholder="Кол-во узлов"
-                  defaultt={selectCar !==null ? "1" : "1"}
+                  defaultt={selectCar !== null ? "1" : "1"}
                   options={[
                     { label: "1", value: "1" },
                     { label: "3", value: "3" },
@@ -256,21 +262,26 @@ if (
               <div className="relative w-30">
                 <CustomSelect
                   placeholder="Период"
-                  
-                  options={selectCar !==null ?[
-                  ...selectCar?.workloads.map((a) => ({
-                    label: a.time_interval, 
-                    value: a.time_interval
-                  })),
-                ] : []}
-                  defaultt={selectCar !==null ? selectCar?.workloads[0]?.time_interval : ""}
+                  options={
+                    selectCar !== null
+                      ? [
+                          ...selectCar?.workloads.map((a) => ({
+                            label: a.time_interval,
+                            value: a.time_interval,
+                          })),
+                        ]
+                      : []
+                  }
+                  defaultt={
+                    selectCar !== null
+                      ? selectCar?.workloads[0]?.time_interval
+                      : ""
+                  }
                   onChange={(v) => handleChange("period", v)}
                 />
               </div>
             </div>
           </div>
-
-          <InsoCarts isCars={"A414PF"} time={58} graf={23} />
         </div>
       )}
     </div>

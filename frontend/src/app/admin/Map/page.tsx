@@ -8,12 +8,15 @@ import { useEffect, useState } from "react";
 import { Check, Upload } from "lucide-react";
 import Switchmap from "@/widgets/Map/swithmap/swithmap";
 import InfoCarts from "@/widgets/Map/infocarts/InsoCarts";
+import formatTimeInterval from "@/utils/formatTimeInterval";
+import YandexMapSelected from "@/components/map/YandeMapSelected";
+// import YandexMapSelected from "@/components/map/YandexMapSelected";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
   const [segments, setSegments] = useState<Record<string, any>>({});
   const [segments2, setSegments2] = useState<Record<string, any>>({});
-  const [selected, setSelected]  = useState(null);
+  const [selected, setSelected] = useState(null);
 
   const [routes, setRoutes] = useState<any[]>([]);
   const [filters, setFilters] = useState({
@@ -23,9 +26,9 @@ export default function Map() {
     interval: [0, 24] as [number, number] | null,
   });
 
-  useEffect(() =>{
-    console.log(selected)
-  }, [selected])
+  useEffect(() => {
+    console.log(selected);
+  }, [selected]);
 
   useEffect(() => {
     const fetchWorkloads = async (
@@ -81,24 +84,23 @@ export default function Map() {
   return (
     <div className="px-6">
       <div className="flex items-center justify-between max-w-[1400px]">
-
-      <div>
-      <Carsine
-        isAccompaniment={isAccompaniment}
-        setIsAccompaniment={setIsAccompaniment}
-        routes={routes}
-        filters={filters}
-        onFilterChange={setFilters}
-      />
-      </div>
-      <div>
-      <InfoCarts
-          route={routes} 
-          filter={selected}
-          onFilterChange={(a) => setSelected(a)} 
-          // ← обязательно функция! 
-        />
-      </div>
+        <div>
+          <Carsine
+            isAccompaniment={isAccompaniment}
+            setIsAccompaniment={setIsAccompaniment}
+            routes={routes}
+            filters={filters}
+            onFilterChange={setFilters}
+          />
+        </div>
+        <div>
+          <InfoCarts
+            route={routes}
+            filter={selected}
+            onFilterChange={(a) => setSelected(a)}
+            // ← обязательно функция!
+          />
+        </div>
       </div>
       {isAccompaniment ? (
         <YandexMapRoute
@@ -107,6 +109,7 @@ export default function Map() {
         />
       ) : (
         <>
+          <YandexMapSelected />
           <div className="outline rounded-2xl p-6 w-full max-w-[1100px] mx-auto mt-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">
@@ -144,14 +147,4 @@ export default function Map() {
       )}
     </div>
   );
-}
-
-function formatTimeInterval(interval: [number, number]) {
-  const [start, end] = interval;
-
-  const timeStart =
-    start === 24 ? "23:59" : start < 10 ? `0${start}:00` : `${start}:00`;
-  const timeEnd = end === 24 ? "23:59" : end < 10 ? `0${end}:00` : `${end}:00`;
-
-  return { timeStart, timeEnd };
 }
