@@ -95,9 +95,8 @@ export default function Map() {
       <InfoCarts
           route={routes} 
           filter={selected}
-          onFilterChange={(newFilters) => setSelected(newFilters)
-          
-          } // ← обязательно функция!
+          onFilterChange={(a) => setSelected(a)} 
+          // ← обязательно функция! 
         />
       </div>
       </div>
