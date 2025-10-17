@@ -7,7 +7,7 @@ import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
 import { Check, Upload } from "lucide-react";
 import Switchmap from "@/widgets/Map/swithmap/swithmap";
-import InsoCarts from "@/widgets/Map/infocarts/InsoCarts";
+import InfoCarts from "@/widgets/Map/infocarts/InsoCarts";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
@@ -61,7 +61,7 @@ export default function Map() {
           time_interval: filters.period,
         },
       });
-      setRoutes(response.data.joint_movements);
+      setRoutes(response.data);
       console.log(filters);
     } catch (error) {
       console.error("Ошибка при загрузке:", error);
@@ -83,6 +83,13 @@ export default function Map() {
             routes={routes}
             filters={filters}
             onFilterChange={setFilters}
+          />
+        </div>
+        <div>
+          <InfoCarts
+            route={routes}
+            filter={filters}
+            onFilterChange={(newFilters) => setFilters(newFilters)} // ← обязательно функция!
           />
         </div>
       </div>
