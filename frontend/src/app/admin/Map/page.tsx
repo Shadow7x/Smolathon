@@ -4,6 +4,8 @@ import axi from "@/utils/api";
 import Carsine from "@/widgets/Map/carsine/carsine";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
+import CreateDetector from "@/widgets/Map/createDetector/createDetector";
+import WorkloadUpload from "@/widgets/Map/createCar/createCar";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,8 +20,8 @@ export default function Map() {
   const [routes, setRoutes] = useState<any[]>([]);
   const [filters, setFilters] = useState({
     car: "",
-    duration: "",
-    nodes: "3",
+    duration: "10",
+    nodes: "1",
     period: "",
   });
 
@@ -50,6 +52,7 @@ export default function Map() {
     } catch (error) {
       console.error("Ошибка при загрузке:", error);
     }
+    console.log(filters)
   };
 
   useEffect(() => {

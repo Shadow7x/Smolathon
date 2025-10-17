@@ -162,7 +162,7 @@ def getAdjacencies(request: Request):
     try:
         get = request.GET
         if get.get("target"):
-            target = Car.objects.get(id=get.get("target"))
+            target = Car.objects.get(name=get.get("target"))
             if get.get("time_interval"):
                 if target.workloads.filter(
                     time_interval=get.get("time_interval")
