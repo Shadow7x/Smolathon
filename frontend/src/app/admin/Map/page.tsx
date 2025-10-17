@@ -5,34 +5,51 @@ import Carsine from "@/widgets/Map/carsine/carsine";
 import TableDetector from "@/widgets/Map/table/table_detector";
 import TableCars from "@/widgets/Map/table/table_cars";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Check, Upload } from "lucide-react";
 import Switchmap from "@/widgets/Map/swithmap/swithmap";
 import InfoCarts from "@/widgets/Map/infocarts/InsoCarts";
 export default function Map() {
   const [isAccompaniment, setIsAccompaniment] = useState(true);
   const [activeTab, setActiveTab] = useState<"map" | "create">("map");
-
   const [segments, setSegments] = useState<Record<string, any>>({});
+  const [segments2, setSegments2] = useState<Record<string, any>>({});
+
   const [routes, setRoutes] = useState<any[]>([]);
   const [filters, setFilters] = useState({
     car: "",
     duration: "10",
     nodes: "1",
-    period: "",
+    interval: [0, 24] as [number, number] | null,
   });
 
   useEffect(() => {
-    const fetchSegments = async () => {
+    const fetchWorkloads = async (
+      interval: [number, number],
+      key: "segments" | "segments2"
+    ) => {
+      const { timeStart, timeEnd } = formatTimeInterval(interval);
+
       try {
-        const res = await axi.get("analytics/workload/get");
-        setSegments(res.data);
+        const response = await axi.get("/analytics/workload/get", {
+          params: {
+            car: filters.car,
+            time_start: timeStart,
+            time_end: timeEnd,
+          },
+        });
+
+        if (key === "segments") setSegments(response.data);
+        if (key === "segments2") setSegments2(response.data);
       } catch (err) {
-        console.error(err);
+        console.error("Ошибка при загрузке:", err);
       }
     };
-    if (isAccompaniment) fetchSegments();
-  }, [isAccompaniment]);
+
+    if (isAccompaniment && filters.interval)
+      fetchWorkloads(filters.interval, "segments");
+    if (isAccompaniment && filters.interval2)
+      fetchWorkloads(filters.interval2, "segments2");
+  }, [filters, isAccompaniment]);
 
   const fetchRoutes = async () => {
     try {
@@ -78,13 +95,10 @@ export default function Map() {
       </div>
       </div>
       {isAccompaniment ? (
-        Object.keys(segments).length === 0 ? (
-          <div className="flex justify-center mt-6">
-            <Skeleton className="h-[500px] w-full  rounded-2xl" />
-          </div>
-        ) : (
-          <YandexMapRoute segmentsData={segments} />
-        )
+        <YandexMapRoute
+          segmentsData1={segments || {}}
+          segmentsData2={filters.interval2 ? segments2 || {} : undefined}
+        />
       ) : (
         <>
           <div className="outline rounded-2xl p-6 w-full max-w-[1100px] mx-auto mt-6">
@@ -107,7 +121,7 @@ export default function Map() {
 
             <div className="flex justify-center mt-6">
               <Switchmap
-                isAccompaniment={activeTab === "map"} // true = Авто, false = Детекторы
+                isAccompaniment={activeTab === "map"}
                 setIsAccompaniment={(val) =>
                   setActiveTab(val ? "map" : "create")
                 }
@@ -124,4 +138,14 @@ export default function Map() {
       )}
     </div>
   );
+}
+
+function formatTimeInterval(interval: [number, number]) {
+  const [start, end] = interval;
+
+  const timeStart =
+    start === 24 ? "23:59" : start < 10 ? `0${start}:00` : `${start}:00`;
+  const timeEnd = end === 24 ? "23:59" : end < 10 ? `0${end}:00` : `${end}:00`;
+
+  return { timeStart, timeEnd };
 }
