@@ -9,6 +9,7 @@ import { Range, getTrackBackground } from "react-range";
 import { cn } from "@/lib/utils";
 import DoubleHourSlider from "@/components/common/DoubleHourSlider";
 import { Checkbox } from "@radix-ui/react-checkbox";
+import InsoCarts from "../infocarts/InsoCarts";
 
 interface CarsineProps {
   isAccompaniment: boolean;
@@ -177,8 +178,8 @@ export default function Carsine({
           </div>
         </div>
       ) : (
-        <>
-          <div className="relative w-60 mt-4">
+        <div className="flex flex-col gap-4 mt-4">
+          <div className="relative flex flex-col w-60">
             <CustomInput
               type="text"
               placeholder="Выберите гос. номер ТС"
@@ -206,7 +207,7 @@ export default function Carsine({
           </div>
 
           {/* Блок фильтров */}
-          <div className="flex flex-col gap-2 mt-4">
+          <div className="flex flex-col gap-2 ml-4">
             <p className="mb-2 font-semibold">Фильтрация</p>
             <div className="flex flex-row gap-4">
               {/* Длительность */}
@@ -261,7 +262,9 @@ export default function Carsine({
               </div>
             </div>
           </div>
-        </>
+
+          <InsoCarts isCars={"A414PF"} time={58} graf={23} />
+        </div>
       )}
     </div>
   );

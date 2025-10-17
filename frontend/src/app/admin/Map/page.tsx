@@ -85,9 +85,6 @@ export default function Map() {
             onFilterChange={setFilters}
           />
         </div>
-        <div>
-          <InsoCarts isCars={"A414PF"} time={58} graf={23} />
-        </div>
       </div>
       {isAccompaniment ? (
         <YandexMapRoute
